@@ -4,6 +4,9 @@ using System.Text;
 
 namespace Dagger.SDK.GraphQL;
 
+/// <summary>
+/// A builder for constructing GraphQL query.
+/// </summary>
 public class QueryBuilder
 {
     public readonly ImmutableList<Field> Path = [];
@@ -15,11 +18,22 @@ public class QueryBuilder
         this.Path = children;
     }
 
+    /// <summary>
+    /// Select a field with name.
+    /// </summary>
+    /// <param name="name">The field name.</param>
+    /// <returns>A new QueryBuilder instance.</returns>
     public QueryBuilder Select(string name)
     {
         return Select(name, []);
     }
 
+    /// <summary>
+    /// Select a field with name plus arguments.
+    /// </summary>
+    /// <param name="name">The field name.</param>
+    /// <param name="args">The field arguments.</param>
+    /// <returns>A new QueryBuilder instance.</returns>
     public QueryBuilder Select(string name, ImmutableList<Argument> args)
     {
         return Select(new Field(name, args));
@@ -53,6 +67,10 @@ public class QueryBuilder
         return builder.ToString();
     }
 
+    /// <summary>
+    /// Create a query builder.
+    /// </summary>
+    /// <returns>A QueryBuilder instance.</returns>
     public static QueryBuilder Builder()
     {
         return new QueryBuilder();
