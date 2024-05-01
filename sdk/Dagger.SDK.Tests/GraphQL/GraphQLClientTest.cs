@@ -1,6 +1,7 @@
-using Dagger.SDK.GraphQL;
 using System.Net;
 using System.Net.Http.Json;
+
+using Dagger.SDK.GraphQL;
 
 namespace Dagger.SDK.Tests.GraphQL;
 

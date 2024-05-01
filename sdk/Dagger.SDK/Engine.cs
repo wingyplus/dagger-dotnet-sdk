@@ -1,4 +1,3 @@
-﻿using Dagger.SDK.GraphQL;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -7,6 +6,8 @@ using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+
+using Dagger.SDK.GraphQL;
 
 namespace Dagger.SDK;
 
