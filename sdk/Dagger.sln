@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dagger.SDK", "Dagger.SDK\Da
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dagger.SDK.Tests", "Dagger.SDK.Tests\Dagger.SDK.Tests.csproj", "{9B811549-D265-4E16-AC82-48C364A827E3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dagger.Codegen", "Dagger.Codegen\Dagger.Codegen.csproj", "{BCCC831C-6AAB-48BB-B867-4F2E10621154}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +26,9 @@ Global
 		{9B811549-D265-4E16-AC82-48C364A827E3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9B811549-D265-4E16-AC82-48C364A827E3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9B811549-D265-4E16-AC82-48C364A827E3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BCCC831C-6AAB-48BB-B867-4F2E10621154}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BCCC831C-6AAB-48BB-B867-4F2E10621154}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BCCC831C-6AAB-48BB-B867-4F2E10621154}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BCCC831C-6AAB-48BB-B867-4F2E10621154}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
