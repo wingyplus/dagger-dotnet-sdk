@@ -90,7 +90,7 @@ public class Container : Object
     /// <summary>
     /// Retrieves default arguments for future commands.
     /// </summary>
-    public DefaultArgs()
+    public string[] DefaultArgs()
     {
     }
 
@@ -106,7 +106,7 @@ public class Container : Object
     /// <summary>
     /// Retrieves entrypoint to be prepended to the arguments of all commands.
     /// </summary>
-    public Entrypoint()
+    public string[] Entrypoint()
     {
     }
 
@@ -120,7 +120,7 @@ public class Container : Object
     /// <summary>
     /// Retrieves the list of environment variables passed to commands.
     /// </summary>
-    public EnvVariables()
+    public EnvVariable[] EnvVariables()
     {
     }
 
@@ -142,7 +142,7 @@ public class Container : Object
     /// 
     /// This currently works for Nvidia devices only.
     /// </summary>
-    public Container ExperimentalWithGPU(devices)
+    public Container ExperimentalWithGPU(string[] devices)
     {
     }
 
@@ -162,7 +162,7 @@ public class Container : Object
     /// 
     /// This includes ports already exposed by the image, even if not explicitly added with dagger.
     /// </summary>
-    public ExposedPorts()
+    public Port[] ExposedPorts()
     {
     }
 
@@ -213,14 +213,14 @@ public class Container : Object
     /// <summary>
     /// Retrieves the list of labels passed to container.
     /// </summary>
-    public Labels()
+    public Label[] Labels()
     {
     }
 
     /// <summary>
     /// Retrieves the list of paths where a directory is mounted.
     /// </summary>
-    public Mounts()
+    public string[] Mounts()
     {
     }
 
@@ -300,14 +300,14 @@ public class Container : Object
     /// <summary>
     /// Configures default arguments for future commands.
     /// </summary>
-    public Container WithDefaultArgs(args)
+    public Container WithDefaultArgs(string[] args)
     {
     }
 
     /// <summary>
     /// Set the default command to invoke for the container's terminal API.
     /// </summary>
-    public Container WithDefaultTerminalCmd(args, bool experimentalPrivilegedNesting = false, bool insecureRootCapabilities = false)
+    public Container WithDefaultTerminalCmd(string[] args, bool experimentalPrivilegedNesting = false, bool insecureRootCapabilities = false)
     {
     }
 
@@ -321,7 +321,7 @@ public class Container : Object
     /// <summary>
     /// Retrieves this container but with a different command entrypoint.
     /// </summary>
-    public Container WithEntrypoint(args, bool keepDefaultArgs = false)
+    public Container WithEntrypoint(string[] args, bool keepDefaultArgs = false)
     {
     }
 
@@ -335,7 +335,7 @@ public class Container : Object
     /// <summary>
     /// Retrieves this container after executing the specified command inside it.
     /// </summary>
-    public Container WithExec(args, bool experimentalPrivilegedNesting = false, bool insecureRootCapabilities = false, string redirectStderr = "", string redirectStdout = "", bool skipEntrypoint = false, string stdin = "")
+    public Container WithExec(string[] args, bool experimentalPrivilegedNesting = false, bool insecureRootCapabilities = false, string redirectStderr = "", string redirectStdout = "", bool skipEntrypoint = false, string stdin = "")
     {
     }
 
@@ -362,7 +362,7 @@ public class Container : Object
     /// <summary>
     /// Retrieves this container plus the contents of the given files copied to the given path.
     /// </summary>
-    public Container WithFiles(string path, sources, string owner = "", int permissions = null)
+    public Container WithFiles(string path, FileID[] sources, string owner = "", int permissions = null)
     {
     }
 
@@ -659,7 +659,7 @@ public class Directory : Object
     /// <summary>
     /// Returns a list of files and directories at the given path.
     /// </summary>
-    public Entries(string path = null)
+    public string[] Entries(string path = null)
     {
     }
 
@@ -680,7 +680,7 @@ public class Directory : Object
     /// <summary>
     /// Returns a list of files and directories that matche the given pattern.
     /// </summary>
-    public Glob(string pattern)
+    public string[] Glob(string pattern)
     {
     }
 
@@ -722,7 +722,7 @@ public class Directory : Object
     /// <summary>
     /// Retrieves this directory plus the contents of the given files copied to the given path.
     /// </summary>
-    public Directory WithFiles(string path, sources, int permissions = null)
+    public Directory WithFiles(string path, FileID[] sources, int permissions = null)
     {
     }
 
@@ -918,7 +918,7 @@ public class Function : Object
     /// <summary>
     /// Arguments accepted by the function, if any.
     /// </summary>
-    public Args()
+    public FunctionArg[] Args()
     {
     }
 
@@ -1030,7 +1030,7 @@ public class FunctionCall : Object
     /// <summary>
     /// The argument values the function is being invoked with.
     /// </summary>
-    public InputArgs()
+    public FunctionCallArgValue[] InputArgs()
     {
     }
 
@@ -1133,28 +1133,28 @@ public class GeneratedCode : Object
     /// <summary>
     /// List of paths to mark generated in version control (i.e. .gitattributes).
     /// </summary>
-    public VcsGeneratedPaths()
+    public string[] VcsGeneratedPaths()
     {
     }
 
     /// <summary>
     /// List of paths to ignore in version control (i.e. .gitignore).
     /// </summary>
-    public VcsIgnoredPaths()
+    public string[] VcsIgnoredPaths()
     {
     }
 
     /// <summary>
     /// Set the list of paths to mark generated in version control.
     /// </summary>
-    public GeneratedCode WithVCSGeneratedPaths(paths)
+    public GeneratedCode WithVCSGeneratedPaths(string[] paths)
     {
     }
 
     /// <summary>
     /// Set the list of paths to ignore in version control.
     /// </summary>
-    public GeneratedCode WithVCSIgnoredPaths(paths)
+    public GeneratedCode WithVCSIgnoredPaths(string[] paths)
     {
     }
 }
@@ -1346,7 +1346,7 @@ public class Host : Object
     /// <summary>
     /// Creates a service that forwards traffic to a specified address via the host.
     /// </summary>
-    public Service Service(ports, string host = "localhost")
+    public Service Service(PortForward[] ports, string host = "localhost")
     {
     }
 
@@ -1412,7 +1412,7 @@ public class InputTypeDef : Object
     /// <summary>
     /// Static fields defined on this input object, if any.
     /// </summary>
-    public Fields()
+    public FieldTypeDef[] Fields()
     {
     }
 
@@ -1453,7 +1453,7 @@ public class InterfaceTypeDef : Object
     /// <summary>
     /// Functions defined on this interface, if any.
     /// </summary>
-    public Functions()
+    public Function[] Functions()
     {
     }
 
@@ -1596,14 +1596,14 @@ public class Module : Object
     /// <summary>
     /// Modules used by this module.
     /// </summary>
-    public Dependencies()
+    public Module[] Dependencies()
     {
     }
 
     /// <summary>
     /// The dependencies as configured by the module.
     /// </summary>
-    public DependencyConfig()
+    public ModuleDependency[] DependencyConfig()
     {
     }
 
@@ -1645,7 +1645,7 @@ public class Module : Object
     /// <summary>
     /// Interfaces served by this module.
     /// </summary>
-    public Interfaces()
+    public TypeDef[] Interfaces()
     {
     }
 
@@ -1659,7 +1659,7 @@ public class Module : Object
     /// <summary>
     /// Objects served by this module.
     /// </summary>
-    public Objects()
+    public TypeDef[] Objects()
     {
     }
 
@@ -1813,7 +1813,7 @@ public class ModuleSource : Object
     /// <summary>
     /// The dependencies of the module source. Includes dependencies from the configuration and any extras from withDependencies calls.
     /// </summary>
-    public Dependencies()
+    public ModuleDependency[] Dependencies()
     {
     }
 
@@ -1904,7 +1904,7 @@ public class ModuleSource : Object
     /// <summary>
     /// The named views defined for this module source, which are sets of directory filters that can be applied to directory arguments provided to functions.
     /// </summary>
-    public Views()
+    public ModuleSourceView[] Views()
     {
     }
 
@@ -1918,7 +1918,7 @@ public class ModuleSource : Object
     /// <summary>
     /// Append the provided dependencies to the module source's dependency list.
     /// </summary>
-    public ModuleSource WithDependencies(dependencies)
+    public ModuleSource WithDependencies(ModuleDependencyID[] dependencies)
     {
     }
 
@@ -1946,7 +1946,7 @@ public class ModuleSource : Object
     /// <summary>
     /// Update the module source with a new named view.
     /// </summary>
-    public ModuleSource WithView(string name, patterns)
+    public ModuleSource WithView(string name, string[] patterns)
     {
     }
 }
@@ -1989,7 +1989,7 @@ public class ModuleSourceView : Object
     /// <summary>
     /// The patterns of the view used to filter paths
     /// </summary>
-    public Patterns()
+    public string[] Patterns()
     {
     }
 }
@@ -2032,14 +2032,14 @@ public class ObjectTypeDef : Object
     /// <summary>
     /// Static fields defined on this object, if any.
     /// </summary>
-    public Fields()
+    public FieldTypeDef[] Fields()
     {
     }
 
     /// <summary>
     /// Functions defined on this object, if any.
     /// </summary>
-    public Functions()
+    public Function[] Functions()
     {
     }
 
@@ -2224,7 +2224,7 @@ public class Query : Object
     /// <summary>
     /// The TypeDef representations of the objects currently being served in the session.
     /// </summary>
-    public CurrentTypeDefs()
+    public TypeDef[] CurrentTypeDefs()
     {
     }
 
@@ -2634,7 +2634,7 @@ public class Service : Object
     /// <summary>
     /// Retrieves the list of ports provided by the service.
     /// </summary>
-    public Ports()
+    public Port[] Ports()
     {
     }
 

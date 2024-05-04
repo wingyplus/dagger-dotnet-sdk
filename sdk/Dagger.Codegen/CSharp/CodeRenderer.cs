@@ -132,6 +132,10 @@ public class CodeRenderer : Codegen.CodeRenderer
     {
         if (type.Kind == "NON_NULL")
         {
+            if (type.OfType.Kind == "LIST")
+            {
+                return $"{RenderType(type.OfType.OfType)}[]";
+            }
             return NormalizeType(type.OfType.Name);
         }
         else
