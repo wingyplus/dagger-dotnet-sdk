@@ -1,3 +1,5 @@
+using System.Diagnostics;
+
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
@@ -10,7 +12,11 @@ public class CodeRenderer : Codegen.CodeRenderer
     public override string RenderPre()
     {
         return """
-        using Dagger.SDK;
+        using System.Collections.Immutable;
+
+        using Dagger.SDK.GraphQL;
+
+        namespace Dagger.SDK;
 
         public class Scalar
         {
@@ -19,8 +25,11 @@ public class CodeRenderer : Codegen.CodeRenderer
             public override string ToString() => Value;
         }
 
-        public class Object
+        public class Object(QueryBuilder queryBuilder, GraphQLClient gqlClient)
         {
+            public QueryBuilder QueryBuilder { get; } = queryBuilder;
+
+            public GraphQLClient GraphQLClient { get; } = gqlClient;
         }
 
         public class InputObject
@@ -61,19 +70,29 @@ public class CodeRenderer : Codegen.CodeRenderer
     {
         var methods = type.Fields.Select(field =>
         {
-            var requiredArgs = field.Args.Where(arg => arg.Type.Kind == "NON_NULL").OrderBy(type => type.Name).Select(RenderArgument);
-            var optionalArgs = field.Args.Where(arg => arg.Type.Kind != "NON_NULL").OrderBy(type => type.Name).Select(RenderOptionalArgument);
-            var args = requiredArgs.Concat(optionalArgs);
+            var methodName = Formatter.FormatMethod(field.Name);
+            if (type.Name.Equals(field.Name, StringComparison.CurrentCultureIgnoreCase))
+            {
+                methodName = $"{methodName}_";
+            }
+
+            var (requiredArgs, optionalArgs) = SplitArguments(field.Args);
+            var args = requiredArgs.Select(RenderArgument).Concat(optionalArgs.Select(RenderOptionalArgument));
 
             return $$"""
             {{RenderDocComment(field)}}
-            public {{RenderType(field.Type)}} {{Formatter.FormatMethod(field.Name)}}({{string.Join(",", args)}}) {}
+            public {{RenderReturnType(field.Type)}} {{methodName}}({{string.Join(",", args)}})
+            {
+                {{RenderArgumentBuilder(field)}}
+                var queryBuilder = QueryBuilder.Select("{{field.Name}}");
+                return {{RenderReturnValue(field)}};
+            }
             """;
         });
 
         return $$"""
         {{RenderDocComment(type)}}
-        public class {{type.Name}} : Object
+        public class {{type.Name}}(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object(queryBuilder, gqlClient)
         {
             {{string.Join("\n\n", methods)}}
         }
@@ -125,7 +144,21 @@ public class CodeRenderer : Codegen.CodeRenderer
 
     private static string RenderOptionalArgument(InputValue argument)
     {
-        return $"{RenderArgument(argument)} = {argument.DefaultValue ?? "null"}";
+        var nullableType = argument.DefaultValue == null ? "?" : "";
+        return $"{RenderType(argument.Type)}{nullableType} {argument.Name} = {RenderDefaultValue(argument)}";
+    }
+
+    private static string RenderDefaultValue(InputValue argument)
+    {
+        if (argument.Type.Kind == "LIST")
+        {
+            return "null";
+        }
+        if (argument.Type.Kind == "ENUM" && argument.DefaultValue != null)
+        {
+            return $"{argument.Type.Name}.{argument.DefaultValue}";
+        }
+        return argument.DefaultValue ?? "null";
     }
 
     private static string RenderType(TypeRef type)
@@ -134,7 +167,6 @@ public class CodeRenderer : Codegen.CodeRenderer
         if (_ref.Kind == "NON_NULL")
         {
             _ref = _ref.OfType;
-
         }
 
         if (_ref.Kind == "LIST")
@@ -154,5 +186,41 @@ public class CodeRenderer : Codegen.CodeRenderer
             "Float" => "float",
             _ => name,
         };
+    }
+
+    private static string RenderReturnType(TypeRef type)
+    {
+        if (type.Kind == "ENUM" || type.Kind == "SCALAR" || (type.Kind == "NON_NULL" && type.OfType.Kind == "SCALAR") || (type.Kind == "NON_NULL" && type.OfType.Kind == "LIST"))
+        {
+            return $"async Task<{RenderType(type)}>";
+        }
+        return RenderType(type);
+    }
+
+    private static string RenderReturnValue(Field field)
+    {
+        var type = field.Type;
+        if (type.Kind == "ENUM" || type.Kind == "SCALAR" || (type.Kind == "NON_NULL" && type.OfType.Kind == "SCALAR") || (type.Kind == "NON_NULL" && type.OfType.Kind == "LIST"))
+        {
+            return $"await Engine.Execute<{RenderType(field.Type)}>(GraphQLClient, QueryBuilder)";
+        }
+        return $"new {RenderType(field.Type)}(QueryBuilder, GraphQLClient)";
+    }
+
+    private object RenderArgumentBuilder(Field field)
+    {
+        if (field.Args.Length == 0)
+        {
+            return "";
+        }
+
+        return "var arguments = ImmutableList<Argument>.Empty;";
+    }
+
+    private static (IOrderedEnumerable<InputValue>, IOrderedEnumerable<InputValue>) SplitArguments(InputValue[] arguments)
+    {
+        var requiredArgs = arguments.Where(arg => arg.Type.Kind == "NON_NULL").OrderBy(type => type.Name);
+        var optionalArgs = arguments.Where(arg => arg.Type.Kind != "NON_NULL").OrderBy(type => type.Name);
+        return (requiredArgs, optionalArgs);
     }
 }

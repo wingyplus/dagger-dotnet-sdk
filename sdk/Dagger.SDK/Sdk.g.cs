@@ -1,13 +1,17 @@
-using Dagger.SDK;
+using System.Collections.Immutable;
+using Dagger.SDK.GraphQL;
 
+namespace Dagger.SDK;
 public class Scalar
 {
     public readonly string Value;
     public override string ToString() => Value;
 }
 
-public class Object
+public class Object(QueryBuilder queryBuilder, GraphQLClient gqlClient)
 {
+    public QueryBuilder QueryBuilder { get; } = queryBuilder;
+    public GraphQLClient GraphQLClient { get; } = gqlClient;
 }
 
 public class InputObject
@@ -42,13 +46,15 @@ public enum CacheSharingMode
 /// <summary>
 /// A directory whose contents persist across runs.
 /// </summary>
-public class CacheVolume : Object
+public class CacheVolume(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object(queryBuilder, gqlClient)
 {
     /// <summary>
     /// A unique identifier for this CacheVolume.
     /// </summary>
-    public CacheVolumeID Id()
+    public async Task<CacheVolumeID> Id()
     {
+        var queryBuilder = QueryBuilder.Select("id");
+        return await Engine.Execute<CacheVolumeID>(GraphQLClient, QueryBuilder);
     }
 }
 
@@ -62,7 +68,7 @@ public class CacheVolumeID : Scalar
 /// <summary>
 /// An OCI-compatible container, also known as a Docker container.
 /// </summary>
-public class Container : Object
+public class Container(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object(queryBuilder, gqlClient)
 {
     /// <summary>
     /// Turn the container into a Service.
@@ -71,27 +77,37 @@ public class Container : Object
     /// </summary>
     public Service AsService()
     {
+        var queryBuilder = QueryBuilder.Select("asService");
+        return new Service(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
     /// Returns a File representing the container serialized to a tarball.
     /// </summary>
-    public File AsTarball(ImageLayerCompression forcedCompression = null, ImageMediaTypes mediaTypes = OCIMediaTypes, ContainerID[] platformVariants = [])
+    public File AsTarball(ImageLayerCompression? forcedCompression = null, ImageMediaTypes mediaTypes = ImageMediaTypes.OCIMediaTypes, ContainerID[] platformVariants = null)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("asTarball");
+        return new File(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
     /// Initializes this container from a Dockerfile build.
     /// </summary>
-    public Container Build(DirectoryID context, BuildArg[] buildArgs = [], string dockerfile = "Dockerfile", SecretID[] secrets = [], string target = "")
+    public Container Build(DirectoryID context, BuildArg[] buildArgs = null, string dockerfile = "Dockerfile", SecretID[] secrets = null, string target = "")
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("build");
+        return new Container(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
     /// Retrieves default arguments for future commands.
     /// </summary>
-    public string[] DefaultArgs()
+    public async Task<string[]> DefaultArgs()
     {
+        var queryBuilder = QueryBuilder.Select("defaultArgs");
+        return await Engine.Execute<string[]>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
@@ -101,27 +117,37 @@ public class Container : Object
     /// </summary>
     public Directory Directory(string path)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("directory");
+        return new Directory(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
     /// Retrieves entrypoint to be prepended to the arguments of all commands.
     /// </summary>
-    public string[] Entrypoint()
+    public async Task<string[]> Entrypoint()
     {
+        var queryBuilder = QueryBuilder.Select("entrypoint");
+        return await Engine.Execute<string[]>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
     /// Retrieves the value of the specified environment variable.
     /// </summary>
-    public string EnvVariable(string name)
+    public async Task<string> EnvVariable(string name)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("envVariable");
+        return await Engine.Execute<string>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
     /// Retrieves the list of environment variables passed to commands.
     /// </summary>
-    public EnvVariable[] EnvVariables()
+    public async Task<EnvVariable[]> EnvVariables()
     {
+        var queryBuilder = QueryBuilder.Select("envVariables");
+        return await Engine.Execute<EnvVariable[]>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
@@ -133,6 +159,8 @@ public class Container : Object
     /// </summary>
     public Container ExperimentalWithAllGPUs()
     {
+        var queryBuilder = QueryBuilder.Select("experimentalWithAllGPUs");
+        return new Container(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -144,6 +172,9 @@ public class Container : Object
     /// </summary>
     public Container ExperimentalWithGPU(string[] devices)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("experimentalWithGPU");
+        return new Container(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -153,8 +184,11 @@ public class Container : Object
     /// 
     /// It can also export platform variants.
     /// </summary>
-    public bool Export(string path, ImageLayerCompression forcedCompression = null, ImageMediaTypes mediaTypes = OCIMediaTypes, ContainerID[] platformVariants = [])
+    public async Task<bool> Export(string path, ImageLayerCompression? forcedCompression = null, ImageMediaTypes mediaTypes = ImageMediaTypes.OCIMediaTypes, ContainerID[] platformVariants = null)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("export");
+        return await Engine.Execute<bool>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
@@ -162,8 +196,10 @@ public class Container : Object
     /// 
     /// This includes ports already exposed by the image, even if not explicitly added with dagger.
     /// </summary>
-    public Port[] ExposedPorts()
+    public async Task<Port[]> ExposedPorts()
     {
+        var queryBuilder = QueryBuilder.Select("exposedPorts");
+        return await Engine.Execute<Port[]>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
@@ -173,6 +209,9 @@ public class Container : Object
     /// </summary>
     public File File(string path)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("file");
+        return new File(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -180,20 +219,27 @@ public class Container : Object
     /// </summary>
     public Container From(string address)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("from");
+        return new Container(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
     /// A unique identifier for this Container.
     /// </summary>
-    public ContainerID Id()
+    public async Task<ContainerID> Id()
     {
+        var queryBuilder = QueryBuilder.Select("id");
+        return await Engine.Execute<ContainerID>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
     /// The unique image reference which can only be retrieved immediately after the 'Container.From' call.
     /// </summary>
-    public string ImageRef()
+    public async Task<string> ImageRef()
     {
+        var queryBuilder = QueryBuilder.Select("imageRef");
+        return await Engine.Execute<string>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
@@ -201,41 +247,56 @@ public class Container : Object
     /// </summary>
     public Container Import(FileID source, string tag = "")
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("import");
+        return new Container(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
     /// Retrieves the value of the specified label.
     /// </summary>
-    public string Label(string name)
+    public async Task<string> Label(string name)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("label");
+        return await Engine.Execute<string>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
     /// Retrieves the list of labels passed to container.
     /// </summary>
-    public Label[] Labels()
+    public async Task<Label[]> Labels()
     {
+        var queryBuilder = QueryBuilder.Select("labels");
+        return await Engine.Execute<Label[]>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
     /// Retrieves the list of paths where a directory is mounted.
     /// </summary>
-    public string[] Mounts()
+    public async Task<string[]> Mounts()
     {
+        var queryBuilder = QueryBuilder.Select("mounts");
+        return await Engine.Execute<string[]>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
     /// Creates a named sub-pipeline.
     /// </summary>
-    public Container Pipeline(string name, string description = "", PipelineLabel[] labels = [])
+    public Container Pipeline(string name, string description = "", PipelineLabel[] labels = null)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("pipeline");
+        return new Container(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
     /// The platform this container executes and publishes as.
     /// </summary>
-    public Platform Platform()
+    public async Task<Platform> Platform()
     {
+        var queryBuilder = QueryBuilder.Select("platform");
+        return await Engine.Execute<Platform>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
@@ -245,8 +306,11 @@ public class Container : Object
     /// 
     /// It can also publish platform variants.
     /// </summary>
-    public string Publish(string address, ImageLayerCompression forcedCompression = null, ImageMediaTypes mediaTypes = OCIMediaTypes, ContainerID[] platformVariants = [])
+    public async Task<string> Publish(string address, ImageLayerCompression? forcedCompression = null, ImageMediaTypes mediaTypes = ImageMediaTypes.OCIMediaTypes, ContainerID[] platformVariants = null)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("publish");
+        return await Engine.Execute<string>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
@@ -254,6 +318,8 @@ public class Container : Object
     /// </summary>
     public Directory Rootfs()
     {
+        var queryBuilder = QueryBuilder.Select("rootfs");
+        return new Directory(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -261,8 +327,10 @@ public class Container : Object
     /// 
     /// Will execute default command if none is set, or error if there's no default.
     /// </summary>
-    public string Stderr()
+    public async Task<string> Stderr()
     {
+        var queryBuilder = QueryBuilder.Select("stderr");
+        return await Engine.Execute<string>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
@@ -270,8 +338,10 @@ public class Container : Object
     /// 
     /// Will execute default command if none is set, or error if there's no default.
     /// </summary>
-    public string Stdout()
+    public async Task<string> Stdout()
     {
+        var queryBuilder = QueryBuilder.Select("stdout");
+        return await Engine.Execute<string>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
@@ -279,22 +349,29 @@ public class Container : Object
     /// 
     /// It doesn't run the default command if no exec has been set.
     /// </summary>
-    public ContainerID Sync()
+    public async Task<ContainerID> Sync()
     {
+        var queryBuilder = QueryBuilder.Select("sync");
+        return await Engine.Execute<ContainerID>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
     /// Return an interactive terminal for this container using its configured default terminal command if not overridden by args (or sh as a fallback default).
     /// </summary>
-    public Terminal Terminal(string[] cmd = [], bool experimentalPrivilegedNesting = false, bool insecureRootCapabilities = false)
+    public Terminal Terminal(string[] cmd = null, bool experimentalPrivilegedNesting = false, bool insecureRootCapabilities = false)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("terminal");
+        return new Terminal(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
     /// Retrieves the user to be set for all commands.
     /// </summary>
-    public string User()
+    public async Task<string> User()
     {
+        var queryBuilder = QueryBuilder.Select("user");
+        return await Engine.Execute<string>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
@@ -302,6 +379,9 @@ public class Container : Object
     /// </summary>
     public Container WithDefaultArgs(string[] args)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("withDefaultArgs");
+        return new Container(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -309,13 +389,19 @@ public class Container : Object
     /// </summary>
     public Container WithDefaultTerminalCmd(string[] args, bool experimentalPrivilegedNesting = false, bool insecureRootCapabilities = false)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("withDefaultTerminalCmd");
+        return new Container(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
     /// Retrieves this container plus a directory written at the given path.
     /// </summary>
-    public Container WithDirectory(DirectoryID directory, string path, string[] exclude = [], string[] include = [], string owner = "")
+    public Container WithDirectory(DirectoryID directory, string path, string[] exclude = null, string[] include = null, string owner = "")
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("withDirectory");
+        return new Container(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -323,6 +409,9 @@ public class Container : Object
     /// </summary>
     public Container WithEntrypoint(string[] args, bool keepDefaultArgs = false)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("withEntrypoint");
+        return new Container(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -330,6 +419,9 @@ public class Container : Object
     /// </summary>
     public Container WithEnvVariable(string name, string value, bool expand = false)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("withEnvVariable");
+        return new Container(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -337,6 +429,9 @@ public class Container : Object
     /// </summary>
     public Container WithExec(string[] args, bool experimentalPrivilegedNesting = false, bool insecureRootCapabilities = false, string redirectStderr = "", string redirectStdout = "", bool skipEntrypoint = false, string stdin = "")
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("withExec");
+        return new Container(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -348,22 +443,31 @@ public class Container : Object
     /// 
     /// - For setting the EXPOSE OCI field when publishing the container
     /// </summary>
-    public Container WithExposedPort(int port, string description = null, bool experimentalSkipHealthcheck = false, NetworkProtocol protocol = TCP)
+    public Container WithExposedPort(int port, string? description = null, bool experimentalSkipHealthcheck = false, NetworkProtocol protocol = NetworkProtocol.TCP)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("withExposedPort");
+        return new Container(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
     /// Retrieves this container plus the contents of the given file copied to the given path.
     /// </summary>
-    public Container WithFile(string path, FileID source, string owner = "", int permissions = null)
+    public Container WithFile(string path, FileID source, string owner = "", int? permissions = null)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("withFile");
+        return new Container(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
     /// Retrieves this container plus the contents of the given files copied to the given path.
     /// </summary>
-    public Container WithFiles(string path, FileID[] sources, string owner = "", int permissions = null)
+    public Container WithFiles(string path, FileID[] sources, string owner = "", int? permissions = null)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("withFiles");
+        return new Container(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -371,6 +475,8 @@ public class Container : Object
     /// </summary>
     public Container WithFocus()
     {
+        var queryBuilder = QueryBuilder.Select("withFocus");
+        return new Container(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -378,13 +484,19 @@ public class Container : Object
     /// </summary>
     public Container WithLabel(string name, string value)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("withLabel");
+        return new Container(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
     /// Retrieves this container plus a cache volume mounted at the given path.
     /// </summary>
-    public Container WithMountedCache(CacheVolumeID cache, string path, string owner = "", CacheSharingMode sharing = SHARED, DirectoryID source = null)
+    public Container WithMountedCache(CacheVolumeID cache, string path, string owner = "", CacheSharingMode sharing = CacheSharingMode.SHARED, DirectoryID? source = null)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("withMountedCache");
+        return new Container(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -392,6 +504,9 @@ public class Container : Object
     /// </summary>
     public Container WithMountedDirectory(string path, DirectoryID source, string owner = "")
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("withMountedDirectory");
+        return new Container(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -399,6 +514,9 @@ public class Container : Object
     /// </summary>
     public Container WithMountedFile(string path, FileID source, string owner = "")
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("withMountedFile");
+        return new Container(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -406,6 +524,9 @@ public class Container : Object
     /// </summary>
     public Container WithMountedSecret(string path, SecretID source, int mode = 256, string owner = "")
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("withMountedSecret");
+        return new Container(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -413,6 +534,9 @@ public class Container : Object
     /// </summary>
     public Container WithMountedTemp(string path)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("withMountedTemp");
+        return new Container(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -420,6 +544,9 @@ public class Container : Object
     /// </summary>
     public Container WithNewFile(string path, string contents = "", string owner = "", int permissions = 420)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("withNewFile");
+        return new Container(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -427,6 +554,9 @@ public class Container : Object
     /// </summary>
     public Container WithRegistryAuth(string address, SecretID secret, string username)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("withRegistryAuth");
+        return new Container(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -434,6 +564,9 @@ public class Container : Object
     /// </summary>
     public Container WithRootfs(DirectoryID directory)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("withRootfs");
+        return new Container(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -441,6 +574,9 @@ public class Container : Object
     /// </summary>
     public Container WithSecretVariable(string name, SecretID secret)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("withSecretVariable");
+        return new Container(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -454,6 +590,9 @@ public class Container : Object
     /// </summary>
     public Container WithServiceBinding(string alias, ServiceID service)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("withServiceBinding");
+        return new Container(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -461,6 +600,9 @@ public class Container : Object
     /// </summary>
     public Container WithUnixSocket(string path, SocketID source, string owner = "")
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("withUnixSocket");
+        return new Container(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -468,6 +610,9 @@ public class Container : Object
     /// </summary>
     public Container WithUser(string name)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("withUser");
+        return new Container(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -475,6 +620,9 @@ public class Container : Object
     /// </summary>
     public Container WithWorkdir(string path)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("withWorkdir");
+        return new Container(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -482,6 +630,8 @@ public class Container : Object
     /// </summary>
     public Container WithoutDefaultArgs()
     {
+        var queryBuilder = QueryBuilder.Select("withoutDefaultArgs");
+        return new Container(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -489,6 +639,9 @@ public class Container : Object
     /// </summary>
     public Container WithoutEntrypoint(bool keepDefaultArgs = false)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("withoutEntrypoint");
+        return new Container(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -496,13 +649,19 @@ public class Container : Object
     /// </summary>
     public Container WithoutEnvVariable(string name)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("withoutEnvVariable");
+        return new Container(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
     /// Unexpose a previously exposed port.
     /// </summary>
-    public Container WithoutExposedPort(int port, NetworkProtocol protocol = TCP)
+    public Container WithoutExposedPort(int port, NetworkProtocol protocol = NetworkProtocol.TCP)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("withoutExposedPort");
+        return new Container(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -512,6 +671,8 @@ public class Container : Object
     /// </summary>
     public Container WithoutFocus()
     {
+        var queryBuilder = QueryBuilder.Select("withoutFocus");
+        return new Container(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -519,6 +680,9 @@ public class Container : Object
     /// </summary>
     public Container WithoutLabel(string name)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("withoutLabel");
+        return new Container(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -526,6 +690,9 @@ public class Container : Object
     /// </summary>
     public Container WithoutMount(string path)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("withoutMount");
+        return new Container(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -533,6 +700,9 @@ public class Container : Object
     /// </summary>
     public Container WithoutRegistryAuth(string address)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("withoutRegistryAuth");
+        return new Container(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -540,6 +710,9 @@ public class Container : Object
     /// </summary>
     public Container WithoutUnixSocket(string path)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("withoutUnixSocket");
+        return new Container(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -549,6 +722,8 @@ public class Container : Object
     /// </summary>
     public Container WithoutUser()
     {
+        var queryBuilder = QueryBuilder.Select("withoutUser");
+        return new Container(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -558,13 +733,17 @@ public class Container : Object
     /// </summary>
     public Container WithoutWorkdir()
     {
+        var queryBuilder = QueryBuilder.Select("withoutWorkdir");
+        return new Container(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
     /// Retrieves the working directory for all commands.
     /// </summary>
-    public string Workdir()
+    public async Task<string> Workdir()
     {
+        var queryBuilder = QueryBuilder.Select("workdir");
+        return await Engine.Execute<string>(GraphQLClient, QueryBuilder);
     }
 }
 
@@ -578,20 +757,24 @@ public class ContainerID : Scalar
 /// <summary>
 /// Reflective module API provided to functions at runtime.
 /// </summary>
-public class CurrentModule : Object
+public class CurrentModule(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object(queryBuilder, gqlClient)
 {
     /// <summary>
     /// A unique identifier for this CurrentModule.
     /// </summary>
-    public CurrentModuleID Id()
+    public async Task<CurrentModuleID> Id()
     {
+        var queryBuilder = QueryBuilder.Select("id");
+        return await Engine.Execute<CurrentModuleID>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
     /// The name of the module being executed in
     /// </summary>
-    public string Name()
+    public async Task<string> Name()
     {
+        var queryBuilder = QueryBuilder.Select("name");
+        return await Engine.Execute<string>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
@@ -599,13 +782,18 @@ public class CurrentModule : Object
     /// </summary>
     public Directory Source()
     {
+        var queryBuilder = QueryBuilder.Select("source");
+        return new Directory(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
     /// Load a directory from the module's scratch working directory, including any changes that may have been made to it during module function execution.
     /// </summary>
-    public Directory Workdir(string path, string[] exclude = [], string[] include = [])
+    public Directory Workdir(string path, string[] exclude = null, string[] include = null)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("workdir");
+        return new Directory(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -613,6 +801,9 @@ public class CurrentModule : Object
     /// </summary>
     public File WorkdirFile(string path)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("workdirFile");
+        return new File(QueryBuilder, GraphQLClient);
     }
 }
 
@@ -626,13 +817,16 @@ public class CurrentModuleID : Scalar
 /// <summary>
 /// A directory.
 /// </summary>
-public class Directory : Object
+public class Directory(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object(queryBuilder, gqlClient)
 {
     /// <summary>
     /// Load the directory as a Dagger module
     /// </summary>
     public Module AsModule(string sourceRootPath = ".")
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("asModule");
+        return new Module(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -640,34 +834,49 @@ public class Directory : Object
     /// </summary>
     public Directory Diff(DirectoryID other)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("diff");
+        return new Directory(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
     /// Retrieves a directory at the given path.
     /// </summary>
-    public Directory Directory(string path)
+    public Directory Directory_(string path)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("directory");
+        return new Directory(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
     /// Builds a new Docker container from this directory.
     /// </summary>
-    public Container DockerBuild(BuildArg[] buildArgs = [], string dockerfile = "Dockerfile", Platform platform = null, SecretID[] secrets = [], string target = "")
+    public Container DockerBuild(BuildArg[] buildArgs = null, string dockerfile = "Dockerfile", Platform? platform = null, SecretID[] secrets = null, string target = "")
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("dockerBuild");
+        return new Container(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
     /// Returns a list of files and directories at the given path.
     /// </summary>
-    public string[] Entries(string path = null)
+    public async Task<string[]> Entries(string? path = null)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("entries");
+        return await Engine.Execute<string[]>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
     /// Writes the contents of the directory to a path on the host.
     /// </summary>
-    public bool Export(string path, bool wipe = false)
+    public async Task<bool> Export(string path, bool wipe = false)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("export");
+        return await Engine.Execute<bool>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
@@ -675,55 +884,77 @@ public class Directory : Object
     /// </summary>
     public File File(string path)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("file");
+        return new File(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
     /// Returns a list of files and directories that matche the given pattern.
     /// </summary>
-    public string[] Glob(string pattern)
+    public async Task<string[]> Glob(string pattern)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("glob");
+        return await Engine.Execute<string[]>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
     /// A unique identifier for this Directory.
     /// </summary>
-    public DirectoryID Id()
+    public async Task<DirectoryID> Id()
     {
+        var queryBuilder = QueryBuilder.Select("id");
+        return await Engine.Execute<DirectoryID>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
     /// Creates a named sub-pipeline.
     /// </summary>
-    public Directory Pipeline(string name, string description = "", PipelineLabel[] labels = [])
+    public Directory Pipeline(string name, string description = "", PipelineLabel[] labels = null)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("pipeline");
+        return new Directory(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
     /// Force evaluation in the engine.
     /// </summary>
-    public DirectoryID Sync()
+    public async Task<DirectoryID> Sync()
     {
+        var queryBuilder = QueryBuilder.Select("sync");
+        return await Engine.Execute<DirectoryID>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
     /// Retrieves this directory plus a directory written at the given path.
     /// </summary>
-    public Directory WithDirectory(DirectoryID directory, string path, string[] exclude = [], string[] include = [])
+    public Directory WithDirectory(DirectoryID directory, string path, string[] exclude = null, string[] include = null)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("withDirectory");
+        return new Directory(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
     /// Retrieves this directory plus the contents of the given file copied to the given path.
     /// </summary>
-    public Directory WithFile(string path, FileID source, int permissions = null)
+    public Directory WithFile(string path, FileID source, int? permissions = null)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("withFile");
+        return new Directory(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
     /// Retrieves this directory plus the contents of the given files copied to the given path.
     /// </summary>
-    public Directory WithFiles(string path, FileID[] sources, int permissions = null)
+    public Directory WithFiles(string path, FileID[] sources, int? permissions = null)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("withFiles");
+        return new Directory(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -731,6 +962,9 @@ public class Directory : Object
     /// </summary>
     public Directory WithNewDirectory(string path, int permissions = 420)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("withNewDirectory");
+        return new Directory(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -738,6 +972,9 @@ public class Directory : Object
     /// </summary>
     public Directory WithNewFile(string contents, string path, int permissions = 420)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("withNewFile");
+        return new Directory(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -745,6 +982,9 @@ public class Directory : Object
     /// </summary>
     public Directory WithTimestamps(int timestamp)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("withTimestamps");
+        return new Directory(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -752,6 +992,9 @@ public class Directory : Object
     /// </summary>
     public Directory WithoutDirectory(string path)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("withoutDirectory");
+        return new Directory(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -759,6 +1002,9 @@ public class Directory : Object
     /// </summary>
     public Directory WithoutFile(string path)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("withoutFile");
+        return new Directory(QueryBuilder, GraphQLClient);
     }
 }
 
@@ -772,27 +1018,33 @@ public class DirectoryID : Scalar
 /// <summary>
 /// An environment variable name and value.
 /// </summary>
-public class EnvVariable : Object
+public class EnvVariable(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object(queryBuilder, gqlClient)
 {
     /// <summary>
     /// A unique identifier for this EnvVariable.
     /// </summary>
-    public EnvVariableID Id()
+    public async Task<EnvVariableID> Id()
     {
+        var queryBuilder = QueryBuilder.Select("id");
+        return await Engine.Execute<EnvVariableID>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
     /// The environment variable name.
     /// </summary>
-    public string Name()
+    public async Task<string> Name()
     {
+        var queryBuilder = QueryBuilder.Select("name");
+        return await Engine.Execute<string>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
     /// The environment variable value.
     /// </summary>
-    public string Value()
+    public async Task<string> Value()
     {
+        var queryBuilder = QueryBuilder.Select("value");
+        return await Engine.Execute<string>(GraphQLClient, QueryBuilder);
     }
 }
 
@@ -808,27 +1060,33 @@ public class EnvVariableID : Scalar
 /// 
 /// A field on an object has a static value, as opposed to a function on an object whose value is computed by invoking code (and can accept arguments).
 /// </summary>
-public class FieldTypeDef : Object
+public class FieldTypeDef(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object(queryBuilder, gqlClient)
 {
     /// <summary>
     /// A doc string for the field, if any.
     /// </summary>
-    public string Description()
+    public async Task<string> Description()
     {
+        var queryBuilder = QueryBuilder.Select("description");
+        return await Engine.Execute<string>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
     /// A unique identifier for this FieldTypeDef.
     /// </summary>
-    public FieldTypeDefID Id()
+    public async Task<FieldTypeDefID> Id()
     {
+        var queryBuilder = QueryBuilder.Select("id");
+        return await Engine.Execute<FieldTypeDefID>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
     /// The name of the field in lowerCamelCase format.
     /// </summary>
-    public string Name()
+    public async Task<string> Name()
     {
+        var queryBuilder = QueryBuilder.Select("name");
+        return await Engine.Execute<string>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
@@ -836,6 +1094,8 @@ public class FieldTypeDef : Object
     /// </summary>
     public TypeDef TypeDef()
     {
+        var queryBuilder = QueryBuilder.Select("typeDef");
+        return new TypeDef(QueryBuilder, GraphQLClient);
     }
 }
 
@@ -849,48 +1109,61 @@ public class FieldTypeDefID : Scalar
 /// <summary>
 /// A file.
 /// </summary>
-public class File : Object
+public class File(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object(queryBuilder, gqlClient)
 {
     /// <summary>
     /// Retrieves the contents of the file.
     /// </summary>
-    public string Contents()
+    public async Task<string> Contents()
     {
+        var queryBuilder = QueryBuilder.Select("contents");
+        return await Engine.Execute<string>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
     /// Writes the file to a file path on the host.
     /// </summary>
-    public bool Export(string path, bool allowParentDirPath = false)
+    public async Task<bool> Export(string path, bool allowParentDirPath = false)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("export");
+        return await Engine.Execute<bool>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
     /// A unique identifier for this File.
     /// </summary>
-    public FileID Id()
+    public async Task<FileID> Id()
     {
+        var queryBuilder = QueryBuilder.Select("id");
+        return await Engine.Execute<FileID>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
     /// Retrieves the name of the file.
     /// </summary>
-    public string Name()
+    public async Task<string> Name()
     {
+        var queryBuilder = QueryBuilder.Select("name");
+        return await Engine.Execute<string>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
     /// Retrieves the size of the file, in bytes.
     /// </summary>
-    public int Size()
+    public async Task<int> Size()
     {
+        var queryBuilder = QueryBuilder.Select("size");
+        return await Engine.Execute<int>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
     /// Force evaluation in the engine.
     /// </summary>
-    public FileID Sync()
+    public async Task<FileID> Sync()
     {
+        var queryBuilder = QueryBuilder.Select("sync");
+        return await Engine.Execute<FileID>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
@@ -898,6 +1171,9 @@ public class File : Object
     /// </summary>
     public File WithTimestamps(int timestamp)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("withTimestamps");
+        return new File(QueryBuilder, GraphQLClient);
     }
 }
 
@@ -913,34 +1189,42 @@ public class FileID : Scalar
 /// 
 /// A function always evaluates against a parent object and is given a set of named arguments.
 /// </summary>
-public class Function : Object
+public class Function(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object(queryBuilder, gqlClient)
 {
     /// <summary>
     /// Arguments accepted by the function, if any.
     /// </summary>
-    public FunctionArg[] Args()
+    public async Task<FunctionArg[]> Args()
     {
+        var queryBuilder = QueryBuilder.Select("args");
+        return await Engine.Execute<FunctionArg[]>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
     /// A doc string for the function, if any.
     /// </summary>
-    public string Description()
+    public async Task<string> Description()
     {
+        var queryBuilder = QueryBuilder.Select("description");
+        return await Engine.Execute<string>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
     /// A unique identifier for this Function.
     /// </summary>
-    public FunctionID Id()
+    public async Task<FunctionID> Id()
     {
+        var queryBuilder = QueryBuilder.Select("id");
+        return await Engine.Execute<FunctionID>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
     /// The name of the function.
     /// </summary>
-    public string Name()
+    public async Task<string> Name()
     {
+        var queryBuilder = QueryBuilder.Select("name");
+        return await Engine.Execute<string>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
@@ -948,13 +1232,18 @@ public class Function : Object
     /// </summary>
     public TypeDef ReturnType()
     {
+        var queryBuilder = QueryBuilder.Select("returnType");
+        return new TypeDef(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
     /// Returns the function with the provided argument
     /// </summary>
-    public Function WithArg(string name, TypeDefID typeDef, JSON defaultValue = null, string description = "")
+    public Function WithArg(string name, TypeDefID typeDef, JSON? defaultValue = null, string description = "")
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("withArg");
+        return new Function(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -962,6 +1251,9 @@ public class Function : Object
     /// </summary>
     public Function WithDescription(string description)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("withDescription");
+        return new Function(QueryBuilder, GraphQLClient);
     }
 }
 
@@ -970,34 +1262,42 @@ public class Function : Object
 /// 
 /// This is a specification for an argument at function definition time, not an argument passed at function call time.
 /// </summary>
-public class FunctionArg : Object
+public class FunctionArg(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object(queryBuilder, gqlClient)
 {
     /// <summary>
     /// A default value to use for this argument when not explicitly set by the caller, if any.
     /// </summary>
-    public JSON DefaultValue()
+    public async Task<JSON> DefaultValue()
     {
+        var queryBuilder = QueryBuilder.Select("defaultValue");
+        return await Engine.Execute<JSON>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
     /// A doc string for the argument, if any.
     /// </summary>
-    public string Description()
+    public async Task<string> Description()
     {
+        var queryBuilder = QueryBuilder.Select("description");
+        return await Engine.Execute<string>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
     /// A unique identifier for this FunctionArg.
     /// </summary>
-    public FunctionArgID Id()
+    public async Task<FunctionArgID> Id()
     {
+        var queryBuilder = QueryBuilder.Select("id");
+        return await Engine.Execute<FunctionArgID>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
     /// The name of the argument in lowerCamelCase format.
     /// </summary>
-    public string Name()
+    public async Task<string> Name()
     {
+        var queryBuilder = QueryBuilder.Select("name");
+        return await Engine.Execute<string>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
@@ -1005,6 +1305,8 @@ public class FunctionArg : Object
     /// </summary>
     public TypeDef TypeDef()
     {
+        var queryBuilder = QueryBuilder.Select("typeDef");
+        return new TypeDef(QueryBuilder, GraphQLClient);
     }
 }
 
@@ -1018,75 +1320,94 @@ public class FunctionArgID : Scalar
 /// <summary>
 /// An active function call.
 /// </summary>
-public class FunctionCall : Object
+public class FunctionCall(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object(queryBuilder, gqlClient)
 {
     /// <summary>
     /// A unique identifier for this FunctionCall.
     /// </summary>
-    public FunctionCallID Id()
+    public async Task<FunctionCallID> Id()
     {
+        var queryBuilder = QueryBuilder.Select("id");
+        return await Engine.Execute<FunctionCallID>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
     /// The argument values the function is being invoked with.
     /// </summary>
-    public FunctionCallArgValue[] InputArgs()
+    public async Task<FunctionCallArgValue[]> InputArgs()
     {
+        var queryBuilder = QueryBuilder.Select("inputArgs");
+        return await Engine.Execute<FunctionCallArgValue[]>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
     /// The name of the function being called.
     /// </summary>
-    public string Name()
+    public async Task<string> Name()
     {
+        var queryBuilder = QueryBuilder.Select("name");
+        return await Engine.Execute<string>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
     /// The value of the parent object of the function being called. If the function is top-level to the module, this is always an empty object.
     /// </summary>
-    public JSON Parent()
+    public async Task<JSON> Parent()
     {
+        var queryBuilder = QueryBuilder.Select("parent");
+        return await Engine.Execute<JSON>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
     /// The name of the parent object of the function being called. If the function is top-level to the module, this is the name of the module.
     /// </summary>
-    public string ParentName()
+    public async Task<string> ParentName()
     {
+        var queryBuilder = QueryBuilder.Select("parentName");
+        return await Engine.Execute<string>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
     /// Set the return value of the function call to the provided value.
     /// </summary>
-    public Void ReturnValue(JSON value)
+    public async Task<Void> ReturnValue(JSON value)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("returnValue");
+        return await Engine.Execute<Void>(GraphQLClient, QueryBuilder);
     }
 }
 
 /// <summary>
 /// A value passed as a named argument to a function call.
 /// </summary>
-public class FunctionCallArgValue : Object
+public class FunctionCallArgValue(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object(queryBuilder, gqlClient)
 {
     /// <summary>
     /// A unique identifier for this FunctionCallArgValue.
     /// </summary>
-    public FunctionCallArgValueID Id()
+    public async Task<FunctionCallArgValueID> Id()
     {
+        var queryBuilder = QueryBuilder.Select("id");
+        return await Engine.Execute<FunctionCallArgValueID>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
     /// The name of the argument.
     /// </summary>
-    public string Name()
+    public async Task<string> Name()
     {
+        var queryBuilder = QueryBuilder.Select("name");
+        return await Engine.Execute<string>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
     /// The value of the argument represented as a JSON serialized string.
     /// </summary>
-    public JSON Value()
+    public async Task<JSON> Value()
     {
+        var queryBuilder = QueryBuilder.Select("value");
+        return await Engine.Execute<JSON>(GraphQLClient, QueryBuilder);
     }
 }
 
@@ -1114,34 +1435,42 @@ public class FunctionID : Scalar
 /// <summary>
 /// The result of running an SDK's codegen.
 /// </summary>
-public class GeneratedCode : Object
+public class GeneratedCode(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object(queryBuilder, gqlClient)
 {
     /// <summary>
     /// The directory containing the generated code.
     /// </summary>
     public Directory Code()
     {
+        var queryBuilder = QueryBuilder.Select("code");
+        return new Directory(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
     /// A unique identifier for this GeneratedCode.
     /// </summary>
-    public GeneratedCodeID Id()
+    public async Task<GeneratedCodeID> Id()
     {
+        var queryBuilder = QueryBuilder.Select("id");
+        return await Engine.Execute<GeneratedCodeID>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
     /// List of paths to mark generated in version control (i.e. .gitattributes).
     /// </summary>
-    public string[] VcsGeneratedPaths()
+    public async Task<string[]> VcsGeneratedPaths()
     {
+        var queryBuilder = QueryBuilder.Select("vcsGeneratedPaths");
+        return await Engine.Execute<string[]>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
     /// List of paths to ignore in version control (i.e. .gitignore).
     /// </summary>
-    public string[] VcsIgnoredPaths()
+    public async Task<string[]> VcsIgnoredPaths()
     {
+        var queryBuilder = QueryBuilder.Select("vcsIgnoredPaths");
+        return await Engine.Execute<string[]>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
@@ -1149,6 +1478,9 @@ public class GeneratedCode : Object
     /// </summary>
     public GeneratedCode WithVCSGeneratedPaths(string[] paths)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("withVCSGeneratedPaths");
+        return new GeneratedCode(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -1156,6 +1488,9 @@ public class GeneratedCode : Object
     /// </summary>
     public GeneratedCode WithVCSIgnoredPaths(string[] paths)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("withVCSIgnoredPaths");
+        return new GeneratedCode(QueryBuilder, GraphQLClient);
     }
 }
 
@@ -1169,20 +1504,24 @@ public class GeneratedCodeID : Scalar
 /// <summary>
 /// Module source originating from a git repo.
 /// </summary>
-public class GitModuleSource : Object
+public class GitModuleSource(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object(queryBuilder, gqlClient)
 {
     /// <summary>
     /// The URL from which the source's git repo can be cloned.
     /// </summary>
-    public string CloneURL()
+    public async Task<string> CloneURL()
     {
+        var queryBuilder = QueryBuilder.Select("cloneURL");
+        return await Engine.Execute<string>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
     /// The resolved commit of the git repo this source points to.
     /// </summary>
-    public string Commit()
+    public async Task<string> Commit()
     {
+        var queryBuilder = QueryBuilder.Select("commit");
+        return await Engine.Execute<string>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
@@ -1190,34 +1529,44 @@ public class GitModuleSource : Object
     /// </summary>
     public Directory ContextDirectory()
     {
+        var queryBuilder = QueryBuilder.Select("contextDirectory");
+        return new Directory(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
     /// The URL to the source's git repo in a web browser
     /// </summary>
-    public string HtmlURL()
+    public async Task<string> HtmlURL()
     {
+        var queryBuilder = QueryBuilder.Select("htmlURL");
+        return await Engine.Execute<string>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
     /// A unique identifier for this GitModuleSource.
     /// </summary>
-    public GitModuleSourceID Id()
+    public async Task<GitModuleSourceID> Id()
     {
+        var queryBuilder = QueryBuilder.Select("id");
+        return await Engine.Execute<GitModuleSourceID>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
     /// The path to the root of the module source under the context directory. This directory contains its configuration file. It also contains its source code (possibly as a subdirectory).
     /// </summary>
-    public string RootSubpath()
+    public async Task<string> RootSubpath()
     {
+        var queryBuilder = QueryBuilder.Select("rootSubpath");
+        return await Engine.Execute<string>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
     /// The specified version of the git repo this source points to.
     /// </summary>
-    public string Version()
+    public async Task<string> Version()
     {
+        var queryBuilder = QueryBuilder.Select("version");
+        return await Engine.Execute<string>(GraphQLClient, QueryBuilder);
     }
 }
 
@@ -1231,27 +1580,34 @@ public class GitModuleSourceID : Scalar
 /// <summary>
 /// A git ref (tag, branch, or commit).
 /// </summary>
-public class GitRef : Object
+public class GitRef(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object(queryBuilder, gqlClient)
 {
     /// <summary>
     /// The resolved commit id at this ref.
     /// </summary>
-    public string Commit()
+    public async Task<string> Commit()
     {
+        var queryBuilder = QueryBuilder.Select("commit");
+        return await Engine.Execute<string>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
     /// A unique identifier for this GitRef.
     /// </summary>
-    public GitRefID Id()
+    public async Task<GitRefID> Id()
     {
+        var queryBuilder = QueryBuilder.Select("id");
+        return await Engine.Execute<GitRefID>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
     /// The filesystem tree at this ref.
     /// </summary>
-    public Directory Tree(SocketID sshAuthSocket = null, string sshKnownHosts = null)
+    public Directory Tree(SocketID? sshAuthSocket = null, string? sshKnownHosts = null)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("tree");
+        return new Directory(QueryBuilder, GraphQLClient);
     }
 }
 
@@ -1265,13 +1621,16 @@ public class GitRefID : Scalar
 /// <summary>
 /// A git repository.
 /// </summary>
-public class GitRepository : Object
+public class GitRepository(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object(queryBuilder, gqlClient)
 {
     /// <summary>
     /// Returns details of a branch.
     /// </summary>
     public GitRef Branch(string name)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("branch");
+        return new GitRef(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -1279,6 +1638,9 @@ public class GitRepository : Object
     /// </summary>
     public GitRef Commit(string id)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("commit");
+        return new GitRef(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -1286,13 +1648,17 @@ public class GitRepository : Object
     /// </summary>
     public GitRef Head()
     {
+        var queryBuilder = QueryBuilder.Select("head");
+        return new GitRef(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
     /// A unique identifier for this GitRepository.
     /// </summary>
-    public GitRepositoryID Id()
+    public async Task<GitRepositoryID> Id()
     {
+        var queryBuilder = QueryBuilder.Select("id");
+        return await Engine.Execute<GitRepositoryID>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
@@ -1300,6 +1666,9 @@ public class GitRepository : Object
     /// </summary>
     public GitRef Ref(string name)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("ref");
+        return new GitRef(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -1307,6 +1676,9 @@ public class GitRepository : Object
     /// </summary>
     public GitRef Tag(string name)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("tag");
+        return new GitRef(QueryBuilder, GraphQLClient);
     }
 }
 
@@ -1320,13 +1692,16 @@ public class GitRepositoryID : Scalar
 /// <summary>
 /// Information about the host environment.
 /// </summary>
-public class Host : Object
+public class Host(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object(queryBuilder, gqlClient)
 {
     /// <summary>
     /// Accesses a directory on the host.
     /// </summary>
-    public Directory Directory(string path, string[] exclude = [], string[] include = [])
+    public Directory Directory(string path, string[] exclude = null, string[] include = null)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("directory");
+        return new Directory(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -1334,13 +1709,18 @@ public class Host : Object
     /// </summary>
     public File File(string path)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("file");
+        return new File(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
     /// A unique identifier for this Host.
     /// </summary>
-    public HostID Id()
+    public async Task<HostID> Id()
     {
+        var queryBuilder = QueryBuilder.Select("id");
+        return await Engine.Execute<HostID>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
@@ -1348,6 +1728,9 @@ public class Host : Object
     /// </summary>
     public Service Service(PortForward[] ports, string host = "localhost")
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("service");
+        return new Service(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -1357,13 +1740,19 @@ public class Host : Object
     /// </summary>
     public Secret SetSecretFile(string name, string path)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("setSecretFile");
+        return new Secret(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
     /// Creates a tunnel that forwards traffic from the host to a service.
     /// </summary>
-    public Service Tunnel(ServiceID service, bool native = false, PortForward[] ports = [])
+    public Service Tunnel(ServiceID service, bool native = false, PortForward[] ports = null)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("tunnel");
+        return new Service(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -1371,6 +1760,9 @@ public class Host : Object
     /// </summary>
     public Socket UnixSocket(string path)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("unixSocket");
+        return new Socket(QueryBuilder, GraphQLClient);
     }
 }
 
@@ -1407,27 +1799,33 @@ public enum ImageMediaTypes
 /// in the core API. It is not used by user modules and shouldn't ever be as user
 /// module accept input objects via their id rather than graphql input types.
 /// </summary>
-public class InputTypeDef : Object
+public class InputTypeDef(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object(queryBuilder, gqlClient)
 {
     /// <summary>
     /// Static fields defined on this input object, if any.
     /// </summary>
-    public FieldTypeDef[] Fields()
+    public async Task<FieldTypeDef[]> Fields()
     {
+        var queryBuilder = QueryBuilder.Select("fields");
+        return await Engine.Execute<FieldTypeDef[]>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
     /// A unique identifier for this InputTypeDef.
     /// </summary>
-    public InputTypeDefID Id()
+    public async Task<InputTypeDefID> Id()
     {
+        var queryBuilder = QueryBuilder.Select("id");
+        return await Engine.Execute<InputTypeDefID>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
     /// The name of the input object.
     /// </summary>
-    public string Name()
+    public async Task<string> Name()
     {
+        var queryBuilder = QueryBuilder.Select("name");
+        return await Engine.Execute<string>(GraphQLClient, QueryBuilder);
     }
 }
 
@@ -1441,41 +1839,51 @@ public class InputTypeDefID : Scalar
 /// <summary>
 /// A definition of a custom interface defined in a Module.
 /// </summary>
-public class InterfaceTypeDef : Object
+public class InterfaceTypeDef(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object(queryBuilder, gqlClient)
 {
     /// <summary>
     /// The doc string for the interface, if any.
     /// </summary>
-    public string Description()
+    public async Task<string> Description()
     {
+        var queryBuilder = QueryBuilder.Select("description");
+        return await Engine.Execute<string>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
     /// Functions defined on this interface, if any.
     /// </summary>
-    public Function[] Functions()
+    public async Task<Function[]> Functions()
     {
+        var queryBuilder = QueryBuilder.Select("functions");
+        return await Engine.Execute<Function[]>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
     /// A unique identifier for this InterfaceTypeDef.
     /// </summary>
-    public InterfaceTypeDefID Id()
+    public async Task<InterfaceTypeDefID> Id()
     {
+        var queryBuilder = QueryBuilder.Select("id");
+        return await Engine.Execute<InterfaceTypeDefID>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
     /// The name of the interface.
     /// </summary>
-    public string Name()
+    public async Task<string> Name()
     {
+        var queryBuilder = QueryBuilder.Select("name");
+        return await Engine.Execute<string>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
     /// If this InterfaceTypeDef is associated with a Module, the name of the module. Unset otherwise.
     /// </summary>
-    public string SourceModuleName()
+    public async Task<string> SourceModuleName()
     {
+        var queryBuilder = QueryBuilder.Select("sourceModuleName");
+        return await Engine.Execute<string>(GraphQLClient, QueryBuilder);
     }
 }
 
@@ -1496,27 +1904,33 @@ public class JSON : Scalar
 /// <summary>
 /// A simple key value object that represents a label.
 /// </summary>
-public class Label : Object
+public class Label(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object(queryBuilder, gqlClient)
 {
     /// <summary>
     /// A unique identifier for this Label.
     /// </summary>
-    public LabelID Id()
+    public async Task<LabelID> Id()
     {
+        var queryBuilder = QueryBuilder.Select("id");
+        return await Engine.Execute<LabelID>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
     /// The label name.
     /// </summary>
-    public string Name()
+    public async Task<string> Name()
     {
+        var queryBuilder = QueryBuilder.Select("name");
+        return await Engine.Execute<string>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
     /// The label value.
     /// </summary>
-    public string Value()
+    public async Task<string> Value()
     {
+        var queryBuilder = QueryBuilder.Select("value");
+        return await Engine.Execute<string>(GraphQLClient, QueryBuilder);
     }
 }
 
@@ -1530,20 +1944,24 @@ public class LabelID : Scalar
 /// <summary>
 /// A definition of a list type in a Module.
 /// </summary>
-public class ListTypeDef : Object
+public class ListTypeDef(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object(queryBuilder, gqlClient)
 {
     /// <summary>
     /// The type of the elements in the list.
     /// </summary>
     public TypeDef ElementTypeDef()
     {
+        var queryBuilder = QueryBuilder.Select("elementTypeDef");
+        return new TypeDef(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
     /// A unique identifier for this ListTypeDef.
     /// </summary>
-    public ListTypeDefID Id()
+    public async Task<ListTypeDefID> Id()
     {
+        var queryBuilder = QueryBuilder.Select("id");
+        return await Engine.Execute<ListTypeDefID>(GraphQLClient, QueryBuilder);
     }
 }
 
@@ -1557,27 +1975,33 @@ public class ListTypeDefID : Scalar
 /// <summary>
 /// Module source that that originates from a path locally relative to an arbitrary directory.
 /// </summary>
-public class LocalModuleSource : Object
+public class LocalModuleSource(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object(queryBuilder, gqlClient)
 {
     /// <summary>
     /// The directory containing everything needed to load load and use the module.
     /// </summary>
     public Directory ContextDirectory()
     {
+        var queryBuilder = QueryBuilder.Select("contextDirectory");
+        return new Directory(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
     /// A unique identifier for this LocalModuleSource.
     /// </summary>
-    public LocalModuleSourceID Id()
+    public async Task<LocalModuleSourceID> Id()
     {
+        var queryBuilder = QueryBuilder.Select("id");
+        return await Engine.Execute<LocalModuleSourceID>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
     /// The path to the root of the module source under the context directory. This directory contains its configuration file. It also contains its source code (possibly as a subdirectory).
     /// </summary>
-    public string RootSubpath()
+    public async Task<string> RootSubpath()
     {
+        var queryBuilder = QueryBuilder.Select("rootSubpath");
+        return await Engine.Execute<string>(GraphQLClient, QueryBuilder);
     }
 }
 
@@ -1591,27 +2015,33 @@ public class LocalModuleSourceID : Scalar
 /// <summary>
 /// A Dagger module.
 /// </summary>
-public class Module : Object
+public class Module(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object(queryBuilder, gqlClient)
 {
     /// <summary>
     /// Modules used by this module.
     /// </summary>
-    public Module[] Dependencies()
+    public async Task<Module[]> Dependencies()
     {
+        var queryBuilder = QueryBuilder.Select("dependencies");
+        return await Engine.Execute<Module[]>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
     /// The dependencies as configured by the module.
     /// </summary>
-    public ModuleDependency[] DependencyConfig()
+    public async Task<ModuleDependency[]> DependencyConfig()
     {
+        var queryBuilder = QueryBuilder.Select("dependencyConfig");
+        return await Engine.Execute<ModuleDependency[]>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
     /// The doc string of the module, if any
     /// </summary>
-    public string Description()
+    public async Task<string> Description()
     {
+        var queryBuilder = QueryBuilder.Select("description");
+        return await Engine.Execute<string>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
@@ -1619,6 +2049,8 @@ public class Module : Object
     /// </summary>
     public Directory GeneratedContextDiff()
     {
+        var queryBuilder = QueryBuilder.Select("generatedContextDiff");
+        return new Directory(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -1626,13 +2058,17 @@ public class Module : Object
     /// </summary>
     public Directory GeneratedContextDirectory()
     {
+        var queryBuilder = QueryBuilder.Select("generatedContextDirectory");
+        return new Directory(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
     /// A unique identifier for this Module.
     /// </summary>
-    public ModuleID Id()
+    public async Task<ModuleID> Id()
     {
+        var queryBuilder = QueryBuilder.Select("id");
+        return await Engine.Execute<ModuleID>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
@@ -1640,27 +2076,35 @@ public class Module : Object
     /// </summary>
     public Module Initialize()
     {
+        var queryBuilder = QueryBuilder.Select("initialize");
+        return new Module(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
     /// Interfaces served by this module.
     /// </summary>
-    public TypeDef[] Interfaces()
+    public async Task<TypeDef[]> Interfaces()
     {
+        var queryBuilder = QueryBuilder.Select("interfaces");
+        return await Engine.Execute<TypeDef[]>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
     /// The name of the module
     /// </summary>
-    public string Name()
+    public async Task<string> Name()
     {
+        var queryBuilder = QueryBuilder.Select("name");
+        return await Engine.Execute<string>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
     /// Objects served by this module.
     /// </summary>
-    public TypeDef[] Objects()
+    public async Task<TypeDef[]> Objects()
     {
+        var queryBuilder = QueryBuilder.Select("objects");
+        return await Engine.Execute<TypeDef[]>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
@@ -1668,13 +2112,17 @@ public class Module : Object
     /// </summary>
     public Container Runtime()
     {
+        var queryBuilder = QueryBuilder.Select("runtime");
+        return new Container(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
     /// The SDK used by this module. Either a name of a builtin SDK or a module source ref string pointing to the SDK's implementation.
     /// </summary>
-    public string Sdk()
+    public async Task<string> Sdk()
     {
+        var queryBuilder = QueryBuilder.Select("sdk");
+        return await Engine.Execute<string>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
@@ -1682,8 +2130,10 @@ public class Module : Object
     /// 
     /// Note: this can only be called once per session. In the future, it could return a stream or service to remove the side effect.
     /// </summary>
-    public Void Serve()
+    public async Task<Void> Serve()
     {
+        var queryBuilder = QueryBuilder.Select("serve");
+        return await Engine.Execute<Void>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
@@ -1691,6 +2141,8 @@ public class Module : Object
     /// </summary>
     public ModuleSource Source()
     {
+        var queryBuilder = QueryBuilder.Select("source");
+        return new ModuleSource(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -1698,6 +2150,9 @@ public class Module : Object
     /// </summary>
     public Module WithDescription(string description)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("withDescription");
+        return new Module(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -1705,6 +2160,9 @@ public class Module : Object
     /// </summary>
     public Module WithInterface(TypeDefID iface)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("withInterface");
+        return new Module(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -1712,6 +2170,9 @@ public class Module : Object
     /// </summary>
     public Module WithObject(TypeDefID object)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("withObject");
+        return new Module(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -1719,26 +2180,33 @@ public class Module : Object
     /// </summary>
     public Module WithSource(ModuleSourceID source)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("withSource");
+        return new Module(QueryBuilder, GraphQLClient);
     }
 }
 
 /// <summary>
 /// The configuration of dependency of a module.
 /// </summary>
-public class ModuleDependency : Object
+public class ModuleDependency(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object(queryBuilder, gqlClient)
 {
     /// <summary>
     /// A unique identifier for this ModuleDependency.
     /// </summary>
-    public ModuleDependencyID Id()
+    public async Task<ModuleDependencyID> Id()
     {
+        var queryBuilder = QueryBuilder.Select("id");
+        return await Engine.Execute<ModuleDependencyID>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
     /// The name of the dependency module.
     /// </summary>
-    public string Name()
+    public async Task<string> Name()
     {
+        var queryBuilder = QueryBuilder.Select("name");
+        return await Engine.Execute<string>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
@@ -1746,6 +2214,8 @@ public class ModuleDependency : Object
     /// </summary>
     public ModuleSource Source()
     {
+        var queryBuilder = QueryBuilder.Select("source");
+        return new ModuleSource(QueryBuilder, GraphQLClient);
     }
 }
 
@@ -1766,13 +2236,15 @@ public class ModuleID : Scalar
 /// <summary>
 /// The source needed to load and run a module, along with any metadata about the source such as versions/urls/etc.
 /// </summary>
-public class ModuleSource : Object
+public class ModuleSource(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object(queryBuilder, gqlClient)
 {
     /// <summary>
     /// If the source is a of kind git, the git source representation of it.
     /// </summary>
     public GitModuleSource AsGitSource()
     {
+        var queryBuilder = QueryBuilder.Select("asGitSource");
+        return new GitModuleSource(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -1780,6 +2252,8 @@ public class ModuleSource : Object
     /// </summary>
     public LocalModuleSource AsLocalSource()
     {
+        var queryBuilder = QueryBuilder.Select("asLocalSource");
+        return new LocalModuleSource(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -1787,20 +2261,26 @@ public class ModuleSource : Object
     /// </summary>
     public Module AsModule()
     {
+        var queryBuilder = QueryBuilder.Select("asModule");
+        return new Module(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
     /// A human readable ref string representation of this module source.
     /// </summary>
-    public string AsString()
+    public async Task<string> AsString()
     {
+        var queryBuilder = QueryBuilder.Select("asString");
+        return await Engine.Execute<string>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
     /// Returns whether the module source has a configuration file.
     /// </summary>
-    public bool ConfigExists()
+    public async Task<bool> ConfigExists()
     {
+        var queryBuilder = QueryBuilder.Select("configExists");
+        return await Engine.Execute<bool>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
@@ -1808,13 +2288,17 @@ public class ModuleSource : Object
     /// </summary>
     public Directory ContextDirectory()
     {
+        var queryBuilder = QueryBuilder.Select("contextDirectory");
+        return new Directory(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
     /// The dependencies of the module source. Includes dependencies from the configuration and any extras from withDependencies calls.
     /// </summary>
-    public ModuleDependency[] Dependencies()
+    public async Task<ModuleDependency[]> Dependencies()
     {
+        var queryBuilder = QueryBuilder.Select("dependencies");
+        return await Engine.Execute<ModuleDependency[]>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
@@ -1822,13 +2306,18 @@ public class ModuleSource : Object
     /// </summary>
     public Directory Directory(string path)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("directory");
+        return new Directory(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
     /// A unique identifier for this ModuleSource.
     /// </summary>
-    public ModuleSourceID Id()
+    public async Task<ModuleSourceID> Id()
     {
+        var queryBuilder = QueryBuilder.Select("id");
+        return await Engine.Execute<ModuleSourceID>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
@@ -1836,27 +2325,35 @@ public class ModuleSource : Object
     /// </summary>
     public ModuleSourceKind Kind()
     {
+        var queryBuilder = QueryBuilder.Select("kind");
+        return new ModuleSourceKind(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
     /// If set, the name of the module this source references, including any overrides at runtime by callers.
     /// </summary>
-    public string ModuleName()
+    public async Task<string> ModuleName()
     {
+        var queryBuilder = QueryBuilder.Select("moduleName");
+        return await Engine.Execute<string>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
     /// The original name of the module this source references, as defined in the module configuration.
     /// </summary>
-    public string ModuleOriginalName()
+    public async Task<string> ModuleOriginalName()
     {
+        var queryBuilder = QueryBuilder.Select("moduleOriginalName");
+        return await Engine.Execute<string>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
     /// The path to the module source's context directory on the caller's filesystem. Only valid for local sources.
     /// </summary>
-    public string ResolveContextPathFromCaller()
+    public async Task<string> ResolveContextPathFromCaller()
     {
+        var queryBuilder = QueryBuilder.Select("resolveContextPathFromCaller");
+        return await Engine.Execute<string>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
@@ -1864,13 +2361,19 @@ public class ModuleSource : Object
     /// </summary>
     public ModuleSource ResolveDependency(ModuleSourceID dep)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("resolveDependency");
+        return new ModuleSource(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
     /// Load a directory from the caller optionally with a given view applied.
     /// </summary>
-    public Directory ResolveDirectoryFromCaller(string path, string viewName = null)
+    public Directory ResolveDirectoryFromCaller(string path, string? viewName = null)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("resolveDirectoryFromCaller");
+        return new Directory(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -1878,20 +2381,26 @@ public class ModuleSource : Object
     /// </summary>
     public ModuleSource ResolveFromCaller()
     {
+        var queryBuilder = QueryBuilder.Select("resolveFromCaller");
+        return new ModuleSource(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
     /// The path relative to context of the root of the module source, which contains dagger.json. It also contains the module implementation source code, but that may or may not being a subdir of this root.
     /// </summary>
-    public string SourceRootSubpath()
+    public async Task<string> SourceRootSubpath()
     {
+        var queryBuilder = QueryBuilder.Select("sourceRootSubpath");
+        return await Engine.Execute<string>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
     /// The path relative to context of the module implementation source code.
     /// </summary>
-    public string SourceSubpath()
+    public async Task<string> SourceSubpath()
     {
+        var queryBuilder = QueryBuilder.Select("sourceSubpath");
+        return await Engine.Execute<string>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
@@ -1899,13 +2408,18 @@ public class ModuleSource : Object
     /// </summary>
     public ModuleSourceView View(string name)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("view");
+        return new ModuleSourceView(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
     /// The named views defined for this module source, which are sets of directory filters that can be applied to directory arguments provided to functions.
     /// </summary>
-    public ModuleSourceView[] Views()
+    public async Task<ModuleSourceView[]> Views()
     {
+        var queryBuilder = QueryBuilder.Select("views");
+        return await Engine.Execute<ModuleSourceView[]>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
@@ -1913,6 +2427,9 @@ public class ModuleSource : Object
     /// </summary>
     public ModuleSource WithContextDirectory(DirectoryID dir)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("withContextDirectory");
+        return new ModuleSource(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -1920,6 +2437,9 @@ public class ModuleSource : Object
     /// </summary>
     public ModuleSource WithDependencies(ModuleDependencyID[] dependencies)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("withDependencies");
+        return new ModuleSource(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -1927,6 +2447,9 @@ public class ModuleSource : Object
     /// </summary>
     public ModuleSource WithName(string name)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("withName");
+        return new ModuleSource(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -1934,6 +2457,9 @@ public class ModuleSource : Object
     /// </summary>
     public ModuleSource WithSDK(string sdk)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("withSDK");
+        return new ModuleSource(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -1941,6 +2467,9 @@ public class ModuleSource : Object
     /// </summary>
     public ModuleSource WithSourceSubpath(string path)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("withSourceSubpath");
+        return new ModuleSource(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -1948,6 +2477,9 @@ public class ModuleSource : Object
     /// </summary>
     public ModuleSource WithView(string name, string[] patterns)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("withView");
+        return new ModuleSource(QueryBuilder, GraphQLClient);
     }
 }
 
@@ -1970,27 +2502,33 @@ public enum ModuleSourceKind
 /// <summary>
 /// A named set of path filters that can be applied to directory arguments provided to functions.
 /// </summary>
-public class ModuleSourceView : Object
+public class ModuleSourceView(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object(queryBuilder, gqlClient)
 {
     /// <summary>
     /// A unique identifier for this ModuleSourceView.
     /// </summary>
-    public ModuleSourceViewID Id()
+    public async Task<ModuleSourceViewID> Id()
     {
+        var queryBuilder = QueryBuilder.Select("id");
+        return await Engine.Execute<ModuleSourceViewID>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
     /// The name of the view
     /// </summary>
-    public string Name()
+    public async Task<string> Name()
     {
+        var queryBuilder = QueryBuilder.Select("name");
+        return await Engine.Execute<string>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
     /// The patterns of the view used to filter paths
     /// </summary>
-    public string[] Patterns()
+    public async Task<string[]> Patterns()
     {
+        var queryBuilder = QueryBuilder.Select("patterns");
+        return await Engine.Execute<string[]>(GraphQLClient, QueryBuilder);
     }
 }
 
@@ -2013,55 +2551,69 @@ public enum NetworkProtocol
 /// <summary>
 /// A definition of a custom object defined in a Module.
 /// </summary>
-public class ObjectTypeDef : Object
+public class ObjectTypeDef(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object(queryBuilder, gqlClient)
 {
     /// <summary>
     /// The function used to construct new instances of this object, if any
     /// </summary>
     public Function Constructor()
     {
+        var queryBuilder = QueryBuilder.Select("constructor");
+        return new Function(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
     /// The doc string for the object, if any.
     /// </summary>
-    public string Description()
+    public async Task<string> Description()
     {
+        var queryBuilder = QueryBuilder.Select("description");
+        return await Engine.Execute<string>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
     /// Static fields defined on this object, if any.
     /// </summary>
-    public FieldTypeDef[] Fields()
+    public async Task<FieldTypeDef[]> Fields()
     {
+        var queryBuilder = QueryBuilder.Select("fields");
+        return await Engine.Execute<FieldTypeDef[]>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
     /// Functions defined on this object, if any.
     /// </summary>
-    public Function[] Functions()
+    public async Task<Function[]> Functions()
     {
+        var queryBuilder = QueryBuilder.Select("functions");
+        return await Engine.Execute<Function[]>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
     /// A unique identifier for this ObjectTypeDef.
     /// </summary>
-    public ObjectTypeDefID Id()
+    public async Task<ObjectTypeDefID> Id()
     {
+        var queryBuilder = QueryBuilder.Select("id");
+        return await Engine.Execute<ObjectTypeDefID>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
     /// The name of the object.
     /// </summary>
-    public string Name()
+    public async Task<string> Name()
     {
+        var queryBuilder = QueryBuilder.Select("name");
+        return await Engine.Execute<string>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
     /// If this ObjectTypeDef is associated with a Module, the name of the module. Unset otherwise.
     /// </summary>
-    public string SourceModuleName()
+    public async Task<string> SourceModuleName()
     {
+        var queryBuilder = QueryBuilder.Select("sourceModuleName");
+        return await Engine.Execute<string>(GraphQLClient, QueryBuilder);
     }
 }
 
@@ -2099,34 +2651,42 @@ public class Platform : Scalar
 /// <summary>
 /// A port exposed by a container.
 /// </summary>
-public class Port : Object
+public class Port(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object(queryBuilder, gqlClient)
 {
     /// <summary>
     /// The port description.
     /// </summary>
-    public string Description()
+    public async Task<string> Description()
     {
+        var queryBuilder = QueryBuilder.Select("description");
+        return await Engine.Execute<string>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
     /// Skip the health check when run as a service.
     /// </summary>
-    public bool ExperimentalSkipHealthcheck()
+    public async Task<bool> ExperimentalSkipHealthcheck()
     {
+        var queryBuilder = QueryBuilder.Select("experimentalSkipHealthcheck");
+        return await Engine.Execute<bool>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
     /// A unique identifier for this Port.
     /// </summary>
-    public PortID Id()
+    public async Task<PortID> Id()
     {
+        var queryBuilder = QueryBuilder.Select("id");
+        return await Engine.Execute<PortID>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
     /// The port number.
     /// </summary>
-    public int Port()
+    public async Task<int> Port_()
     {
+        var queryBuilder = QueryBuilder.Select("port");
+        return await Engine.Execute<int>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
@@ -2134,6 +2694,8 @@ public class Port : Object
     /// </summary>
     public NetworkProtocol Protocol()
     {
+        var queryBuilder = QueryBuilder.Select("protocol");
+        return new NetworkProtocol(QueryBuilder, GraphQLClient);
     }
 }
 
@@ -2166,13 +2728,16 @@ public class PortID : Scalar
 /// <summary>
 /// The root of the DAG.
 /// </summary>
-public class Query : Object
+public class Query(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object(queryBuilder, gqlClient)
 {
     /// <summary>
     /// Retrieves a content-addressed blob.
     /// </summary>
     public Directory Blob(string digest, string mediaType, int size, string uncompressed)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("blob");
+        return new Directory(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -2180,6 +2745,9 @@ public class Query : Object
     /// </summary>
     public Container BuiltinContainer(string digest)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("builtinContainer");
+        return new Container(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -2187,13 +2755,19 @@ public class Query : Object
     /// </summary>
     public CacheVolume CacheVolume(string key)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("cacheVolume");
+        return new CacheVolume(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
     /// Checks if the current Dagger Engine is compatible with an SDK's required version.
     /// </summary>
-    public bool CheckVersionCompatibility(string version)
+    public async Task<bool> CheckVersionCompatibility(string version)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("checkVersionCompatibility");
+        return await Engine.Execute<bool>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
@@ -2201,8 +2775,11 @@ public class Query : Object
     /// 
     /// Optional platform argument initializes new containers to execute and publish as that platform. Platform defaults to that of the builder's host.
     /// </summary>
-    public Container Container(ContainerID id = null, Platform platform = null)
+    public Container Container(ContainerID? id = null, Platform? platform = null)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("container");
+        return new Container(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -2212,6 +2789,8 @@ public class Query : Object
     /// </summary>
     public FunctionCall CurrentFunctionCall()
     {
+        var queryBuilder = QueryBuilder.Select("currentFunctionCall");
+        return new FunctionCall(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -2219,27 +2798,36 @@ public class Query : Object
     /// </summary>
     public CurrentModule CurrentModule()
     {
+        var queryBuilder = QueryBuilder.Select("currentModule");
+        return new CurrentModule(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
     /// The TypeDef representations of the objects currently being served in the session.
     /// </summary>
-    public TypeDef[] CurrentTypeDefs()
+    public async Task<TypeDef[]> CurrentTypeDefs()
     {
+        var queryBuilder = QueryBuilder.Select("currentTypeDefs");
+        return await Engine.Execute<TypeDef[]>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
     /// The default platform of the engine.
     /// </summary>
-    public Platform DefaultPlatform()
+    public async Task<Platform> DefaultPlatform()
     {
+        var queryBuilder = QueryBuilder.Select("defaultPlatform");
+        return await Engine.Execute<Platform>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
     /// Creates an empty directory.
     /// </summary>
-    public Directory Directory(DirectoryID id = null)
+    public Directory Directory(DirectoryID? id = null)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("directory");
+        return new Directory(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -2247,6 +2835,9 @@ public class Query : Object
     /// </summary>
     public File File(FileID id)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("file");
+        return new File(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -2254,6 +2845,9 @@ public class Query : Object
     /// </summary>
     public Function Function(string name, TypeDefID returnType)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("function");
+        return new Function(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -2261,13 +2855,19 @@ public class Query : Object
     /// </summary>
     public GeneratedCode GeneratedCode(DirectoryID code)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("generatedCode");
+        return new GeneratedCode(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
     /// Queries a Git repository.
     /// </summary>
-    public GitRepository Git(string url, ServiceID experimentalServiceHost = null, bool keepGitDir = false, SocketID sshAuthSocket = null, string sshKnownHosts = "")
+    public GitRepository Git(string url, ServiceID? experimentalServiceHost = null, bool keepGitDir = false, SocketID? sshAuthSocket = null, string sshKnownHosts = "")
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("git");
+        return new GitRepository(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -2275,13 +2875,18 @@ public class Query : Object
     /// </summary>
     public Host Host()
     {
+        var queryBuilder = QueryBuilder.Select("host");
+        return new Host(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
     /// Returns a file containing an http remote url content.
     /// </summary>
-    public File Http(string url, ServiceID experimentalServiceHost = null)
+    public File Http(string url, ServiceID? experimentalServiceHost = null)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("http");
+        return new File(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -2289,6 +2894,9 @@ public class Query : Object
     /// </summary>
     public CacheVolume LoadCacheVolumeFromID(CacheVolumeID id)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("loadCacheVolumeFromID");
+        return new CacheVolume(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -2296,6 +2904,9 @@ public class Query : Object
     /// </summary>
     public Container LoadContainerFromID(ContainerID id)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("loadContainerFromID");
+        return new Container(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -2303,6 +2914,9 @@ public class Query : Object
     /// </summary>
     public CurrentModule LoadCurrentModuleFromID(CurrentModuleID id)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("loadCurrentModuleFromID");
+        return new CurrentModule(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -2310,6 +2924,9 @@ public class Query : Object
     /// </summary>
     public Directory LoadDirectoryFromID(DirectoryID id)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("loadDirectoryFromID");
+        return new Directory(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -2317,6 +2934,9 @@ public class Query : Object
     /// </summary>
     public EnvVariable LoadEnvVariableFromID(EnvVariableID id)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("loadEnvVariableFromID");
+        return new EnvVariable(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -2324,6 +2944,9 @@ public class Query : Object
     /// </summary>
     public FieldTypeDef LoadFieldTypeDefFromID(FieldTypeDefID id)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("loadFieldTypeDefFromID");
+        return new FieldTypeDef(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -2331,6 +2954,9 @@ public class Query : Object
     /// </summary>
     public File LoadFileFromID(FileID id)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("loadFileFromID");
+        return new File(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -2338,6 +2964,9 @@ public class Query : Object
     /// </summary>
     public FunctionArg LoadFunctionArgFromID(FunctionArgID id)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("loadFunctionArgFromID");
+        return new FunctionArg(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -2345,6 +2974,9 @@ public class Query : Object
     /// </summary>
     public FunctionCallArgValue LoadFunctionCallArgValueFromID(FunctionCallArgValueID id)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("loadFunctionCallArgValueFromID");
+        return new FunctionCallArgValue(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -2352,6 +2984,9 @@ public class Query : Object
     /// </summary>
     public FunctionCall LoadFunctionCallFromID(FunctionCallID id)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("loadFunctionCallFromID");
+        return new FunctionCall(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -2359,6 +2994,9 @@ public class Query : Object
     /// </summary>
     public Function LoadFunctionFromID(FunctionID id)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("loadFunctionFromID");
+        return new Function(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -2366,6 +3004,9 @@ public class Query : Object
     /// </summary>
     public GeneratedCode LoadGeneratedCodeFromID(GeneratedCodeID id)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("loadGeneratedCodeFromID");
+        return new GeneratedCode(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -2373,6 +3014,9 @@ public class Query : Object
     /// </summary>
     public GitModuleSource LoadGitModuleSourceFromID(GitModuleSourceID id)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("loadGitModuleSourceFromID");
+        return new GitModuleSource(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -2380,6 +3024,9 @@ public class Query : Object
     /// </summary>
     public GitRef LoadGitRefFromID(GitRefID id)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("loadGitRefFromID");
+        return new GitRef(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -2387,6 +3034,9 @@ public class Query : Object
     /// </summary>
     public GitRepository LoadGitRepositoryFromID(GitRepositoryID id)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("loadGitRepositoryFromID");
+        return new GitRepository(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -2394,6 +3044,9 @@ public class Query : Object
     /// </summary>
     public Host LoadHostFromID(HostID id)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("loadHostFromID");
+        return new Host(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -2401,6 +3054,9 @@ public class Query : Object
     /// </summary>
     public InputTypeDef LoadInputTypeDefFromID(InputTypeDefID id)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("loadInputTypeDefFromID");
+        return new InputTypeDef(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -2408,6 +3064,9 @@ public class Query : Object
     /// </summary>
     public InterfaceTypeDef LoadInterfaceTypeDefFromID(InterfaceTypeDefID id)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("loadInterfaceTypeDefFromID");
+        return new InterfaceTypeDef(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -2415,6 +3074,9 @@ public class Query : Object
     /// </summary>
     public Label LoadLabelFromID(LabelID id)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("loadLabelFromID");
+        return new Label(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -2422,6 +3084,9 @@ public class Query : Object
     /// </summary>
     public ListTypeDef LoadListTypeDefFromID(ListTypeDefID id)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("loadListTypeDefFromID");
+        return new ListTypeDef(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -2429,6 +3094,9 @@ public class Query : Object
     /// </summary>
     public LocalModuleSource LoadLocalModuleSourceFromID(LocalModuleSourceID id)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("loadLocalModuleSourceFromID");
+        return new LocalModuleSource(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -2436,6 +3104,9 @@ public class Query : Object
     /// </summary>
     public ModuleDependency LoadModuleDependencyFromID(ModuleDependencyID id)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("loadModuleDependencyFromID");
+        return new ModuleDependency(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -2443,6 +3114,9 @@ public class Query : Object
     /// </summary>
     public Module LoadModuleFromID(ModuleID id)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("loadModuleFromID");
+        return new Module(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -2450,6 +3124,9 @@ public class Query : Object
     /// </summary>
     public ModuleSource LoadModuleSourceFromID(ModuleSourceID id)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("loadModuleSourceFromID");
+        return new ModuleSource(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -2457,6 +3134,9 @@ public class Query : Object
     /// </summary>
     public ModuleSourceView LoadModuleSourceViewFromID(ModuleSourceViewID id)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("loadModuleSourceViewFromID");
+        return new ModuleSourceView(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -2464,6 +3144,9 @@ public class Query : Object
     /// </summary>
     public ObjectTypeDef LoadObjectTypeDefFromID(ObjectTypeDefID id)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("loadObjectTypeDefFromID");
+        return new ObjectTypeDef(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -2471,6 +3154,9 @@ public class Query : Object
     /// </summary>
     public Port LoadPortFromID(PortID id)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("loadPortFromID");
+        return new Port(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -2478,6 +3164,9 @@ public class Query : Object
     /// </summary>
     public Secret LoadSecretFromID(SecretID id)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("loadSecretFromID");
+        return new Secret(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -2485,6 +3174,9 @@ public class Query : Object
     /// </summary>
     public Service LoadServiceFromID(ServiceID id)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("loadServiceFromID");
+        return new Service(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -2492,6 +3184,9 @@ public class Query : Object
     /// </summary>
     public Socket LoadSocketFromID(SocketID id)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("loadSocketFromID");
+        return new Socket(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -2499,6 +3194,9 @@ public class Query : Object
     /// </summary>
     public Terminal LoadTerminalFromID(TerminalID id)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("loadTerminalFromID");
+        return new Terminal(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -2506,6 +3204,9 @@ public class Query : Object
     /// </summary>
     public TypeDef LoadTypeDefFromID(TypeDefID id)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("loadTypeDefFromID");
+        return new TypeDef(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -2513,6 +3214,8 @@ public class Query : Object
     /// </summary>
     public Module Module()
     {
+        var queryBuilder = QueryBuilder.Select("module");
+        return new Module(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -2520,6 +3223,9 @@ public class Query : Object
     /// </summary>
     public ModuleDependency ModuleDependency(ModuleSourceID source, string name = "")
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("moduleDependency");
+        return new ModuleDependency(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -2527,20 +3233,29 @@ public class Query : Object
     /// </summary>
     public ModuleSource ModuleSource(string refString, bool stable = false)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("moduleSource");
+        return new ModuleSource(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
     /// Creates a named sub-pipeline.
     /// </summary>
-    public Query Pipeline(string name, string description = "", PipelineLabel[] labels = null)
+    public Query Pipeline(string name, string description = "", PipelineLabel[]? labels = null)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("pipeline");
+        return new Query(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
     /// Reference a secret by name.
     /// </summary>
-    public Secret Secret(string name, string accessor = null)
+    public Secret Secret(string name, string? accessor = null)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("secret");
+        return new Secret(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -2550,6 +3265,9 @@ public class Query : Object
     /// </summary>
     public Secret SetSecret(string name, string plaintext)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("setSecret");
+        return new Secret(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -2557,6 +3275,9 @@ public class Query : Object
     /// </summary>
     public Socket Socket(SocketID id)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("socket");
+        return new Socket(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -2564,33 +3285,41 @@ public class Query : Object
     /// </summary>
     public TypeDef TypeDef()
     {
+        var queryBuilder = QueryBuilder.Select("typeDef");
+        return new TypeDef(QueryBuilder, GraphQLClient);
     }
 }
 
 /// <summary>
 /// A reference to a secret value, which can be handled more safely than the value itself.
 /// </summary>
-public class Secret : Object
+public class Secret(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object(queryBuilder, gqlClient)
 {
     /// <summary>
     /// A unique identifier for this Secret.
     /// </summary>
-    public SecretID Id()
+    public async Task<SecretID> Id()
     {
+        var queryBuilder = QueryBuilder.Select("id");
+        return await Engine.Execute<SecretID>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
     /// The name of this secret.
     /// </summary>
-    public string Name()
+    public async Task<string> Name()
     {
+        var queryBuilder = QueryBuilder.Select("name");
+        return await Engine.Execute<string>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
     /// The value of this secret.
     /// </summary>
-    public string Plaintext()
+    public async Task<string> Plaintext()
     {
+        var queryBuilder = QueryBuilder.Select("plaintext");
+        return await Engine.Execute<string>(GraphQLClient, QueryBuilder);
     }
 }
 
@@ -2604,7 +3333,7 @@ public class SecretID : Scalar
 /// <summary>
 /// A content-addressed service providing TCP connectivity.
 /// </summary>
-public class Service : Object
+public class Service(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object(queryBuilder, gqlClient)
 {
     /// <summary>
     /// Retrieves an endpoint that clients can use to reach this container.
@@ -2613,29 +3342,38 @@ public class Service : Object
     /// 
     /// If a scheme is specified, a URL is returned. Otherwise, a host:port pair is returned.
     /// </summary>
-    public string Endpoint(int port = null, string scheme = "")
+    public async Task<string> Endpoint(int? port = null, string scheme = "")
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("endpoint");
+        return await Engine.Execute<string>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
     /// Retrieves a hostname which can be used by clients to reach this container.
     /// </summary>
-    public string Hostname()
+    public async Task<string> Hostname()
     {
+        var queryBuilder = QueryBuilder.Select("hostname");
+        return await Engine.Execute<string>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
     /// A unique identifier for this Service.
     /// </summary>
-    public ServiceID Id()
+    public async Task<ServiceID> Id()
     {
+        var queryBuilder = QueryBuilder.Select("id");
+        return await Engine.Execute<ServiceID>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
     /// Retrieves the list of ports provided by the service.
     /// </summary>
-    public Port[] Ports()
+    public async Task<Port[]> Ports()
     {
+        var queryBuilder = QueryBuilder.Select("ports");
+        return await Engine.Execute<Port[]>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
@@ -2643,22 +3381,30 @@ public class Service : Object
     /// 
     /// Services bound to a Container do not need to be manually started.
     /// </summary>
-    public ServiceID Start()
+    public async Task<ServiceID> Start()
     {
+        var queryBuilder = QueryBuilder.Select("start");
+        return await Engine.Execute<ServiceID>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
     /// Stop the service.
     /// </summary>
-    public ServiceID Stop(bool kill = false)
+    public async Task<ServiceID> Stop(bool kill = false)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("stop");
+        return await Engine.Execute<ServiceID>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
     /// Creates a tunnel that forwards traffic from the caller's network to this service.
     /// </summary>
-    public Void Up(PortForward[] ports = [], bool random = false)
+    public async Task<Void> Up(PortForward[] ports = null, bool random = false)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("up");
+        return await Engine.Execute<Void>(GraphQLClient, QueryBuilder);
     }
 }
 
@@ -2672,13 +3418,15 @@ public class ServiceID : Scalar
 /// <summary>
 /// A Unix or TCP/IP socket that can be mounted into a container.
 /// </summary>
-public class Socket : Object
+public class Socket(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object(queryBuilder, gqlClient)
 {
     /// <summary>
     /// A unique identifier for this Socket.
     /// </summary>
-    public SocketID Id()
+    public async Task<SocketID> Id()
     {
+        var queryBuilder = QueryBuilder.Select("id");
+        return await Engine.Execute<SocketID>(GraphQLClient, QueryBuilder);
     }
 }
 
@@ -2692,20 +3440,24 @@ public class SocketID : Scalar
 /// <summary>
 /// An interactive terminal that clients can connect to.
 /// </summary>
-public class Terminal : Object
+public class Terminal(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object(queryBuilder, gqlClient)
 {
     /// <summary>
     /// A unique identifier for this Terminal.
     /// </summary>
-    public TerminalID Id()
+    public async Task<TerminalID> Id()
     {
+        var queryBuilder = QueryBuilder.Select("id");
+        return await Engine.Execute<TerminalID>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
     /// An http endpoint at which this terminal can be connected to over a websocket.
     /// </summary>
-    public string WebsocketEndpoint()
+    public async Task<string> WebsocketEndpoint()
     {
+        var queryBuilder = QueryBuilder.Select("websocketEndpoint");
+        return await Engine.Execute<string>(GraphQLClient, QueryBuilder);
     }
 }
 
@@ -2719,13 +3471,15 @@ public class TerminalID : Scalar
 /// <summary>
 /// A definition of a parameter or return type in a Module.
 /// </summary>
-public class TypeDef : Object
+public class TypeDef(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object(queryBuilder, gqlClient)
 {
     /// <summary>
     /// If kind is INPUT, the input-specific type definition. If kind is not INPUT, this will be null.
     /// </summary>
     public InputTypeDef AsInput()
     {
+        var queryBuilder = QueryBuilder.Select("asInput");
+        return new InputTypeDef(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -2733,6 +3487,8 @@ public class TypeDef : Object
     /// </summary>
     public InterfaceTypeDef AsInterface()
     {
+        var queryBuilder = QueryBuilder.Select("asInterface");
+        return new InterfaceTypeDef(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -2740,6 +3496,8 @@ public class TypeDef : Object
     /// </summary>
     public ListTypeDef AsList()
     {
+        var queryBuilder = QueryBuilder.Select("asList");
+        return new ListTypeDef(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -2747,13 +3505,17 @@ public class TypeDef : Object
     /// </summary>
     public ObjectTypeDef AsObject()
     {
+        var queryBuilder = QueryBuilder.Select("asObject");
+        return new ObjectTypeDef(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
     /// A unique identifier for this TypeDef.
     /// </summary>
-    public TypeDefID Id()
+    public async Task<TypeDefID> Id()
     {
+        var queryBuilder = QueryBuilder.Select("id");
+        return await Engine.Execute<TypeDefID>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
@@ -2761,13 +3523,17 @@ public class TypeDef : Object
     /// </summary>
     public TypeDefKind Kind()
     {
+        var queryBuilder = QueryBuilder.Select("kind");
+        return new TypeDefKind(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
     /// Whether this type can be set to null. Defaults to false.
     /// </summary>
-    public bool Optional()
+    public async Task<bool> Optional()
     {
+        var queryBuilder = QueryBuilder.Select("optional");
+        return await Engine.Execute<bool>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
@@ -2775,6 +3541,9 @@ public class TypeDef : Object
     /// </summary>
     public TypeDef WithConstructor(FunctionID function)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("withConstructor");
+        return new TypeDef(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -2782,6 +3551,9 @@ public class TypeDef : Object
     /// </summary>
     public TypeDef WithField(string name, TypeDefID typeDef, string description = "")
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("withField");
+        return new TypeDef(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -2789,6 +3561,9 @@ public class TypeDef : Object
     /// </summary>
     public TypeDef WithFunction(FunctionID function)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("withFunction");
+        return new TypeDef(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -2796,6 +3571,9 @@ public class TypeDef : Object
     /// </summary>
     public TypeDef WithInterface(string name, string description = "")
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("withInterface");
+        return new TypeDef(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -2803,6 +3581,9 @@ public class TypeDef : Object
     /// </summary>
     public TypeDef WithKind(TypeDefKind kind)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("withKind");
+        return new TypeDef(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -2810,6 +3591,9 @@ public class TypeDef : Object
     /// </summary>
     public TypeDef WithListOf(TypeDefID elementType)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("withListOf");
+        return new TypeDef(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -2819,6 +3603,9 @@ public class TypeDef : Object
     /// </summary>
     public TypeDef WithObject(string name, string description = "")
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("withObject");
+        return new TypeDef(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -2826,6 +3613,9 @@ public class TypeDef : Object
     /// </summary>
     public TypeDef WithOptional(bool optional)
     {
+        var arguments = ImmutableList<Argument>.Empty;
+        var queryBuilder = QueryBuilder.Select("withOptional");
+        return new TypeDef(QueryBuilder, GraphQLClient);
     }
 }
 
