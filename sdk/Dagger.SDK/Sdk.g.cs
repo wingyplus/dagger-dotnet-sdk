@@ -76,14 +76,14 @@ public class Container : Object
     /// <summary>
     /// Returns a File representing the container serialized to a tarball.
     /// </summary>
-    public File AsTarball(ImageLayerCompression forcedCompression = null, ImageMediaTypes mediaTypes = OCIMediaTypes, platformVariants = [])
+    public File AsTarball(ImageLayerCompression forcedCompression = null, ImageMediaTypes mediaTypes = OCIMediaTypes, ContainerID[] platformVariants = [])
     {
     }
 
     /// <summary>
     /// Initializes this container from a Dockerfile build.
     /// </summary>
-    public Container Build(DirectoryID context, buildArgs = [], string dockerfile = "Dockerfile", secrets = [], string target = "")
+    public Container Build(DirectoryID context, BuildArg[] buildArgs = [], string dockerfile = "Dockerfile", SecretID[] secrets = [], string target = "")
     {
     }
 
@@ -153,7 +153,7 @@ public class Container : Object
     /// 
     /// It can also export platform variants.
     /// </summary>
-    public bool Export(string path, ImageLayerCompression forcedCompression = null, ImageMediaTypes mediaTypes = OCIMediaTypes, platformVariants = [])
+    public bool Export(string path, ImageLayerCompression forcedCompression = null, ImageMediaTypes mediaTypes = OCIMediaTypes, ContainerID[] platformVariants = [])
     {
     }
 
@@ -227,7 +227,7 @@ public class Container : Object
     /// <summary>
     /// Creates a named sub-pipeline.
     /// </summary>
-    public Container Pipeline(string name, string description = "", labels = [])
+    public Container Pipeline(string name, string description = "", PipelineLabel[] labels = [])
     {
     }
 
@@ -245,7 +245,7 @@ public class Container : Object
     /// 
     /// It can also publish platform variants.
     /// </summary>
-    public string Publish(string address, ImageLayerCompression forcedCompression = null, ImageMediaTypes mediaTypes = OCIMediaTypes, platformVariants = [])
+    public string Publish(string address, ImageLayerCompression forcedCompression = null, ImageMediaTypes mediaTypes = OCIMediaTypes, ContainerID[] platformVariants = [])
     {
     }
 
@@ -286,7 +286,7 @@ public class Container : Object
     /// <summary>
     /// Return an interactive terminal for this container using its configured default terminal command if not overridden by args (or sh as a fallback default).
     /// </summary>
-    public Terminal Terminal(cmd = [], bool experimentalPrivilegedNesting = false, bool insecureRootCapabilities = false)
+    public Terminal Terminal(string[] cmd = [], bool experimentalPrivilegedNesting = false, bool insecureRootCapabilities = false)
     {
     }
 
@@ -314,7 +314,7 @@ public class Container : Object
     /// <summary>
     /// Retrieves this container plus a directory written at the given path.
     /// </summary>
-    public Container WithDirectory(DirectoryID directory, string path, exclude = [], include = [], string owner = "")
+    public Container WithDirectory(DirectoryID directory, string path, string[] exclude = [], string[] include = [], string owner = "")
     {
     }
 
@@ -604,7 +604,7 @@ public class CurrentModule : Object
     /// <summary>
     /// Load a directory from the module's scratch working directory, including any changes that may have been made to it during module function execution.
     /// </summary>
-    public Directory Workdir(string path, exclude = [], include = [])
+    public Directory Workdir(string path, string[] exclude = [], string[] include = [])
     {
     }
 
@@ -652,7 +652,7 @@ public class Directory : Object
     /// <summary>
     /// Builds a new Docker container from this directory.
     /// </summary>
-    public Container DockerBuild(buildArgs = [], string dockerfile = "Dockerfile", Platform platform = null, secrets = [], string target = "")
+    public Container DockerBuild(BuildArg[] buildArgs = [], string dockerfile = "Dockerfile", Platform platform = null, SecretID[] secrets = [], string target = "")
     {
     }
 
@@ -694,7 +694,7 @@ public class Directory : Object
     /// <summary>
     /// Creates a named sub-pipeline.
     /// </summary>
-    public Directory Pipeline(string name, string description = "", labels = [])
+    public Directory Pipeline(string name, string description = "", PipelineLabel[] labels = [])
     {
     }
 
@@ -708,7 +708,7 @@ public class Directory : Object
     /// <summary>
     /// Retrieves this directory plus a directory written at the given path.
     /// </summary>
-    public Directory WithDirectory(DirectoryID directory, string path, exclude = [], include = [])
+    public Directory WithDirectory(DirectoryID directory, string path, string[] exclude = [], string[] include = [])
     {
     }
 
@@ -1325,7 +1325,7 @@ public class Host : Object
     /// <summary>
     /// Accesses a directory on the host.
     /// </summary>
-    public Directory Directory(string path, exclude = [], include = [])
+    public Directory Directory(string path, string[] exclude = [], string[] include = [])
     {
     }
 
@@ -1362,7 +1362,7 @@ public class Host : Object
     /// <summary>
     /// Creates a tunnel that forwards traffic from the host to a service.
     /// </summary>
-    public Service Tunnel(ServiceID service, bool native = false, ports = [])
+    public Service Tunnel(ServiceID service, bool native = false, PortForward[] ports = [])
     {
     }
 
@@ -2532,7 +2532,7 @@ public class Query : Object
     /// <summary>
     /// Creates a named sub-pipeline.
     /// </summary>
-    public Query Pipeline(string name, string description = "", labels = null)
+    public Query Pipeline(string name, string description = "", PipelineLabel[] labels = null)
     {
     }
 
@@ -2657,7 +2657,7 @@ public class Service : Object
     /// <summary>
     /// Creates a tunnel that forwards traffic from the caller's network to this service.
     /// </summary>
-    public Void Up(ports = [], bool random = false)
+    public Void Up(PortForward[] ports = [], bool random = false)
     {
     }
 }

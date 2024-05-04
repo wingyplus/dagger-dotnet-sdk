@@ -130,18 +130,18 @@ public class CodeRenderer : Codegen.CodeRenderer
 
     private static string RenderType(TypeRef type)
     {
-        if (type.Kind == "NON_NULL")
+        var _ref = type;
+        if (_ref.Kind == "NON_NULL")
         {
-            if (type.OfType.Kind == "LIST")
-            {
-                return $"{RenderType(type.OfType.OfType)}[]";
-            }
-            return NormalizeType(type.OfType.Name);
+            _ref = _ref.OfType;
+
         }
-        else
+
+        if (_ref.Kind == "LIST")
         {
-            return NormalizeType(type.Name);
+            return $"{RenderType(_ref.OfType)}[]";
         }
+        return NormalizeType(_ref.Name);
     }
 
     private static string NormalizeType(string name)
