@@ -1,4 +1,7 @@
+using System.Collections.Immutable;
+using System.CommandLine;
 using System.Diagnostics;
+using System.Text;
 
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -13,6 +16,7 @@ public class CodeRenderer : Codegen.CodeRenderer
     {
         return """
         using System.Collections.Immutable;
+        using System.Text.Json.Serialization;
 
         using Dagger.SDK.GraphQL;
 
@@ -44,6 +48,7 @@ public class CodeRenderer : Codegen.CodeRenderer
         var evs = type.EnumValues.Select(ev => ev.Name);
         return $$"""
         {{RenderDocComment(type)}}
+        [JsonConverter(typeof(JsonStringEnumConverter<{{type.Name}}>))]
         public enum {{type.Name}} {
             {{string.Join(",", evs)}}
         }
@@ -84,7 +89,7 @@ public class CodeRenderer : Codegen.CodeRenderer
             public {{RenderReturnType(field.Type)}} {{methodName}}({{string.Join(",", args)}})
             {
                 {{RenderArgumentBuilder(field)}}
-                var queryBuilder = QueryBuilder.Select("{{field.Name}}");
+                {{RenderQueryBuilder(field)}}
                 return {{RenderReturnValue(field)}};
             }
             """;
@@ -98,6 +103,8 @@ public class CodeRenderer : Codegen.CodeRenderer
         }
         """;
     }
+
+
 
     public override string RenderScalar(Type type)
     {
@@ -214,7 +221,70 @@ public class CodeRenderer : Codegen.CodeRenderer
             return "";
         }
 
-        return "var arguments = ImmutableList<Argument>.Empty;";
+        var (requiredArgs, _optionalArgs) = SplitArguments(field.Args);
+        var builder = new StringBuilder("var arguments = ImmutableList<Argument>.Empty;");
+        builder.Append('\n');
+
+        if (requiredArgs.Count() > 0)
+        {
+            builder.Append("arguments = arguments.").Append(string.Join(".", requiredArgs.Select(arg => $$"""Add(new Argument("{{arg.Name}}", {{RenderArgumentValue(arg)}}))"""))).Append(';');
+            builder.Append('\n');
+        }
+
+        return builder.ToString();
+    }
+
+    private static string RenderArgumentValue(InputValue arg)
+    {
+        var argName = Formatter.FormatVarName(arg.Name);
+
+        if (arg.Type.Kind == "SCALAR" || IsNonNull(arg.Type, "SCALAR"))
+        {
+            var type = RenderType(arg.Type);
+            switch (type)
+            {
+                case "string": return $"new StringValue({argName})";
+                case "bool": return $"new BooleanValue({argName})";
+                case "int": return $"new IntValue({argName})";
+                case "float": return $"new FloatValue({argName})";
+                default: return $"new StringValue({argName}.Value)";
+            }
+        }
+
+        if (arg.Type.Kind == "ENUM" || IsNonNull(arg.Type, "ENUM"))
+        {
+
+            return $"new StringValue({argName}.ToString())";
+        }
+
+        if (arg.Type.Kind == "INPUT_OBJECT" || IsNonNull(arg.Type, "INPUT_OBJECT"))
+        {
+            return $"new ObjectValue({argName}.ToKeyValues())";
+        }
+
+        if (arg.Type.Kind == "LIST" || IsNonNull(arg.Type, "LIST"))
+        {
+            return $"new ListValue([])";
+        }
+
+        throw new Exception($"SHIT! {arg.Type.OfType.Kind}");
+    }
+
+    private static string RenderQueryBuilder(Field field)
+    {
+        var builder = new StringBuilder("var queryBuilder = QueryBuilder.Select(");
+        builder.Append($"\"{field.Name}\"");
+        if (field.Args.Length > 0)
+        {
+            builder.Append(", arguments");
+        }
+        builder.Append(')');
+        if (field.Type.Kind == "LIST" || IsNonNull(field.Type, "LISTS"))
+        {
+            builder.Append(".Select(\"id\")");
+        }
+        builder.Append(';');
+        return builder.ToString();
     }
 
     private static bool IsNonNull(TypeRef type, string kind)
