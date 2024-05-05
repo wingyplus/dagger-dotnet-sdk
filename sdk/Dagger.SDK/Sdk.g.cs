@@ -2168,7 +2168,7 @@ public class Module(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object
     /// <summary>
     /// This module plus the given Object type and associated functions.
     /// </summary>
-    public Module WithObject(TypeDefID object)
+    public Module WithObject(TypeDefID object_)
     {
         var arguments = ImmutableList<Argument>.Empty;
         var queryBuilder = QueryBuilder.Select("withObject");

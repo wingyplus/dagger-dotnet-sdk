@@ -139,13 +139,13 @@ public class CodeRenderer : Codegen.CodeRenderer
 
     private static string RenderArgument(InputValue argument)
     {
-        return $"{RenderType(argument.Type)} {argument.Name}";
+        return $"{RenderType(argument.Type)} {Formatter.FormatVarName(argument.Name)}";
     }
 
     private static string RenderOptionalArgument(InputValue argument)
     {
         var nullableType = argument.DefaultValue == null ? "?" : "";
-        return $"{RenderType(argument.Type)}{nullableType} {argument.Name} = {RenderDefaultValue(argument)}";
+        return $"{RenderType(argument.Type)}{nullableType} {Formatter.FormatVarName(argument.Name)} = {RenderDefaultValue(argument)}";
     }
 
     private static string RenderDefaultValue(InputValue argument)
