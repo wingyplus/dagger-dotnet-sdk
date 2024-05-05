@@ -2323,10 +2323,10 @@ public class ModuleSource(QueryBuilder queryBuilder, GraphQLClient gqlClient) : 
     /// <summary>
     /// The kind of source (e.g. local, git, etc.)
     /// </summary>
-    public ModuleSourceKind Kind()
+    public async Task<ModuleSourceKind> Kind()
     {
         var queryBuilder = QueryBuilder.Select("kind");
-        return new ModuleSourceKind(QueryBuilder, GraphQLClient);
+        return await Engine.Execute<ModuleSourceKind>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>
@@ -2692,10 +2692,10 @@ public class Port(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object(q
     /// <summary>
     /// The transport layer protocol.
     /// </summary>
-    public NetworkProtocol Protocol()
+    public async Task<NetworkProtocol> Protocol()
     {
         var queryBuilder = QueryBuilder.Select("protocol");
-        return new NetworkProtocol(QueryBuilder, GraphQLClient);
+        return await Engine.Execute<NetworkProtocol>(GraphQLClient, QueryBuilder);
     }
 }
 
@@ -3521,10 +3521,10 @@ public class TypeDef(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Objec
     /// <summary>
     /// The kind of type this is (e.g. primitive, list, object).
     /// </summary>
-    public TypeDefKind Kind()
+    public async Task<TypeDefKind> Kind()
     {
         var queryBuilder = QueryBuilder.Select("kind");
-        return new TypeDefKind(QueryBuilder, GraphQLClient);
+        return await Engine.Execute<TypeDefKind>(GraphQLClient, QueryBuilder);
     }
 
     /// <summary>

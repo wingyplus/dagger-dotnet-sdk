@@ -190,7 +190,7 @@ public class CodeRenderer : Codegen.CodeRenderer
 
     private static string RenderReturnType(TypeRef type)
     {
-        if (type.Kind == "ENUM" || type.Kind == "SCALAR" || (type.Kind == "NON_NULL" && type.OfType.Kind == "SCALAR") || (type.Kind == "NON_NULL" && type.OfType.Kind == "LIST"))
+        if (type.Kind == "ENUM" || IsNonNull(type, "ENUM") || type.Kind == "SCALAR" || IsNonNull(type, "SCALAR") || IsNonNull(type, "LIST"))
         {
             return $"async Task<{RenderType(type)}>";
         }
@@ -200,7 +200,7 @@ public class CodeRenderer : Codegen.CodeRenderer
     private static string RenderReturnValue(Field field)
     {
         var type = field.Type;
-        if (type.Kind == "ENUM" || type.Kind == "SCALAR" || (type.Kind == "NON_NULL" && type.OfType.Kind == "SCALAR") || (type.Kind == "NON_NULL" && type.OfType.Kind == "LIST"))
+        if (type.Kind == "ENUM" || IsNonNull(type, "ENUM") || type.Kind == "SCALAR" || IsNonNull(type, "SCALAR") || IsNonNull(type, "LIST"))
         {
             return $"await Engine.Execute<{RenderType(field.Type)}>(GraphQLClient, QueryBuilder)";
         }
@@ -215,6 +215,11 @@ public class CodeRenderer : Codegen.CodeRenderer
         }
 
         return "var arguments = ImmutableList<Argument>.Empty;";
+    }
+
+    private static bool IsNonNull(TypeRef type, string kind)
+    {
+        return type.Kind == "NON_NULL" && type.OfType.Kind == kind;
     }
 
     private static (IOrderedEnumerable<InputValue>, IOrderedEnumerable<InputValue>) SplitArguments(InputValue[] arguments)
