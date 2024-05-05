@@ -109,7 +109,7 @@ public class CodeRenderer : Codegen.CodeRenderer
 
     public override string Format(string source)
     {
-        return CSharpSyntaxTree.ParseText(source).GetRoot().NormalizeWhitespace().ToFullString();
+        return CSharpSyntaxTree.ParseText(source).GetRoot().NormalizeWhitespace(eol: "\n").ToFullString();
     }
 
     private static string RenderDocComment(Type type)
