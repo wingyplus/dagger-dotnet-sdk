@@ -8,6 +8,30 @@ import (
 	"github.com/iancoleman/strcase"
 )
 
+func RenderInit(builder *strings.Builder) {
+	builder.WriteString("using System.Collections.Immutable;")
+	nl(builder)
+	builder.WriteString("using System.Text.Json.Serialization;")
+	nl(builder)
+	builder.WriteString("using Dagger.SDK.GraphQL;")
+	nl(builder)
+	nl(builder)
+	builder.WriteString("namespace Dagger.SDK;")
+}
+
+func RenderBaseClient(builder *strings.Builder) {
+	builder.WriteString("public class BaseClient(QueryBuilder queryBuilder, GraphQLClient gqlClient) {")
+	nl(builder)
+	RenderIndent2(builder, 1)
+	builder.WriteString("public QueryBuilder QueryBuilder { get; } = queryBuilder;")
+	nl(builder)
+	RenderIndent2(builder, 1)
+	builder.WriteString("public GraphQLClient GraphQLClient { get; } = gqlClient;")
+	nl(builder)
+	builder.WriteRune('}')
+
+}
+
 type EnumValue struct {
 	Name        string
 	Description string

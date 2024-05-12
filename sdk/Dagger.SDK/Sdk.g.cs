@@ -1,3 +1,14 @@
+using System.Collections.Immutable;
+using System.Text.Json.Serialization;
+using Dagger.SDK.GraphQL;
+
+namespace Dagger.SDK;
+
+public class BaseClient(QueryBuilder queryBuilder, GraphQLClient gqlClient) {
+    public QueryBuilder QueryBuilder { get; } = queryBuilder;
+    public GraphQLClient GraphQLClient { get; } = gqlClient;
+}
+
 /// <summary>
 /// Sharing mode of the cache volume.
 /// </summary>

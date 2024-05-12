@@ -12,11 +12,18 @@ type DotnetSdk struct{}
 //
 // Returns a generated C# file.
 func (m *DotnetSdk) GenerateCode(ctx context.Context) (string, error) {
-	introspection := dag.Codegen().Introspect()
+	schema := dag.Codegen().Introspect()
 
 	builder := &strings.Builder{}
 
-	enums, err := introspection.Enums(ctx)
+	RenderInit(builder)
+	nl(builder)
+	nl(builder)
+	RenderBaseClient(builder)
+	nl(builder)
+	nl(builder)
+
+	enums, err := schema.Enums(ctx)
 	if err != nil {
 		return "", err
 	}
@@ -26,7 +33,7 @@ func (m *DotnetSdk) GenerateCode(ctx context.Context) (string, error) {
 		return "", err
 	}
 
-	inputs, err := introspection.Inputs(ctx)
+	inputs, err := schema.Inputs(ctx)
 	if err != nil {
 		return "", err
 	}
