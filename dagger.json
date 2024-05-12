@@ -1,5 +1,12 @@
 {
   "name": "dotnet-sdk",
   "sdk": "go",
-  "engineVersion": "v0.11.2"
+  "dependencies": [
+    {
+      "name": "codegen",
+      "source": "github.com/helderco/daggerverse/codegen@357dfd7f97eae9a62a2a13454b48cb7c69c44e34"
+    }
+  ],
+  "source": ".",
+  "engineVersion": "v0.11.4"
 }
