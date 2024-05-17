@@ -1,10 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 using Dagger.SDK.GraphQL;
+using Dagger.SDK;
 
 namespace Dagger.SDK.Tests;
 
@@ -20,9 +15,8 @@ public class EngineTest
             .Select("container")
             .Select("from", [new Argument("address", new StringValue("alpine"))])
             .Select("id");
-        var engine = new Engine();
 
-        string id = await engine.Execute<string>(gqlClient, queryBuilder);
+        string id = await Engine.Execute<string>(gqlClient, queryBuilder);
 
         Assert.NotEmpty(id);
     }
@@ -37,9 +31,8 @@ public class EngineTest
             .Select("from", [new Argument("address", new StringValue("alpine"))])
             .Select("envVariables")
             .Select("name");
-        var engine = new Engine();
 
-        var ids = await engine.ExecuteList<string>(gqlClient, queryBuilder);
+        var ids = await Engine.ExecuteList<string>(gqlClient, queryBuilder);
 
         Assert.NotEmpty(ids);
     }
