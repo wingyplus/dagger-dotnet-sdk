@@ -237,6 +237,10 @@ func RenderDoc2(builder *strings.Builder, description string) {
 
 // RenderDoc3 similar to RenderDoc2 but allow to custom indentation.
 func RenderDoc3(builder *strings.Builder, description string, nested int) {
+	if description == "" {
+		return
+	}
+
 	lines := strings.Split(description, "\n")
 	for i, line := range lines {
 		lines[i] = indent(nested) + "/// " + line
