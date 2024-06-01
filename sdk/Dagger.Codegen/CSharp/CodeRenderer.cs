@@ -202,7 +202,7 @@ public class CodeRenderer : Codegen.CodeRenderer
         var type = field.Type;
         if (type.IsLeaf() || type.IsList())
         {
-            return $"await Engine.Execute<{RenderType(field.Type)}>(GraphQLClient, QueryBuilder)";
+            return $"await Engine.Execute<{RenderType(field.Type)}>(GraphQLClient, queryBuilder)";
         }
         return $"new {RenderType(field.Type)}(QueryBuilder, GraphQLClient)";
     }
