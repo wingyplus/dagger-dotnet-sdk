@@ -1,6 +1,3 @@
-using System.Collections.Immutable;
-using System.CommandLine;
-using System.Diagnostics;
 using System.Text;
 
 using Microsoft.CodeAnalysis;
@@ -32,12 +29,7 @@ public class CodeRenderer : Codegen.CodeRenderer
         public class Object(QueryBuilder queryBuilder, GraphQLClient gqlClient)
         {
             public QueryBuilder QueryBuilder { get; } = queryBuilder;
-
             public GraphQLClient GraphQLClient { get; } = gqlClient;
-        }
-
-        public class InputObject
-        {
         }
         """;
     }
@@ -64,7 +56,7 @@ public class CodeRenderer : Codegen.CodeRenderer
 
         return $$"""
         {{RenderDocComment(type)}}
-        public class {{type.Name}} : InputObject
+        public class {{type.Name}}
         {
             {{string.Join("\n\n", properties)}}
         }
