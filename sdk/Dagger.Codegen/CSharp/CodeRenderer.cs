@@ -73,7 +73,8 @@ public class CodeRenderer : Codegen.CodeRenderer
                 methodName = $"{methodName}_";
             }
 
-            var (requiredArgs, optionalArgs) = SplitArguments(field.Args);
+            var requiredArgs = field.RequiredArgs();
+            var optionalArgs = field.OptionalArgs();
             var args = requiredArgs.Select(RenderArgument).Concat(optionalArgs.Select(RenderOptionalArgument));
 
             return $$"""
@@ -220,7 +221,7 @@ public class CodeRenderer : Codegen.CodeRenderer
             return "";
         }
 
-        var (requiredArgs, _optionalArgs) = SplitArguments(field.Args);
+        var requiredArgs = field.RequiredArgs();
         var builder = new StringBuilder("var arguments = ImmutableList<Argument>.Empty;");
         builder.Append('\n');
 
@@ -289,12 +290,5 @@ public class CodeRenderer : Codegen.CodeRenderer
     private static bool IsNonNull(TypeRef type, string kind)
     {
         return type.Kind == "NON_NULL" && type.OfType.Kind == kind;
-    }
-
-    private static (IOrderedEnumerable<InputValue>, IOrderedEnumerable<InputValue>) SplitArguments(InputValue[] arguments)
-    {
-        var requiredArgs = arguments.Where(arg => arg.Type.Kind == "NON_NULL").OrderBy(type => type.Name);
-        var optionalArgs = arguments.Where(arg => arg.Type.Kind != "NON_NULL").OrderBy(type => type.Name);
-        return (requiredArgs, optionalArgs);
     }
 }
