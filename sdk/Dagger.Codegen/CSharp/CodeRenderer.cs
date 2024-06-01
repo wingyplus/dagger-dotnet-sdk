@@ -155,11 +155,11 @@ public class CodeRenderer : Codegen.CodeRenderer
 
     private static string RenderDefaultValue(InputValue argument)
     {
-        if (argument.Type.Kind == "LIST")
+        if (argument.Type.IsList())
         {
             return "null";
         }
-        if (argument.Type.Kind == "ENUM" && argument.DefaultValue != null)
+        if (argument.Type.IsEnum() && argument.DefaultValue != null)
         {
             return $"{argument.Type.Name}.{argument.DefaultValue}";
         }
@@ -168,20 +168,15 @@ public class CodeRenderer : Codegen.CodeRenderer
 
     private static string RenderType(TypeRef type)
     {
-        var _ref = type;
-        if (_ref.Kind == "NON_NULL")
+        var tr = type.GetType_();
+        if (tr.IsList())
         {
-            _ref = _ref.OfType;
+            return $"{RenderType(tr.OfType)}[]";
         }
-
-        if (_ref.Kind == "LIST")
-        {
-            return $"{RenderType(_ref.OfType)}[]";
-        }
-        return NormalizeType(_ref.Name);
+        return ToCSharpType(tr.Name);
     }
 
-    private static string NormalizeType(string name)
+    private static string ToCSharpType(string name)
     {
         return name switch
         {

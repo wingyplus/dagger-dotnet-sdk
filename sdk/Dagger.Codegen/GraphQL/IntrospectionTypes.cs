@@ -102,6 +102,17 @@ public class TypeRef
         }
         return false;
     }
+
+    public TypeRef GetType_()
+    {
+        var tr = this;
+
+        if (Kind == "NON_NULL")
+        {
+            tr = OfType;
+        }
+        return tr;
+    }
 }
 
 public class Field
