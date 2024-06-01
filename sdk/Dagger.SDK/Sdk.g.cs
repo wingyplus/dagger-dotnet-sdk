@@ -553,7 +553,7 @@ public class Container(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Obj
     }
 
     /// <summary>
-    /// Retrieves this container plus a temporary directory mounted at the given path.
+    /// Retrieves this container plus a temporary directory mounted at the given path. Any writes will be ephemeral to a single withExec call; they will not be persisted to subsequent withExecs.
     /// </summary>
     public Container WithMountedTemp(string path)
     {
@@ -667,6 +667,17 @@ public class Container(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Obj
     }
 
     /// <summary>
+    /// Retrieves this container with the directory at the given path removed.
+    /// </summary>
+    public Container WithoutDirectory(string path)
+    {
+        var arguments = ImmutableList<Argument>.Empty;
+        arguments = arguments.Add(new Argument("path", new StringValue(path)));
+        var queryBuilder = QueryBuilder.Select("withoutDirectory", arguments);
+        return new Container(QueryBuilder, GraphQLClient);
+    }
+
+    /// <summary>
     /// Retrieves this container with an unset command entrypoint.
     /// </summary>
     public Container WithoutEntrypoint(bool keepDefaultArgs = false)
@@ -695,6 +706,17 @@ public class Container(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Obj
         var arguments = ImmutableList<Argument>.Empty;
         arguments = arguments.Add(new Argument("port", new IntValue(port)));
         var queryBuilder = QueryBuilder.Select("withoutExposedPort", arguments);
+        return new Container(QueryBuilder, GraphQLClient);
+    }
+
+    /// <summary>
+    /// Retrieves this container with the file at the given path removed.
+    /// </summary>
+    public Container WithoutFile(string path)
+    {
+        var arguments = ImmutableList<Argument>.Empty;
+        arguments = arguments.Add(new Argument("path", new StringValue(path)));
+        var queryBuilder = QueryBuilder.Select("withoutFile", arguments);
         return new Container(QueryBuilder, GraphQLClient);
     }
 
@@ -739,6 +761,17 @@ public class Container(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Obj
         var arguments = ImmutableList<Argument>.Empty;
         arguments = arguments.Add(new Argument("address", new StringValue(address)));
         var queryBuilder = QueryBuilder.Select("withoutRegistryAuth", arguments);
+        return new Container(QueryBuilder, GraphQLClient);
+    }
+
+    /// <summary>
+    /// Retrieves this container minus the given environment variable containing the secret.
+    /// </summary>
+    public Container WithoutSecretVariable(string name)
+    {
+        var arguments = ImmutableList<Argument>.Empty;
+        arguments = arguments.Add(new Argument("name", new StringValue(name)));
+        var queryBuilder = QueryBuilder.Select("withoutSecretVariable", arguments);
         return new Container(QueryBuilder, GraphQLClient);
     }
 
@@ -1069,6 +1102,39 @@ public class DirectoryID : Scalar
 {
 }
 
+public class DotnetSdk(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object(queryBuilder, gqlClient)
+{
+    /// <summary>
+    /// A unique identifier for this DotnetSdk.
+    /// </summary>
+    public async Task<DotnetSdkID> Id()
+    {
+        var queryBuilder = QueryBuilder.Select("id");
+        return await Engine.Execute<DotnetSdkID>(GraphQLClient, QueryBuilder);
+    }
+
+    /// <summary>
+    ///
+    /// Fetch introspection json from the Engine.
+    ///
+    /// This function forked from https://github.com/helderco/daggerverse/blob/main/codegen/main.go but
+    /// didn't modify anything in the data.
+    ///
+    /// </summary>
+    public File Introspect()
+    {
+        var queryBuilder = QueryBuilder.Select("introspect");
+        return new File(QueryBuilder, GraphQLClient);
+    }
+}
+
+/// <summary>
+/// The `DotnetSdkID` scalar type represents an identifier for an object of type DotnetSdk.
+/// </summary>
+public class DotnetSdkID : Scalar
+{
+}
+
 /// <summary>
 /// An environment variable name and value.
 /// </summary>
@@ -1219,6 +1285,17 @@ public class File(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object(q
     {
         var queryBuilder = QueryBuilder.Select("sync");
         return await Engine.Execute<FileID>(GraphQLClient, QueryBuilder);
+    }
+
+    /// <summary>
+    /// Retrieves this file with its name set to the given name.
+    /// </summary>
+    public File WithName(string name)
+    {
+        var arguments = ImmutableList<Argument>.Empty;
+        arguments = arguments.Add(new Argument("name", new StringValue(name)));
+        var queryBuilder = QueryBuilder.Select("withName", arguments);
+        return new File(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -2945,6 +3022,12 @@ public class Query(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object(
         return new Directory(QueryBuilder, GraphQLClient);
     }
 
+    public DotnetSdk DotnetSdk()
+    {
+        var queryBuilder = QueryBuilder.Select("dotnetSdk");
+        return new DotnetSdk(QueryBuilder, GraphQLClient);
+    }
+
     public File File(FileID id)
     {
         var arguments = ImmutableList<Argument>.Empty;
@@ -3048,6 +3131,17 @@ public class Query(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object(
         arguments = arguments.Add(new Argument("id", new StringValue(id.Value)));
         var queryBuilder = QueryBuilder.Select("loadDirectoryFromID", arguments);
         return new Directory(QueryBuilder, GraphQLClient);
+    }
+
+    /// <summary>
+    /// Load a DotnetSdk from its ID.
+    /// </summary>
+    public DotnetSdk LoadDotnetSdkFromID(DotnetSdkID id)
+    {
+        var arguments = ImmutableList<Argument>.Empty;
+        arguments = arguments.Add(new Argument("id", new StringValue(id.Value)));
+        var queryBuilder = QueryBuilder.Select("loadDotnetSdkFromID", arguments);
+        return new DotnetSdk(QueryBuilder, GraphQLClient);
     }
 
     /// <summary>
@@ -3304,6 +3398,17 @@ public class Query(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object(
     }
 
     /// <summary>
+    /// Load a ScalarTypeDef from its ID.
+    /// </summary>
+    public ScalarTypeDef LoadScalarTypeDefFromID(ScalarTypeDefID id)
+    {
+        var arguments = ImmutableList<Argument>.Empty;
+        arguments = arguments.Add(new Argument("id", new StringValue(id.Value)));
+        var queryBuilder = QueryBuilder.Select("loadScalarTypeDefFromID", arguments);
+        return new ScalarTypeDef(QueryBuilder, GraphQLClient);
+    }
+
+    /// <summary>
     /// Load a Secret from its ID.
     /// </summary>
     public Secret LoadSecretFromID(SecretID id)
@@ -3452,6 +3557,55 @@ public class Query(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object(
         var queryBuilder = QueryBuilder.Select("version");
         return await Engine.Execute<string>(GraphQLClient, QueryBuilder);
     }
+}
+
+/// <summary>
+/// A definition of a custom scalar defined in a Module.
+/// </summary>
+public class ScalarTypeDef(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object(queryBuilder, gqlClient)
+{
+    /// <summary>
+    /// A doc string for the scalar, if any.
+    /// </summary>
+    public async Task<string> Description()
+    {
+        var queryBuilder = QueryBuilder.Select("description");
+        return await Engine.Execute<string>(GraphQLClient, QueryBuilder);
+    }
+
+    /// <summary>
+    /// A unique identifier for this ScalarTypeDef.
+    /// </summary>
+    public async Task<ScalarTypeDefID> Id()
+    {
+        var queryBuilder = QueryBuilder.Select("id");
+        return await Engine.Execute<ScalarTypeDefID>(GraphQLClient, QueryBuilder);
+    }
+
+    /// <summary>
+    /// The name of the scalar.
+    /// </summary>
+    public async Task<string> Name()
+    {
+        var queryBuilder = QueryBuilder.Select("name");
+        return await Engine.Execute<string>(GraphQLClient, QueryBuilder);
+    }
+
+    /// <summary>
+    /// If this ScalarTypeDef is associated with a Module, the name of the module. Unset otherwise.
+    /// </summary>
+    public async Task<string> SourceModuleName()
+    {
+        var queryBuilder = QueryBuilder.Select("sourceModuleName");
+        return await Engine.Execute<string>(GraphQLClient, QueryBuilder);
+    }
+}
+
+/// <summary>
+/// The `ScalarTypeDefID` scalar type represents an identifier for an object of type ScalarTypeDef.
+/// </summary>
+public class ScalarTypeDefID : Scalar
+{
 }
 
 /// <summary>
@@ -3674,6 +3828,15 @@ public class TypeDef(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Objec
     }
 
     /// <summary>
+    /// If kind is SCALAR, the scalar-specific type definition. If kind is not SCALAR, this will be null.
+    /// </summary>
+    public ScalarTypeDef AsScalar()
+    {
+        var queryBuilder = QueryBuilder.Select("asScalar");
+        return new ScalarTypeDef(QueryBuilder, GraphQLClient);
+    }
+
+    /// <summary>
     /// A unique identifier for this TypeDef.
     /// </summary>
     public async Task<TypeDefID> Id()
@@ -3789,6 +3952,17 @@ public class TypeDef(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Objec
         var queryBuilder = QueryBuilder.Select("withOptional", arguments);
         return new TypeDef(QueryBuilder, GraphQLClient);
     }
+
+    /// <summary>
+    /// Returns a TypeDef of kind Scalar with the provided name.
+    /// </summary>
+    public TypeDef WithScalar(string name, string description = "")
+    {
+        var arguments = ImmutableList<Argument>.Empty;
+        arguments = arguments.Add(new Argument("name", new StringValue(name)));
+        var queryBuilder = QueryBuilder.Select("withScalar", arguments);
+        return new TypeDef(QueryBuilder, GraphQLClient);
+    }
 }
 
 /// <summary>
@@ -3807,6 +3981,7 @@ public enum TypeDefKind
     STRING_KIND,
     INTEGER_KIND,
     BOOLEAN_KIND,
+    SCALAR_KIND,
     LIST_KIND,
     OBJECT_KIND,
     INTERFACE_KIND,
