@@ -284,9 +284,4 @@ public class CodeRenderer : Codegen.CodeRenderer
         builder.Append(';');
         return builder.ToString();
     }
-
-    private static bool IsNonNull(TypeRef type, string kind)
-    {
-        return type.Kind == "NON_NULL" && type.OfType.Kind == kind;
-    }
 }
