@@ -56,7 +56,7 @@ public class CodeRenderer : Codegen.CodeRenderer
 
         return $$"""
         {{RenderDocComment(type)}}
-        public class {{type.Name}}
+        public struct {{type.Name}}
         {
             {{string.Join("\n\n", properties)}}
         }

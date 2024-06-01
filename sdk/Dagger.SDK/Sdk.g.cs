@@ -18,7 +18,7 @@ public class Object(QueryBuilder queryBuilder, GraphQLClient gqlClient)
 /// <summary>
 /// Key value object that represents a build argument.
 /// </summary>
-public class BuildArg
+public struct BuildArg
 {
     /// <summary>
     /// The build argument name.
@@ -2738,7 +2738,7 @@ public class ObjectTypeDefID : Scalar
 /// <summary>
 /// Key value object that represents a pipeline label.
 /// </summary>
-public class PipelineLabel
+public struct PipelineLabel
 {
     /// <summary>
     /// Label name.
@@ -2813,7 +2813,7 @@ public class Port(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object(q
 /// <summary>
 /// Port forwarding rules for tunneling network traffic.
 /// </summary>
-public class PortForward
+public struct PortForward
 {
     /// <summary>
     /// Port to expose to clients. If unspecified, a default will be chosen.
