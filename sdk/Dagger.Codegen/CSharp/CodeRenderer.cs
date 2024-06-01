@@ -204,7 +204,7 @@ public class CodeRenderer : Codegen.CodeRenderer
         {
             return $"await Engine.Execute<{RenderType(field.Type)}>(GraphQLClient, queryBuilder)";
         }
-        return $"new {RenderType(field.Type)}(QueryBuilder, GraphQLClient)";
+        return $"new {RenderType(field.Type)}(queryBuilder, GraphQLClient)";
     }
 
     private object RenderArgumentBuilder(Field field)
@@ -256,6 +256,21 @@ public class CodeRenderer : Codegen.CodeRenderer
 
         if (arg.Type.IsList())
         {
+            var tr = arg.Type.GetType_().OfType.GetType_();
+            if (tr.IsScalar())
+            {
+                var value = tr.GetType_().Name switch
+                {
+                    "String" => "new StringValue(v)",
+                    "Integer" => "new IntValue(v)",
+                    "Float" => "new FloatValue(v)",
+                    "Boolean" => "new BooleanValue(v)",
+                    _ => "new StringValue(v.Value)"
+                };
+
+                return $"new ListValue({argName}.Select(v => {value} as Value).ToList())";
+            }
+
             // FIXME: put correct value.
             return $"new ListValue([])";
         }
