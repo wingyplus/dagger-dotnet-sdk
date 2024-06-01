@@ -70,7 +70,7 @@ public class Container(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Obj
 {
     /// <summary>
     /// Turn the container into a Service.
-    /// 
+    ///
     /// Be sure to set any exposed ports before this conversion.
     /// </summary>
     public Service AsService()
@@ -111,7 +111,7 @@ public class Container(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Obj
 
     /// <summary>
     /// Retrieves a directory at the given path.
-    /// 
+    ///
     /// Mounts are included.
     /// </summary>
     public Directory Directory(string path)
@@ -153,9 +153,9 @@ public class Container(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Obj
 
     /// <summary>
     /// EXPERIMENTAL API! Subject to change/removal at any time.
-    /// 
+    ///
     /// Configures all available GPUs on the host to be accessible to this container.
-    /// 
+    ///
     /// This currently works for Nvidia devices only.
     /// </summary>
     public Container ExperimentalWithAllGPUs()
@@ -166,9 +166,9 @@ public class Container(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Obj
 
     /// <summary>
     /// EXPERIMENTAL API! Subject to change/removal at any time.
-    /// 
+    ///
     /// Configures the provided list of devices to be accessible to this container.
-    /// 
+    ///
     /// This currently works for Nvidia devices only.
     /// </summary>
     public Container ExperimentalWithGPU(string[] devices)
@@ -181,9 +181,9 @@ public class Container(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Obj
 
     /// <summary>
     /// Writes the container as an OCI tarball to the destination file path on the host.
-    /// 
+    ///
     /// Return true on success.
-    /// 
+    ///
     /// It can also export platform variants.
     /// </summary>
     public async Task<bool> Export(string path, ImageLayerCompression? forcedCompression = null, ImageMediaTypes mediaTypes = ImageMediaTypes.OCIMediaTypes, ContainerID[] platformVariants = null)
@@ -196,7 +196,7 @@ public class Container(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Obj
 
     /// <summary>
     /// Retrieves the list of exposed ports.
-    /// 
+    ///
     /// This includes ports already exposed by the image, even if not explicitly added with dagger.
     /// </summary>
     public async Task<Port[]> ExposedPorts()
@@ -207,7 +207,7 @@ public class Container(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Obj
 
     /// <summary>
     /// Retrieves a file at the given path.
-    /// 
+    ///
     /// Mounts are included.
     /// </summary>
     public File File(string path)
@@ -309,9 +309,9 @@ public class Container(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Obj
 
     /// <summary>
     /// Publishes this container as a new image to the specified address.
-    /// 
+    ///
     /// Publish returns a fully qualified ref.
-    /// 
+    ///
     /// It can also publish platform variants.
     /// </summary>
     public async Task<string> Publish(string address, ImageLayerCompression? forcedCompression = null, ImageMediaTypes mediaTypes = ImageMediaTypes.OCIMediaTypes, ContainerID[] platformVariants = null)
@@ -333,7 +333,7 @@ public class Container(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Obj
 
     /// <summary>
     /// The error stream of the last executed command.
-    /// 
+    ///
     /// Will execute default command if none is set, or error if there's no default.
     /// </summary>
     public async Task<string> Stderr()
@@ -344,7 +344,7 @@ public class Container(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Obj
 
     /// <summary>
     /// The output stream of the last executed command.
-    /// 
+    ///
     /// Will execute default command if none is set, or error if there's no default.
     /// </summary>
     public async Task<string> Stdout()
@@ -355,7 +355,7 @@ public class Container(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Obj
 
     /// <summary>
     /// Forces evaluation of the pipeline in the engine.
-    /// 
+    ///
     /// It doesn't run the default command if no exec has been set.
     /// </summary>
     public async Task<ContainerID> Sync()
@@ -451,11 +451,11 @@ public class Container(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Obj
 
     /// <summary>
     /// Expose a network port.
-    /// 
+    ///
     /// Exposed ports serve two purposes:
-    /// 
+    ///
     /// - For health checks and introspection, when running services
-    /// 
+    ///
     /// - For setting the EXPOSE OCI field when publishing the container
     /// </summary>
     public Container WithExposedPort(int port, string? description = null, bool experimentalSkipHealthcheck = false, NetworkProtocol protocol = NetworkProtocol.TCP)
@@ -609,11 +609,11 @@ public class Container(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Obj
 
     /// <summary>
     /// Establish a runtime dependency on a service.
-    /// 
+    ///
     /// The service will be started automatically when needed and detached when it is no longer needed, executing the default command if none is set.
-    /// 
+    ///
     /// The service will be reachable from the container via the provided hostname alias.
-    /// 
+    ///
     /// The service dependency will also convey to any files or directories produced by the container.
     /// </summary>
     public Container WithServiceBinding(string alias, ServiceID service)
@@ -700,7 +700,7 @@ public class Container(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Obj
 
     /// <summary>
     /// Indicate that subsequent operations should not be featured more prominently in the UI.
-    /// 
+    ///
     /// This is the initial state of all containers.
     /// </summary>
     public Container WithoutFocus()
@@ -755,7 +755,7 @@ public class Container(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Obj
 
     /// <summary>
     /// Retrieves this container with an unset command user.
-    /// 
+    ///
     /// Should default to root.
     /// </summary>
     public Container WithoutUser()
@@ -766,7 +766,7 @@ public class Container(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Obj
 
     /// <summary>
     /// Retrieves this container with an unset working directory.
-    /// 
+    ///
     /// Should default to "/".
     /// </summary>
     public Container WithoutWorkdir()
@@ -1111,7 +1111,7 @@ public class EnvVariableID : Scalar
 
 /// <summary>
 /// A definition of a field on a custom object defined in a Module.
-/// 
+///
 /// A field on an object has a static value, as opposed to a function on an object whose value is computed by invoking code (and can accept arguments).
 /// </summary>
 public class FieldTypeDef(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object(queryBuilder, gqlClient)
@@ -1242,7 +1242,7 @@ public class FileID : Scalar
 
 /// <summary>
 /// Function represents a resolver provided by a Module.
-/// 
+///
 /// A function always evaluates against a parent object and is given a set of named arguments.
 /// </summary>
 public class Function(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object(queryBuilder, gqlClient)
@@ -1317,7 +1317,7 @@ public class Function(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Obje
 
 /// <summary>
 /// An argument accepted by a function.
-/// 
+///
 /// This is a specification for an argument at function definition time, not an argument passed at function call time.
 /// </summary>
 public class FunctionArg(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object(queryBuilder, gqlClient)
@@ -1825,7 +1825,7 @@ public class Host(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object(q
 
     /// <summary>
     /// Sets a secret given a user-defined name and the file path on the host, and returns the secret.
-    /// 
+    ///
     /// The file is limited to a size of 512000 bytes.
     /// </summary>
     public Secret SetSecretFile(string name, string path)
@@ -2222,7 +2222,7 @@ public class Module(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object
 
     /// <summary>
     /// Serve a module's API in the current session.
-    /// 
+    ///
     /// Note: this can only be called once per session. In the future, it could return a stream or service to remove the side effect.
     /// </summary>
     public async Task<Void> Serve()
@@ -2752,7 +2752,7 @@ public class PipelineLabel
 
 /// <summary>
 /// The platform config OS and architecture in a Container.
-/// 
+///
 /// The format is [os]/[platform]/[version] (e.g., "darwin/arm64/v7", "windows/amd64", "linux/arm64").
 /// </summary>
 public class Platform : Scalar
@@ -2887,7 +2887,7 @@ public class Query(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object(
 
     /// <summary>
     /// Creates a scratch container.
-    /// 
+    ///
     /// Optional platform argument initializes new containers to execute and publish as that platform. Platform defaults to that of the builder's host.
     /// </summary>
     public Container Container(ContainerID? id = null, Platform? platform = null)
@@ -2899,7 +2899,7 @@ public class Query(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object(
 
     /// <summary>
     /// The FunctionCall context that the SDK caller is currently executing in.
-    /// 
+    ///
     /// If the caller is not currently executing in a function, this will return an error.
     /// </summary>
     public FunctionCall CurrentFunctionCall()
@@ -2945,9 +2945,6 @@ public class Query(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object(
         return new Directory(QueryBuilder, GraphQLClient);
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
     public File File(FileID id)
     {
         var arguments = ImmutableList<Argument>.Empty;
@@ -3416,7 +3413,7 @@ public class Query(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object(
 
     /// <summary>
     /// Sets a secret given a user defined name to its plaintext and returns the secret.
-    /// 
+    ///
     /// The plaintext value is limited to a size of 128000 bytes.
     /// </summary>
     public Secret SetSecret(string name, string plaintext)
@@ -3504,9 +3501,9 @@ public class Service(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Objec
 {
     /// <summary>
     /// Retrieves an endpoint that clients can use to reach this container.
-    /// 
+    ///
     /// If no port is specified, the first exposed port is used. If none exist an error is returned.
-    /// 
+    ///
     /// If a scheme is specified, a URL is returned. Otherwise, a host:port pair is returned.
     /// </summary>
     public async Task<string> Endpoint(int? port = null, string scheme = "")
@@ -3545,7 +3542,7 @@ public class Service(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Objec
 
     /// <summary>
     /// Start the service and wait for its health checks to succeed.
-    /// 
+    ///
     /// Services bound to a Container do not need to be manually started.
     /// </summary>
     public async Task<ServiceID> Start()
@@ -3771,7 +3768,7 @@ public class TypeDef(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Objec
 
     /// <summary>
     /// Returns a TypeDef of kind Object with the provided name.
-    /// 
+    ///
     /// Note that an object's fields and functions may be omitted if the intent is only to refer to an object. This is how functions are able to return their own object, or any other circular reference.
     /// </summary>
     public TypeDef WithObject(string name, string description = "")
@@ -3819,7 +3816,7 @@ public enum TypeDefKind
 
 /// <summary>
 /// The absence of a value.
-/// 
+///
 /// A Null Void is used as a placeholder for resolvers that do not return anything.
 /// </summary>
 public class Void : Scalar

@@ -128,7 +128,14 @@ public class CodeRenderer : Codegen.CodeRenderer
 
     private static string RenderDocComment(string doc)
     {
-        var description = doc.Split("\n").Select(text => $"/// {text}");
+        if (string.IsNullOrEmpty(doc))
+        {
+            return "";
+        }
+        var description = doc
+            .Split("\n")
+            .Select(line => $"/// {line}")
+            .Select(line => line.Trim());
         return $$"""
         /// <summary>
         {{string.Join("\n", description)}}
