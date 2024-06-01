@@ -97,8 +97,6 @@ public class CodeRenderer : Codegen.CodeRenderer
         """;
     }
 
-
-
     public override string RenderScalar(Type type)
     {
         return $$"""
@@ -197,7 +195,7 @@ public class CodeRenderer : Codegen.CodeRenderer
 
     private static string RenderReturnType(TypeRef type)
     {
-        if (type.Kind == "ENUM" || IsNonNull(type, "ENUM") || type.Kind == "SCALAR" || IsNonNull(type, "SCALAR") || IsNonNull(type, "LIST"))
+        if (type.IsLeaf() || type.IsList())
         {
             return $"async Task<{RenderType(type)}>";
         }
@@ -207,7 +205,7 @@ public class CodeRenderer : Codegen.CodeRenderer
     private static string RenderReturnValue(Field field)
     {
         var type = field.Type;
-        if (type.Kind == "ENUM" || IsNonNull(type, "ENUM") || type.Kind == "SCALAR" || IsNonNull(type, "SCALAR") || IsNonNull(type, "LIST"))
+        if (type.IsLeaf() || type.IsList())
         {
             return $"await Engine.Execute<{RenderType(field.Type)}>(GraphQLClient, QueryBuilder)";
         }
@@ -238,7 +236,7 @@ public class CodeRenderer : Codegen.CodeRenderer
     {
         var argName = Formatter.FormatVarName(arg.Name);
 
-        if (arg.Type.Kind == "SCALAR" || IsNonNull(arg.Type, "SCALAR"))
+        if (arg.Type.IsScalar())
         {
             var type = RenderType(arg.Type);
             switch (type)
@@ -251,19 +249,19 @@ public class CodeRenderer : Codegen.CodeRenderer
             }
         }
 
-        if (arg.Type.Kind == "ENUM" || IsNonNull(arg.Type, "ENUM"))
+        if (arg.Type.IsEnum())
         {
-
             return $"new StringValue({argName}.ToString())";
         }
 
-        if (arg.Type.Kind == "INPUT_OBJECT" || IsNonNull(arg.Type, "INPUT_OBJECT"))
+        if (arg.Type.IsInputObject())
         {
             return $"new ObjectValue({argName}.ToKeyValues())";
         }
 
-        if (arg.Type.Kind == "LIST" || IsNonNull(arg.Type, "LIST"))
+        if (arg.Type.IsList())
         {
+            // FIXME: put correct value.
             return $"new ListValue([])";
         }
 
@@ -279,7 +277,7 @@ public class CodeRenderer : Codegen.CodeRenderer
             builder.Append(", arguments");
         }
         builder.Append(')');
-        if (field.Type.Kind == "LIST" || IsNonNull(field.Type, "LISTS"))
+        if (field.Type.IsList())
         {
             builder.Append(".Select(\"id\")");
         }

@@ -105,7 +105,7 @@ public class Container(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Obj
     /// </summary>
     public async Task<string[]> DefaultArgs()
     {
-        var queryBuilder = QueryBuilder.Select("defaultArgs");
+        var queryBuilder = QueryBuilder.Select("defaultArgs").Select("id");
         return await Engine.Execute<string[]>(GraphQLClient, QueryBuilder);
     }
 
@@ -127,7 +127,7 @@ public class Container(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Obj
     /// </summary>
     public async Task<string[]> Entrypoint()
     {
-        var queryBuilder = QueryBuilder.Select("entrypoint");
+        var queryBuilder = QueryBuilder.Select("entrypoint").Select("id");
         return await Engine.Execute<string[]>(GraphQLClient, QueryBuilder);
     }
 
@@ -147,7 +147,7 @@ public class Container(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Obj
     /// </summary>
     public async Task<EnvVariable[]> EnvVariables()
     {
-        var queryBuilder = QueryBuilder.Select("envVariables");
+        var queryBuilder = QueryBuilder.Select("envVariables").Select("id");
         return await Engine.Execute<EnvVariable[]>(GraphQLClient, QueryBuilder);
     }
 
@@ -201,7 +201,7 @@ public class Container(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Obj
     /// </summary>
     public async Task<Port[]> ExposedPorts()
     {
-        var queryBuilder = QueryBuilder.Select("exposedPorts");
+        var queryBuilder = QueryBuilder.Select("exposedPorts").Select("id");
         return await Engine.Execute<Port[]>(GraphQLClient, QueryBuilder);
     }
 
@@ -274,7 +274,7 @@ public class Container(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Obj
     /// </summary>
     public async Task<Label[]> Labels()
     {
-        var queryBuilder = QueryBuilder.Select("labels");
+        var queryBuilder = QueryBuilder.Select("labels").Select("id");
         return await Engine.Execute<Label[]>(GraphQLClient, QueryBuilder);
     }
 
@@ -283,7 +283,7 @@ public class Container(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Obj
     /// </summary>
     public async Task<string[]> Mounts()
     {
-        var queryBuilder = QueryBuilder.Select("mounts");
+        var queryBuilder = QueryBuilder.Select("mounts").Select("id");
         return await Engine.Execute<string[]>(GraphQLClient, QueryBuilder);
     }
 
@@ -907,7 +907,7 @@ public class Directory(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Obj
     public async Task<string[]> Entries(string? path = null)
     {
         var arguments = ImmutableList<Argument>.Empty;
-        var queryBuilder = QueryBuilder.Select("entries", arguments);
+        var queryBuilder = QueryBuilder.Select("entries", arguments).Select("id");
         return await Engine.Execute<string[]>(GraphQLClient, QueryBuilder);
     }
 
@@ -940,7 +940,7 @@ public class Directory(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Obj
     {
         var arguments = ImmutableList<Argument>.Empty;
         arguments = arguments.Add(new Argument("pattern", new StringValue(pattern)));
-        var queryBuilder = QueryBuilder.Select("glob", arguments);
+        var queryBuilder = QueryBuilder.Select("glob", arguments).Select("id");
         return await Engine.Execute<string[]>(GraphQLClient, QueryBuilder);
     }
 
@@ -1252,7 +1252,7 @@ public class Function(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Obje
     /// </summary>
     public async Task<FunctionArg[]> Args()
     {
-        var queryBuilder = QueryBuilder.Select("args");
+        var queryBuilder = QueryBuilder.Select("args").Select("id");
         return await Engine.Execute<FunctionArg[]>(GraphQLClient, QueryBuilder);
     }
 
@@ -1394,7 +1394,7 @@ public class FunctionCall(QueryBuilder queryBuilder, GraphQLClient gqlClient) : 
     /// </summary>
     public async Task<FunctionCallArgValue[]> InputArgs()
     {
-        var queryBuilder = QueryBuilder.Select("inputArgs");
+        var queryBuilder = QueryBuilder.Select("inputArgs").Select("id");
         return await Engine.Execute<FunctionCallArgValue[]>(GraphQLClient, QueryBuilder);
     }
 
@@ -1519,7 +1519,7 @@ public class GeneratedCode(QueryBuilder queryBuilder, GraphQLClient gqlClient) :
     /// </summary>
     public async Task<string[]> VcsGeneratedPaths()
     {
-        var queryBuilder = QueryBuilder.Select("vcsGeneratedPaths");
+        var queryBuilder = QueryBuilder.Select("vcsGeneratedPaths").Select("id");
         return await Engine.Execute<string[]>(GraphQLClient, QueryBuilder);
     }
 
@@ -1528,7 +1528,7 @@ public class GeneratedCode(QueryBuilder queryBuilder, GraphQLClient gqlClient) :
     /// </summary>
     public async Task<string[]> VcsIgnoredPaths()
     {
-        var queryBuilder = QueryBuilder.Select("vcsIgnoredPaths");
+        var queryBuilder = QueryBuilder.Select("vcsIgnoredPaths").Select("id");
         return await Engine.Execute<string[]>(GraphQLClient, QueryBuilder);
     }
 
@@ -1901,7 +1901,7 @@ public class InputTypeDef(QueryBuilder queryBuilder, GraphQLClient gqlClient) : 
     /// </summary>
     public async Task<FieldTypeDef[]> Fields()
     {
-        var queryBuilder = QueryBuilder.Select("fields");
+        var queryBuilder = QueryBuilder.Select("fields").Select("id");
         return await Engine.Execute<FieldTypeDef[]>(GraphQLClient, QueryBuilder);
     }
 
@@ -1950,7 +1950,7 @@ public class InterfaceTypeDef(QueryBuilder queryBuilder, GraphQLClient gqlClient
     /// </summary>
     public async Task<Function[]> Functions()
     {
-        var queryBuilder = QueryBuilder.Select("functions");
+        var queryBuilder = QueryBuilder.Select("functions").Select("id");
         return await Engine.Execute<Function[]>(GraphQLClient, QueryBuilder);
     }
 
@@ -2117,7 +2117,7 @@ public class Module(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object
     /// </summary>
     public async Task<Module[]> Dependencies()
     {
-        var queryBuilder = QueryBuilder.Select("dependencies");
+        var queryBuilder = QueryBuilder.Select("dependencies").Select("id");
         return await Engine.Execute<Module[]>(GraphQLClient, QueryBuilder);
     }
 
@@ -2126,7 +2126,7 @@ public class Module(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object
     /// </summary>
     public async Task<ModuleDependency[]> DependencyConfig()
     {
-        var queryBuilder = QueryBuilder.Select("dependencyConfig");
+        var queryBuilder = QueryBuilder.Select("dependencyConfig").Select("id");
         return await Engine.Execute<ModuleDependency[]>(GraphQLClient, QueryBuilder);
     }
 
@@ -2180,7 +2180,7 @@ public class Module(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object
     /// </summary>
     public async Task<TypeDef[]> Interfaces()
     {
-        var queryBuilder = QueryBuilder.Select("interfaces");
+        var queryBuilder = QueryBuilder.Select("interfaces").Select("id");
         return await Engine.Execute<TypeDef[]>(GraphQLClient, QueryBuilder);
     }
 
@@ -2198,7 +2198,7 @@ public class Module(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object
     /// </summary>
     public async Task<TypeDef[]> Objects()
     {
-        var queryBuilder = QueryBuilder.Select("objects");
+        var queryBuilder = QueryBuilder.Select("objects").Select("id");
         return await Engine.Execute<TypeDef[]>(GraphQLClient, QueryBuilder);
     }
 
@@ -2396,7 +2396,7 @@ public class ModuleSource(QueryBuilder queryBuilder, GraphQLClient gqlClient) : 
     /// </summary>
     public async Task<ModuleDependency[]> Dependencies()
     {
-        var queryBuilder = QueryBuilder.Select("dependencies");
+        var queryBuilder = QueryBuilder.Select("dependencies").Select("id");
         return await Engine.Execute<ModuleDependency[]>(GraphQLClient, QueryBuilder);
     }
 
@@ -2521,7 +2521,7 @@ public class ModuleSource(QueryBuilder queryBuilder, GraphQLClient gqlClient) : 
     /// </summary>
     public async Task<ModuleSourceView[]> Views()
     {
-        var queryBuilder = QueryBuilder.Select("views");
+        var queryBuilder = QueryBuilder.Select("views").Select("id");
         return await Engine.Execute<ModuleSourceView[]>(GraphQLClient, QueryBuilder);
     }
 
@@ -2637,7 +2637,7 @@ public class ModuleSourceView(QueryBuilder queryBuilder, GraphQLClient gqlClient
     /// </summary>
     public async Task<string[]> Patterns()
     {
-        var queryBuilder = QueryBuilder.Select("patterns");
+        var queryBuilder = QueryBuilder.Select("patterns").Select("id");
         return await Engine.Execute<string[]>(GraphQLClient, QueryBuilder);
     }
 }
@@ -2687,7 +2687,7 @@ public class ObjectTypeDef(QueryBuilder queryBuilder, GraphQLClient gqlClient) :
     /// </summary>
     public async Task<FieldTypeDef[]> Fields()
     {
-        var queryBuilder = QueryBuilder.Select("fields");
+        var queryBuilder = QueryBuilder.Select("fields").Select("id");
         return await Engine.Execute<FieldTypeDef[]>(GraphQLClient, QueryBuilder);
     }
 
@@ -2696,7 +2696,7 @@ public class ObjectTypeDef(QueryBuilder queryBuilder, GraphQLClient gqlClient) :
     /// </summary>
     public async Task<Function[]> Functions()
     {
-        var queryBuilder = QueryBuilder.Select("functions");
+        var queryBuilder = QueryBuilder.Select("functions").Select("id");
         return await Engine.Execute<Function[]>(GraphQLClient, QueryBuilder);
     }
 
@@ -2922,7 +2922,7 @@ public class Query(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object(
     /// </summary>
     public async Task<TypeDef[]> CurrentTypeDefs()
     {
-        var queryBuilder = QueryBuilder.Select("currentTypeDefs");
+        var queryBuilder = QueryBuilder.Select("currentTypeDefs").Select("id");
         return await Engine.Execute<TypeDef[]>(GraphQLClient, QueryBuilder);
     }
 
@@ -3536,7 +3536,7 @@ public class Service(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Objec
     /// </summary>
     public async Task<Port[]> Ports()
     {
-        var queryBuilder = QueryBuilder.Select("ports");
+        var queryBuilder = QueryBuilder.Select("ports").Select("id");
         return await Engine.Execute<Port[]>(GraphQLClient, QueryBuilder);
     }
 
