@@ -82,9 +82,24 @@ public class Container(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Obj
     /// <summary>
     /// Returns a File representing the container serialized to a tarball.
     /// </summary>
-    public File AsTarball(ImageLayerCompression? forcedCompression = null, ImageMediaTypes mediaTypes = ImageMediaTypes.OCIMediaTypes, ContainerID[] platformVariants = null)
+    public File AsTarball(ImageLayerCompression? forcedCompression = null, ImageMediaTypes? mediaTypes = null, ContainerID[]? platformVariants = null)
     {
         var arguments = ImmutableList<Argument>.Empty;
+        if (forcedCompression is ImageLayerCompression forcedCompression_)
+        {
+            arguments = arguments.Add(new Argument("forcedCompression", new StringValue(forcedCompression_.ToString())));
+        }
+
+        if (mediaTypes is ImageMediaTypes mediaTypes_)
+        {
+            arguments = arguments.Add(new Argument("mediaTypes", new StringValue(mediaTypes_.ToString())));
+        }
+
+        if (platformVariants is ContainerID[] platformVariants_)
+        {
+            arguments = arguments.Add(new Argument("platformVariants", new ListValue(platformVariants_.Select(v => new StringValue(v.Value) as Value).ToList())));
+        }
+
         var queryBuilder = QueryBuilder.Select("asTarball", arguments);
         return new File(queryBuilder, GraphQLClient);
     }
@@ -92,10 +107,30 @@ public class Container(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Obj
     /// <summary>
     /// Initializes this container from a Dockerfile build.
     /// </summary>
-    public Container Build(DirectoryID context, BuildArg[] buildArgs = null, string dockerfile = "Dockerfile", SecretID[] secrets = null, string target = "")
+    public Container Build(DirectoryID context, BuildArg[]? buildArgs = null, string? dockerfile = null, SecretID[]? secrets = null, string? target = null)
     {
         var arguments = ImmutableList<Argument>.Empty;
         arguments = arguments.Add(new Argument("context", new StringValue(context.Value)));
+        if (buildArgs is BuildArg[] buildArgs_)
+        {
+            arguments = arguments.Add(new Argument("buildArgs", new ListValue([])));
+        }
+
+        if (dockerfile is string dockerfile_)
+        {
+            arguments = arguments.Add(new Argument("dockerfile", new StringValue(dockerfile_)));
+        }
+
+        if (secrets is SecretID[] secrets_)
+        {
+            arguments = arguments.Add(new Argument("secrets", new ListValue(secrets_.Select(v => new StringValue(v.Value) as Value).ToList())));
+        }
+
+        if (target is string target_)
+        {
+            arguments = arguments.Add(new Argument("target", new StringValue(target_)));
+        }
+
         var queryBuilder = QueryBuilder.Select("build", arguments);
         return new Container(queryBuilder, GraphQLClient);
     }
@@ -186,10 +221,25 @@ public class Container(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Obj
     ///
     /// It can also export platform variants.
     /// </summary>
-    public async Task<bool> Export(string path, ImageLayerCompression? forcedCompression = null, ImageMediaTypes mediaTypes = ImageMediaTypes.OCIMediaTypes, ContainerID[] platformVariants = null)
+    public async Task<bool> Export(string path, ImageLayerCompression? forcedCompression = null, ImageMediaTypes? mediaTypes = null, ContainerID[]? platformVariants = null)
     {
         var arguments = ImmutableList<Argument>.Empty;
         arguments = arguments.Add(new Argument("path", new StringValue(path)));
+        if (forcedCompression is ImageLayerCompression forcedCompression_)
+        {
+            arguments = arguments.Add(new Argument("forcedCompression", new StringValue(forcedCompression_.ToString())));
+        }
+
+        if (mediaTypes is ImageMediaTypes mediaTypes_)
+        {
+            arguments = arguments.Add(new Argument("mediaTypes", new StringValue(mediaTypes_.ToString())));
+        }
+
+        if (platformVariants is ContainerID[] platformVariants_)
+        {
+            arguments = arguments.Add(new Argument("platformVariants", new ListValue(platformVariants_.Select(v => new StringValue(v.Value) as Value).ToList())));
+        }
+
         var queryBuilder = QueryBuilder.Select("export", arguments);
         return await Engine.Execute<bool>(GraphQLClient, queryBuilder);
     }
@@ -250,10 +300,15 @@ public class Container(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Obj
     /// <summary>
     /// Reads the container from an OCI tarball.
     /// </summary>
-    public Container Import(FileID source, string tag = "")
+    public Container Import(FileID source, string? tag = null)
     {
         var arguments = ImmutableList<Argument>.Empty;
         arguments = arguments.Add(new Argument("source", new StringValue(source.Value)));
+        if (tag is string tag_)
+        {
+            arguments = arguments.Add(new Argument("tag", new StringValue(tag_)));
+        }
+
         var queryBuilder = QueryBuilder.Select("import", arguments);
         return new Container(queryBuilder, GraphQLClient);
     }
@@ -290,10 +345,20 @@ public class Container(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Obj
     /// <summary>
     /// Creates a named sub-pipeline.
     /// </summary>
-    public Container Pipeline(string name, string description = "", PipelineLabel[] labels = null)
+    public Container Pipeline(string name, string? description = null, PipelineLabel[]? labels = null)
     {
         var arguments = ImmutableList<Argument>.Empty;
         arguments = arguments.Add(new Argument("name", new StringValue(name)));
+        if (description is string description_)
+        {
+            arguments = arguments.Add(new Argument("description", new StringValue(description_)));
+        }
+
+        if (labels is PipelineLabel[] labels_)
+        {
+            arguments = arguments.Add(new Argument("labels", new ListValue([])));
+        }
+
         var queryBuilder = QueryBuilder.Select("pipeline", arguments);
         return new Container(queryBuilder, GraphQLClient);
     }
@@ -314,10 +379,25 @@ public class Container(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Obj
     ///
     /// It can also publish platform variants.
     /// </summary>
-    public async Task<string> Publish(string address, ImageLayerCompression? forcedCompression = null, ImageMediaTypes mediaTypes = ImageMediaTypes.OCIMediaTypes, ContainerID[] platformVariants = null)
+    public async Task<string> Publish(string address, ImageLayerCompression? forcedCompression = null, ImageMediaTypes? mediaTypes = null, ContainerID[]? platformVariants = null)
     {
         var arguments = ImmutableList<Argument>.Empty;
         arguments = arguments.Add(new Argument("address", new StringValue(address)));
+        if (forcedCompression is ImageLayerCompression forcedCompression_)
+        {
+            arguments = arguments.Add(new Argument("forcedCompression", new StringValue(forcedCompression_.ToString())));
+        }
+
+        if (mediaTypes is ImageMediaTypes mediaTypes_)
+        {
+            arguments = arguments.Add(new Argument("mediaTypes", new StringValue(mediaTypes_.ToString())));
+        }
+
+        if (platformVariants is ContainerID[] platformVariants_)
+        {
+            arguments = arguments.Add(new Argument("platformVariants", new ListValue(platformVariants_.Select(v => new StringValue(v.Value) as Value).ToList())));
+        }
+
         var queryBuilder = QueryBuilder.Select("publish", arguments);
         return await Engine.Execute<string>(GraphQLClient, queryBuilder);
     }
@@ -367,9 +447,24 @@ public class Container(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Obj
     /// <summary>
     /// Return an interactive terminal for this container using its configured default terminal command if not overridden by args (or sh as a fallback default).
     /// </summary>
-    public Terminal Terminal(string[] cmd = null, bool experimentalPrivilegedNesting = false, bool insecureRootCapabilities = false)
+    public Terminal Terminal(string[]? cmd = null, bool? experimentalPrivilegedNesting = null, bool? insecureRootCapabilities = null)
     {
         var arguments = ImmutableList<Argument>.Empty;
+        if (cmd is string[] cmd_)
+        {
+            arguments = arguments.Add(new Argument("cmd", new ListValue(cmd_.Select(v => new StringValue(v) as Value).ToList())));
+        }
+
+        if (experimentalPrivilegedNesting is bool experimentalPrivilegedNesting_)
+        {
+            arguments = arguments.Add(new Argument("experimentalPrivilegedNesting", new BooleanValue(experimentalPrivilegedNesting_)));
+        }
+
+        if (insecureRootCapabilities is bool insecureRootCapabilities_)
+        {
+            arguments = arguments.Add(new Argument("insecureRootCapabilities", new BooleanValue(insecureRootCapabilities_)));
+        }
+
         var queryBuilder = QueryBuilder.Select("terminal", arguments);
         return new Terminal(queryBuilder, GraphQLClient);
     }
@@ -397,10 +492,20 @@ public class Container(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Obj
     /// <summary>
     /// Set the default command to invoke for the container's terminal API.
     /// </summary>
-    public Container WithDefaultTerminalCmd(string[] args, bool experimentalPrivilegedNesting = false, bool insecureRootCapabilities = false)
+    public Container WithDefaultTerminalCmd(string[] args, bool? experimentalPrivilegedNesting = null, bool? insecureRootCapabilities = null)
     {
         var arguments = ImmutableList<Argument>.Empty;
         arguments = arguments.Add(new Argument("args", new ListValue(args.Select(v => new StringValue(v) as Value).ToList())));
+        if (experimentalPrivilegedNesting is bool experimentalPrivilegedNesting_)
+        {
+            arguments = arguments.Add(new Argument("experimentalPrivilegedNesting", new BooleanValue(experimentalPrivilegedNesting_)));
+        }
+
+        if (insecureRootCapabilities is bool insecureRootCapabilities_)
+        {
+            arguments = arguments.Add(new Argument("insecureRootCapabilities", new BooleanValue(insecureRootCapabilities_)));
+        }
+
         var queryBuilder = QueryBuilder.Select("withDefaultTerminalCmd", arguments);
         return new Container(queryBuilder, GraphQLClient);
     }
@@ -408,10 +513,25 @@ public class Container(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Obj
     /// <summary>
     /// Retrieves this container plus a directory written at the given path.
     /// </summary>
-    public Container WithDirectory(DirectoryID directory, string path, string[] exclude = null, string[] include = null, string owner = "")
+    public Container WithDirectory(DirectoryID directory, string path, string[]? exclude = null, string[]? include = null, string? owner = null)
     {
         var arguments = ImmutableList<Argument>.Empty;
         arguments = arguments.Add(new Argument("directory", new StringValue(directory.Value))).Add(new Argument("path", new StringValue(path)));
+        if (exclude is string[] exclude_)
+        {
+            arguments = arguments.Add(new Argument("exclude", new ListValue(exclude_.Select(v => new StringValue(v) as Value).ToList())));
+        }
+
+        if (include is string[] include_)
+        {
+            arguments = arguments.Add(new Argument("include", new ListValue(include_.Select(v => new StringValue(v) as Value).ToList())));
+        }
+
+        if (owner is string owner_)
+        {
+            arguments = arguments.Add(new Argument("owner", new StringValue(owner_)));
+        }
+
         var queryBuilder = QueryBuilder.Select("withDirectory", arguments);
         return new Container(queryBuilder, GraphQLClient);
     }
@@ -419,10 +539,15 @@ public class Container(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Obj
     /// <summary>
     /// Retrieves this container but with a different command entrypoint.
     /// </summary>
-    public Container WithEntrypoint(string[] args, bool keepDefaultArgs = false)
+    public Container WithEntrypoint(string[] args, bool? keepDefaultArgs = null)
     {
         var arguments = ImmutableList<Argument>.Empty;
         arguments = arguments.Add(new Argument("args", new ListValue(args.Select(v => new StringValue(v) as Value).ToList())));
+        if (keepDefaultArgs is bool keepDefaultArgs_)
+        {
+            arguments = arguments.Add(new Argument("keepDefaultArgs", new BooleanValue(keepDefaultArgs_)));
+        }
+
         var queryBuilder = QueryBuilder.Select("withEntrypoint", arguments);
         return new Container(queryBuilder, GraphQLClient);
     }
@@ -430,10 +555,15 @@ public class Container(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Obj
     /// <summary>
     /// Retrieves this container plus the given environment variable.
     /// </summary>
-    public Container WithEnvVariable(string name, string value, bool expand = false)
+    public Container WithEnvVariable(string name, string value, bool? expand = null)
     {
         var arguments = ImmutableList<Argument>.Empty;
         arguments = arguments.Add(new Argument("name", new StringValue(name))).Add(new Argument("value", new StringValue(value)));
+        if (expand is bool expand_)
+        {
+            arguments = arguments.Add(new Argument("expand", new BooleanValue(expand_)));
+        }
+
         var queryBuilder = QueryBuilder.Select("withEnvVariable", arguments);
         return new Container(queryBuilder, GraphQLClient);
     }
@@ -441,10 +571,40 @@ public class Container(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Obj
     /// <summary>
     /// Retrieves this container after executing the specified command inside it.
     /// </summary>
-    public Container WithExec(string[] args, bool experimentalPrivilegedNesting = false, bool insecureRootCapabilities = false, string redirectStderr = "", string redirectStdout = "", bool skipEntrypoint = false, string stdin = "")
+    public Container WithExec(string[] args, bool? experimentalPrivilegedNesting = null, bool? insecureRootCapabilities = null, string? redirectStderr = null, string? redirectStdout = null, bool? skipEntrypoint = null, string? stdin = null)
     {
         var arguments = ImmutableList<Argument>.Empty;
         arguments = arguments.Add(new Argument("args", new ListValue(args.Select(v => new StringValue(v) as Value).ToList())));
+        if (experimentalPrivilegedNesting is bool experimentalPrivilegedNesting_)
+        {
+            arguments = arguments.Add(new Argument("experimentalPrivilegedNesting", new BooleanValue(experimentalPrivilegedNesting_)));
+        }
+
+        if (insecureRootCapabilities is bool insecureRootCapabilities_)
+        {
+            arguments = arguments.Add(new Argument("insecureRootCapabilities", new BooleanValue(insecureRootCapabilities_)));
+        }
+
+        if (redirectStderr is string redirectStderr_)
+        {
+            arguments = arguments.Add(new Argument("redirectStderr", new StringValue(redirectStderr_)));
+        }
+
+        if (redirectStdout is string redirectStdout_)
+        {
+            arguments = arguments.Add(new Argument("redirectStdout", new StringValue(redirectStdout_)));
+        }
+
+        if (skipEntrypoint is bool skipEntrypoint_)
+        {
+            arguments = arguments.Add(new Argument("skipEntrypoint", new BooleanValue(skipEntrypoint_)));
+        }
+
+        if (stdin is string stdin_)
+        {
+            arguments = arguments.Add(new Argument("stdin", new StringValue(stdin_)));
+        }
+
         var queryBuilder = QueryBuilder.Select("withExec", arguments);
         return new Container(queryBuilder, GraphQLClient);
     }
@@ -458,10 +618,25 @@ public class Container(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Obj
     ///
     /// - For setting the EXPOSE OCI field when publishing the container
     /// </summary>
-    public Container WithExposedPort(int port, string? description = null, bool experimentalSkipHealthcheck = false, NetworkProtocol protocol = NetworkProtocol.TCP)
+    public Container WithExposedPort(int port, string? description = null, bool? experimentalSkipHealthcheck = null, NetworkProtocol? protocol = null)
     {
         var arguments = ImmutableList<Argument>.Empty;
         arguments = arguments.Add(new Argument("port", new IntValue(port)));
+        if (description is string description_)
+        {
+            arguments = arguments.Add(new Argument("description", new StringValue(description_)));
+        }
+
+        if (experimentalSkipHealthcheck is bool experimentalSkipHealthcheck_)
+        {
+            arguments = arguments.Add(new Argument("experimentalSkipHealthcheck", new BooleanValue(experimentalSkipHealthcheck_)));
+        }
+
+        if (protocol is NetworkProtocol protocol_)
+        {
+            arguments = arguments.Add(new Argument("protocol", new StringValue(protocol_.ToString())));
+        }
+
         var queryBuilder = QueryBuilder.Select("withExposedPort", arguments);
         return new Container(queryBuilder, GraphQLClient);
     }
@@ -469,10 +644,20 @@ public class Container(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Obj
     /// <summary>
     /// Retrieves this container plus the contents of the given file copied to the given path.
     /// </summary>
-    public Container WithFile(string path, FileID source, string owner = "", int? permissions = null)
+    public Container WithFile(string path, FileID source, string? owner = null, int? permissions = null)
     {
         var arguments = ImmutableList<Argument>.Empty;
         arguments = arguments.Add(new Argument("path", new StringValue(path))).Add(new Argument("source", new StringValue(source.Value)));
+        if (owner is string owner_)
+        {
+            arguments = arguments.Add(new Argument("owner", new StringValue(owner_)));
+        }
+
+        if (permissions is int permissions_)
+        {
+            arguments = arguments.Add(new Argument("permissions", new IntValue(permissions_)));
+        }
+
         var queryBuilder = QueryBuilder.Select("withFile", arguments);
         return new Container(queryBuilder, GraphQLClient);
     }
@@ -480,10 +665,20 @@ public class Container(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Obj
     /// <summary>
     /// Retrieves this container plus the contents of the given files copied to the given path.
     /// </summary>
-    public Container WithFiles(string path, FileID[] sources, string owner = "", int? permissions = null)
+    public Container WithFiles(string path, FileID[] sources, string? owner = null, int? permissions = null)
     {
         var arguments = ImmutableList<Argument>.Empty;
         arguments = arguments.Add(new Argument("path", new StringValue(path))).Add(new Argument("sources", new ListValue(sources.Select(v => new StringValue(v.Value) as Value).ToList())));
+        if (owner is string owner_)
+        {
+            arguments = arguments.Add(new Argument("owner", new StringValue(owner_)));
+        }
+
+        if (permissions is int permissions_)
+        {
+            arguments = arguments.Add(new Argument("permissions", new IntValue(permissions_)));
+        }
+
         var queryBuilder = QueryBuilder.Select("withFiles", arguments);
         return new Container(queryBuilder, GraphQLClient);
     }
@@ -511,10 +706,25 @@ public class Container(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Obj
     /// <summary>
     /// Retrieves this container plus a cache volume mounted at the given path.
     /// </summary>
-    public Container WithMountedCache(CacheVolumeID cache, string path, string owner = "", CacheSharingMode sharing = CacheSharingMode.SHARED, DirectoryID? source = null)
+    public Container WithMountedCache(CacheVolumeID cache, string path, string? owner = null, CacheSharingMode? sharing = null, DirectoryID? source = null)
     {
         var arguments = ImmutableList<Argument>.Empty;
         arguments = arguments.Add(new Argument("cache", new StringValue(cache.Value))).Add(new Argument("path", new StringValue(path)));
+        if (owner is string owner_)
+        {
+            arguments = arguments.Add(new Argument("owner", new StringValue(owner_)));
+        }
+
+        if (sharing is CacheSharingMode sharing_)
+        {
+            arguments = arguments.Add(new Argument("sharing", new StringValue(sharing_.ToString())));
+        }
+
+        if (source is DirectoryID source_)
+        {
+            arguments = arguments.Add(new Argument("source", new StringValue(source_.Value)));
+        }
+
         var queryBuilder = QueryBuilder.Select("withMountedCache", arguments);
         return new Container(queryBuilder, GraphQLClient);
     }
@@ -522,10 +732,15 @@ public class Container(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Obj
     /// <summary>
     /// Retrieves this container plus a directory mounted at the given path.
     /// </summary>
-    public Container WithMountedDirectory(string path, DirectoryID source, string owner = "")
+    public Container WithMountedDirectory(string path, DirectoryID source, string? owner = null)
     {
         var arguments = ImmutableList<Argument>.Empty;
         arguments = arguments.Add(new Argument("path", new StringValue(path))).Add(new Argument("source", new StringValue(source.Value)));
+        if (owner is string owner_)
+        {
+            arguments = arguments.Add(new Argument("owner", new StringValue(owner_)));
+        }
+
         var queryBuilder = QueryBuilder.Select("withMountedDirectory", arguments);
         return new Container(queryBuilder, GraphQLClient);
     }
@@ -533,10 +748,15 @@ public class Container(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Obj
     /// <summary>
     /// Retrieves this container plus a file mounted at the given path.
     /// </summary>
-    public Container WithMountedFile(string path, FileID source, string owner = "")
+    public Container WithMountedFile(string path, FileID source, string? owner = null)
     {
         var arguments = ImmutableList<Argument>.Empty;
         arguments = arguments.Add(new Argument("path", new StringValue(path))).Add(new Argument("source", new StringValue(source.Value)));
+        if (owner is string owner_)
+        {
+            arguments = arguments.Add(new Argument("owner", new StringValue(owner_)));
+        }
+
         var queryBuilder = QueryBuilder.Select("withMountedFile", arguments);
         return new Container(queryBuilder, GraphQLClient);
     }
@@ -544,10 +764,20 @@ public class Container(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Obj
     /// <summary>
     /// Retrieves this container plus a secret mounted into a file at the given path.
     /// </summary>
-    public Container WithMountedSecret(string path, SecretID source, int mode = 256, string owner = "")
+    public Container WithMountedSecret(string path, SecretID source, int? mode = null, string? owner = null)
     {
         var arguments = ImmutableList<Argument>.Empty;
         arguments = arguments.Add(new Argument("path", new StringValue(path))).Add(new Argument("source", new StringValue(source.Value)));
+        if (mode is int mode_)
+        {
+            arguments = arguments.Add(new Argument("mode", new IntValue(mode_)));
+        }
+
+        if (owner is string owner_)
+        {
+            arguments = arguments.Add(new Argument("owner", new StringValue(owner_)));
+        }
+
         var queryBuilder = QueryBuilder.Select("withMountedSecret", arguments);
         return new Container(queryBuilder, GraphQLClient);
     }
@@ -566,10 +796,25 @@ public class Container(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Obj
     /// <summary>
     /// Retrieves this container plus a new file written at the given path.
     /// </summary>
-    public Container WithNewFile(string path, string contents = "", string owner = "", int permissions = 420)
+    public Container WithNewFile(string path, string? contents = null, string? owner = null, int? permissions = null)
     {
         var arguments = ImmutableList<Argument>.Empty;
         arguments = arguments.Add(new Argument("path", new StringValue(path)));
+        if (contents is string contents_)
+        {
+            arguments = arguments.Add(new Argument("contents", new StringValue(contents_)));
+        }
+
+        if (owner is string owner_)
+        {
+            arguments = arguments.Add(new Argument("owner", new StringValue(owner_)));
+        }
+
+        if (permissions is int permissions_)
+        {
+            arguments = arguments.Add(new Argument("permissions", new IntValue(permissions_)));
+        }
+
         var queryBuilder = QueryBuilder.Select("withNewFile", arguments);
         return new Container(queryBuilder, GraphQLClient);
     }
@@ -627,10 +872,15 @@ public class Container(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Obj
     /// <summary>
     /// Retrieves this container plus a socket forwarded to the given Unix socket path.
     /// </summary>
-    public Container WithUnixSocket(string path, SocketID source, string owner = "")
+    public Container WithUnixSocket(string path, SocketID source, string? owner = null)
     {
         var arguments = ImmutableList<Argument>.Empty;
         arguments = arguments.Add(new Argument("path", new StringValue(path))).Add(new Argument("source", new StringValue(source.Value)));
+        if (owner is string owner_)
+        {
+            arguments = arguments.Add(new Argument("owner", new StringValue(owner_)));
+        }
+
         var queryBuilder = QueryBuilder.Select("withUnixSocket", arguments);
         return new Container(queryBuilder, GraphQLClient);
     }
@@ -680,9 +930,14 @@ public class Container(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Obj
     /// <summary>
     /// Retrieves this container with an unset command entrypoint.
     /// </summary>
-    public Container WithoutEntrypoint(bool keepDefaultArgs = false)
+    public Container WithoutEntrypoint(bool? keepDefaultArgs = null)
     {
         var arguments = ImmutableList<Argument>.Empty;
+        if (keepDefaultArgs is bool keepDefaultArgs_)
+        {
+            arguments = arguments.Add(new Argument("keepDefaultArgs", new BooleanValue(keepDefaultArgs_)));
+        }
+
         var queryBuilder = QueryBuilder.Select("withoutEntrypoint", arguments);
         return new Container(queryBuilder, GraphQLClient);
     }
@@ -701,10 +956,15 @@ public class Container(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Obj
     /// <summary>
     /// Unexpose a previously exposed port.
     /// </summary>
-    public Container WithoutExposedPort(int port, NetworkProtocol protocol = NetworkProtocol.TCP)
+    public Container WithoutExposedPort(int port, NetworkProtocol? protocol = null)
     {
         var arguments = ImmutableList<Argument>.Empty;
         arguments = arguments.Add(new Argument("port", new IntValue(port)));
+        if (protocol is NetworkProtocol protocol_)
+        {
+            arguments = arguments.Add(new Argument("protocol", new StringValue(protocol_.ToString())));
+        }
+
         var queryBuilder = QueryBuilder.Select("withoutExposedPort", arguments);
         return new Container(queryBuilder, GraphQLClient);
     }
@@ -860,10 +1120,20 @@ public class CurrentModule(QueryBuilder queryBuilder, GraphQLClient gqlClient) :
     /// <summary>
     /// Load a directory from the module's scratch working directory, including any changes that may have been made to it during module function execution.
     /// </summary>
-    public Directory Workdir(string path, string[] exclude = null, string[] include = null)
+    public Directory Workdir(string path, string[]? exclude = null, string[]? include = null)
     {
         var arguments = ImmutableList<Argument>.Empty;
         arguments = arguments.Add(new Argument("path", new StringValue(path)));
+        if (exclude is string[] exclude_)
+        {
+            arguments = arguments.Add(new Argument("exclude", new ListValue(exclude_.Select(v => new StringValue(v) as Value).ToList())));
+        }
+
+        if (include is string[] include_)
+        {
+            arguments = arguments.Add(new Argument("include", new ListValue(include_.Select(v => new StringValue(v) as Value).ToList())));
+        }
+
         var queryBuilder = QueryBuilder.Select("workdir", arguments);
         return new Directory(queryBuilder, GraphQLClient);
     }
@@ -895,9 +1165,14 @@ public class Directory(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Obj
     /// <summary>
     /// Load the directory as a Dagger module
     /// </summary>
-    public Module AsModule(string sourceRootPath = ".")
+    public Module AsModule(string? sourceRootPath = null)
     {
         var arguments = ImmutableList<Argument>.Empty;
+        if (sourceRootPath is string sourceRootPath_)
+        {
+            arguments = arguments.Add(new Argument("sourceRootPath", new StringValue(sourceRootPath_)));
+        }
+
         var queryBuilder = QueryBuilder.Select("asModule", arguments);
         return new Module(queryBuilder, GraphQLClient);
     }
@@ -927,9 +1202,34 @@ public class Directory(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Obj
     /// <summary>
     /// Builds a new Docker container from this directory.
     /// </summary>
-    public Container DockerBuild(BuildArg[] buildArgs = null, string dockerfile = "Dockerfile", Platform? platform = null, SecretID[] secrets = null, string target = "")
+    public Container DockerBuild(BuildArg[]? buildArgs = null, string? dockerfile = null, Platform? platform = null, SecretID[]? secrets = null, string? target = null)
     {
         var arguments = ImmutableList<Argument>.Empty;
+        if (buildArgs is BuildArg[] buildArgs_)
+        {
+            arguments = arguments.Add(new Argument("buildArgs", new ListValue([])));
+        }
+
+        if (dockerfile is string dockerfile_)
+        {
+            arguments = arguments.Add(new Argument("dockerfile", new StringValue(dockerfile_)));
+        }
+
+        if (platform is Platform platform_)
+        {
+            arguments = arguments.Add(new Argument("platform", new StringValue(platform_.Value)));
+        }
+
+        if (secrets is SecretID[] secrets_)
+        {
+            arguments = arguments.Add(new Argument("secrets", new ListValue(secrets_.Select(v => new StringValue(v.Value) as Value).ToList())));
+        }
+
+        if (target is string target_)
+        {
+            arguments = arguments.Add(new Argument("target", new StringValue(target_)));
+        }
+
         var queryBuilder = QueryBuilder.Select("dockerBuild", arguments);
         return new Container(queryBuilder, GraphQLClient);
     }
@@ -940,6 +1240,11 @@ public class Directory(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Obj
     public async Task<string[]> Entries(string? path = null)
     {
         var arguments = ImmutableList<Argument>.Empty;
+        if (path is string path_)
+        {
+            arguments = arguments.Add(new Argument("path", new StringValue(path_)));
+        }
+
         var queryBuilder = QueryBuilder.Select("entries", arguments).Select("id");
         return await Engine.Execute<string[]>(GraphQLClient, queryBuilder);
     }
@@ -947,10 +1252,15 @@ public class Directory(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Obj
     /// <summary>
     /// Writes the contents of the directory to a path on the host.
     /// </summary>
-    public async Task<bool> Export(string path, bool wipe = false)
+    public async Task<bool> Export(string path, bool? wipe = null)
     {
         var arguments = ImmutableList<Argument>.Empty;
         arguments = arguments.Add(new Argument("path", new StringValue(path)));
+        if (wipe is bool wipe_)
+        {
+            arguments = arguments.Add(new Argument("wipe", new BooleanValue(wipe_)));
+        }
+
         var queryBuilder = QueryBuilder.Select("export", arguments);
         return await Engine.Execute<bool>(GraphQLClient, queryBuilder);
     }
@@ -989,10 +1299,20 @@ public class Directory(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Obj
     /// <summary>
     /// Creates a named sub-pipeline.
     /// </summary>
-    public Directory Pipeline(string name, string description = "", PipelineLabel[] labels = null)
+    public Directory Pipeline(string name, string? description = null, PipelineLabel[]? labels = null)
     {
         var arguments = ImmutableList<Argument>.Empty;
         arguments = arguments.Add(new Argument("name", new StringValue(name)));
+        if (description is string description_)
+        {
+            arguments = arguments.Add(new Argument("description", new StringValue(description_)));
+        }
+
+        if (labels is PipelineLabel[] labels_)
+        {
+            arguments = arguments.Add(new Argument("labels", new ListValue([])));
+        }
+
         var queryBuilder = QueryBuilder.Select("pipeline", arguments);
         return new Directory(queryBuilder, GraphQLClient);
     }
@@ -1009,10 +1329,20 @@ public class Directory(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Obj
     /// <summary>
     /// Retrieves this directory plus a directory written at the given path.
     /// </summary>
-    public Directory WithDirectory(DirectoryID directory, string path, string[] exclude = null, string[] include = null)
+    public Directory WithDirectory(DirectoryID directory, string path, string[]? exclude = null, string[]? include = null)
     {
         var arguments = ImmutableList<Argument>.Empty;
         arguments = arguments.Add(new Argument("directory", new StringValue(directory.Value))).Add(new Argument("path", new StringValue(path)));
+        if (exclude is string[] exclude_)
+        {
+            arguments = arguments.Add(new Argument("exclude", new ListValue(exclude_.Select(v => new StringValue(v) as Value).ToList())));
+        }
+
+        if (include is string[] include_)
+        {
+            arguments = arguments.Add(new Argument("include", new ListValue(include_.Select(v => new StringValue(v) as Value).ToList())));
+        }
+
         var queryBuilder = QueryBuilder.Select("withDirectory", arguments);
         return new Directory(queryBuilder, GraphQLClient);
     }
@@ -1024,6 +1354,11 @@ public class Directory(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Obj
     {
         var arguments = ImmutableList<Argument>.Empty;
         arguments = arguments.Add(new Argument("path", new StringValue(path))).Add(new Argument("source", new StringValue(source.Value)));
+        if (permissions is int permissions_)
+        {
+            arguments = arguments.Add(new Argument("permissions", new IntValue(permissions_)));
+        }
+
         var queryBuilder = QueryBuilder.Select("withFile", arguments);
         return new Directory(queryBuilder, GraphQLClient);
     }
@@ -1035,6 +1370,11 @@ public class Directory(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Obj
     {
         var arguments = ImmutableList<Argument>.Empty;
         arguments = arguments.Add(new Argument("path", new StringValue(path))).Add(new Argument("sources", new ListValue(sources.Select(v => new StringValue(v.Value) as Value).ToList())));
+        if (permissions is int permissions_)
+        {
+            arguments = arguments.Add(new Argument("permissions", new IntValue(permissions_)));
+        }
+
         var queryBuilder = QueryBuilder.Select("withFiles", arguments);
         return new Directory(queryBuilder, GraphQLClient);
     }
@@ -1042,10 +1382,15 @@ public class Directory(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Obj
     /// <summary>
     /// Retrieves this directory plus a new directory created at the given path.
     /// </summary>
-    public Directory WithNewDirectory(string path, int permissions = 420)
+    public Directory WithNewDirectory(string path, int? permissions = null)
     {
         var arguments = ImmutableList<Argument>.Empty;
         arguments = arguments.Add(new Argument("path", new StringValue(path)));
+        if (permissions is int permissions_)
+        {
+            arguments = arguments.Add(new Argument("permissions", new IntValue(permissions_)));
+        }
+
         var queryBuilder = QueryBuilder.Select("withNewDirectory", arguments);
         return new Directory(queryBuilder, GraphQLClient);
     }
@@ -1053,10 +1398,15 @@ public class Directory(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Obj
     /// <summary>
     /// Retrieves this directory plus a new file written at the given path.
     /// </summary>
-    public Directory WithNewFile(string contents, string path, int permissions = 420)
+    public Directory WithNewFile(string contents, string path, int? permissions = null)
     {
         var arguments = ImmutableList<Argument>.Empty;
         arguments = arguments.Add(new Argument("contents", new StringValue(contents))).Add(new Argument("path", new StringValue(path)));
+        if (permissions is int permissions_)
+        {
+            arguments = arguments.Add(new Argument("permissions", new IntValue(permissions_)));
+        }
+
         var queryBuilder = QueryBuilder.Select("withNewFile", arguments);
         return new Directory(queryBuilder, GraphQLClient);
     }
@@ -1210,10 +1560,15 @@ public class File(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object(q
     /// <summary>
     /// Writes the file to a file path on the host.
     /// </summary>
-    public async Task<bool> Export(string path, bool allowParentDirPath = false)
+    public async Task<bool> Export(string path, bool? allowParentDirPath = null)
     {
         var arguments = ImmutableList<Argument>.Empty;
         arguments = arguments.Add(new Argument("path", new StringValue(path)));
+        if (allowParentDirPath is bool allowParentDirPath_)
+        {
+            arguments = arguments.Add(new Argument("allowParentDirPath", new BooleanValue(allowParentDirPath_)));
+        }
+
         var queryBuilder = QueryBuilder.Select("export", arguments);
         return await Engine.Execute<bool>(GraphQLClient, queryBuilder);
     }
@@ -1339,10 +1694,20 @@ public class Function(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Obje
     /// <summary>
     /// Returns the function with the provided argument
     /// </summary>
-    public Function WithArg(string name, TypeDefID typeDef, JSON? defaultValue = null, string description = "")
+    public Function WithArg(string name, TypeDefID typeDef, JSON? defaultValue = null, string? description = null)
     {
         var arguments = ImmutableList<Argument>.Empty;
         arguments = arguments.Add(new Argument("name", new StringValue(name))).Add(new Argument("typeDef", new StringValue(typeDef.Value)));
+        if (defaultValue is JSON defaultValue_)
+        {
+            arguments = arguments.Add(new Argument("defaultValue", new StringValue(defaultValue_.Value)));
+        }
+
+        if (description is string description_)
+        {
+            arguments = arguments.Add(new Argument("description", new StringValue(description_)));
+        }
+
         var queryBuilder = QueryBuilder.Select("withArg", arguments);
         return new Function(queryBuilder, GraphQLClient);
     }
@@ -1711,6 +2076,16 @@ public class GitRef(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object
     public Directory Tree(SocketID? sshAuthSocket = null, string? sshKnownHosts = null)
     {
         var arguments = ImmutableList<Argument>.Empty;
+        if (sshAuthSocket is SocketID sshAuthSocket_)
+        {
+            arguments = arguments.Add(new Argument("sshAuthSocket", new StringValue(sshAuthSocket_.Value)));
+        }
+
+        if (sshKnownHosts is string sshKnownHosts_)
+        {
+            arguments = arguments.Add(new Argument("sshKnownHosts", new StringValue(sshKnownHosts_)));
+        }
+
         var queryBuilder = QueryBuilder.Select("tree", arguments);
         return new Directory(queryBuilder, GraphQLClient);
     }
@@ -1828,10 +2203,20 @@ public class Host(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object(q
     /// <summary>
     /// Accesses a directory on the host.
     /// </summary>
-    public Directory Directory(string path, string[] exclude = null, string[] include = null)
+    public Directory Directory(string path, string[]? exclude = null, string[]? include = null)
     {
         var arguments = ImmutableList<Argument>.Empty;
         arguments = arguments.Add(new Argument("path", new StringValue(path)));
+        if (exclude is string[] exclude_)
+        {
+            arguments = arguments.Add(new Argument("exclude", new ListValue(exclude_.Select(v => new StringValue(v) as Value).ToList())));
+        }
+
+        if (include is string[] include_)
+        {
+            arguments = arguments.Add(new Argument("include", new ListValue(include_.Select(v => new StringValue(v) as Value).ToList())));
+        }
+
         var queryBuilder = QueryBuilder.Select("directory", arguments);
         return new Directory(queryBuilder, GraphQLClient);
     }
@@ -1859,10 +2244,15 @@ public class Host(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object(q
     /// <summary>
     /// Creates a service that forwards traffic to a specified address via the host.
     /// </summary>
-    public Service Service(PortForward[] ports, string host = "localhost")
+    public Service Service(PortForward[] ports, string? host = null)
     {
         var arguments = ImmutableList<Argument>.Empty;
         arguments = arguments.Add(new Argument("ports", new ListValue([])));
+        if (host is string host_)
+        {
+            arguments = arguments.Add(new Argument("host", new StringValue(host_)));
+        }
+
         var queryBuilder = QueryBuilder.Select("service", arguments);
         return new Service(queryBuilder, GraphQLClient);
     }
@@ -1883,10 +2273,20 @@ public class Host(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object(q
     /// <summary>
     /// Creates a tunnel that forwards traffic from the host to a service.
     /// </summary>
-    public Service Tunnel(ServiceID service, bool native = false, PortForward[] ports = null)
+    public Service Tunnel(ServiceID service, bool? native = null, PortForward[]? ports = null)
     {
         var arguments = ImmutableList<Argument>.Empty;
         arguments = arguments.Add(new Argument("service", new StringValue(service.Value)));
+        if (native is bool native_)
+        {
+            arguments = arguments.Add(new Argument("native", new BooleanValue(native_)));
+        }
+
+        if (ports is PortForward[] ports_)
+        {
+            arguments = arguments.Add(new Argument("ports", new ListValue([])));
+        }
+
         var queryBuilder = QueryBuilder.Select("tunnel", arguments);
         return new Service(queryBuilder, GraphQLClient);
     }
@@ -2518,6 +2918,11 @@ public class ModuleSource(QueryBuilder queryBuilder, GraphQLClient gqlClient) : 
     {
         var arguments = ImmutableList<Argument>.Empty;
         arguments = arguments.Add(new Argument("path", new StringValue(path)));
+        if (viewName is string viewName_)
+        {
+            arguments = arguments.Add(new Argument("viewName", new StringValue(viewName_)));
+        }
+
         var queryBuilder = QueryBuilder.Select("resolveDirectoryFromCaller", arguments);
         return new Directory(queryBuilder, GraphQLClient);
     }
@@ -2937,6 +3342,16 @@ public class Query(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object(
     public Container Container(ContainerID? id = null, Platform? platform = null)
     {
         var arguments = ImmutableList<Argument>.Empty;
+        if (id is ContainerID id_)
+        {
+            arguments = arguments.Add(new Argument("id", new StringValue(id_.Value)));
+        }
+
+        if (platform is Platform platform_)
+        {
+            arguments = arguments.Add(new Argument("platform", new StringValue(platform_.Value)));
+        }
+
         var queryBuilder = QueryBuilder.Select("container", arguments);
         return new Container(queryBuilder, GraphQLClient);
     }
@@ -2985,6 +3400,11 @@ public class Query(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object(
     public Directory Directory(DirectoryID? id = null)
     {
         var arguments = ImmutableList<Argument>.Empty;
+        if (id is DirectoryID id_)
+        {
+            arguments = arguments.Add(new Argument("id", new StringValue(id_.Value)));
+        }
+
         var queryBuilder = QueryBuilder.Select("directory", arguments);
         return new Directory(queryBuilder, GraphQLClient);
     }
@@ -3022,10 +3442,30 @@ public class Query(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object(
     /// <summary>
     /// Queries a Git repository.
     /// </summary>
-    public GitRepository Git(string url, ServiceID? experimentalServiceHost = null, bool keepGitDir = false, SocketID? sshAuthSocket = null, string sshKnownHosts = "")
+    public GitRepository Git(string url, ServiceID? experimentalServiceHost = null, bool? keepGitDir = null, SocketID? sshAuthSocket = null, string? sshKnownHosts = null)
     {
         var arguments = ImmutableList<Argument>.Empty;
         arguments = arguments.Add(new Argument("url", new StringValue(url)));
+        if (experimentalServiceHost is ServiceID experimentalServiceHost_)
+        {
+            arguments = arguments.Add(new Argument("experimentalServiceHost", new StringValue(experimentalServiceHost_.Value)));
+        }
+
+        if (keepGitDir is bool keepGitDir_)
+        {
+            arguments = arguments.Add(new Argument("keepGitDir", new BooleanValue(keepGitDir_)));
+        }
+
+        if (sshAuthSocket is SocketID sshAuthSocket_)
+        {
+            arguments = arguments.Add(new Argument("sshAuthSocket", new StringValue(sshAuthSocket_.Value)));
+        }
+
+        if (sshKnownHosts is string sshKnownHosts_)
+        {
+            arguments = arguments.Add(new Argument("sshKnownHosts", new StringValue(sshKnownHosts_)));
+        }
+
         var queryBuilder = QueryBuilder.Select("git", arguments);
         return new GitRepository(queryBuilder, GraphQLClient);
     }
@@ -3046,6 +3486,11 @@ public class Query(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object(
     {
         var arguments = ImmutableList<Argument>.Empty;
         arguments = arguments.Add(new Argument("url", new StringValue(url)));
+        if (experimentalServiceHost is ServiceID experimentalServiceHost_)
+        {
+            arguments = arguments.Add(new Argument("experimentalServiceHost", new StringValue(experimentalServiceHost_.Value)));
+        }
+
         var queryBuilder = QueryBuilder.Select("http", arguments);
         return new File(queryBuilder, GraphQLClient);
     }
@@ -3425,10 +3870,15 @@ public class Query(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object(
     /// <summary>
     /// Create a new module dependency configuration from a module source and name
     /// </summary>
-    public ModuleDependency ModuleDependency(ModuleSourceID source, string name = "")
+    public ModuleDependency ModuleDependency(ModuleSourceID source, string? name = null)
     {
         var arguments = ImmutableList<Argument>.Empty;
         arguments = arguments.Add(new Argument("source", new StringValue(source.Value)));
+        if (name is string name_)
+        {
+            arguments = arguments.Add(new Argument("name", new StringValue(name_)));
+        }
+
         var queryBuilder = QueryBuilder.Select("moduleDependency", arguments);
         return new ModuleDependency(queryBuilder, GraphQLClient);
     }
@@ -3436,10 +3886,15 @@ public class Query(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object(
     /// <summary>
     /// Create a new module source instance from a source ref string.
     /// </summary>
-    public ModuleSource ModuleSource(string refString, bool stable = false)
+    public ModuleSource ModuleSource(string refString, bool? stable = null)
     {
         var arguments = ImmutableList<Argument>.Empty;
         arguments = arguments.Add(new Argument("refString", new StringValue(refString)));
+        if (stable is bool stable_)
+        {
+            arguments = arguments.Add(new Argument("stable", new BooleanValue(stable_)));
+        }
+
         var queryBuilder = QueryBuilder.Select("moduleSource", arguments);
         return new ModuleSource(queryBuilder, GraphQLClient);
     }
@@ -3447,10 +3902,20 @@ public class Query(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object(
     /// <summary>
     /// Creates a named sub-pipeline.
     /// </summary>
-    public Query Pipeline(string name, string description = "", PipelineLabel[]? labels = null)
+    public Query Pipeline(string name, string? description = null, PipelineLabel[]? labels = null)
     {
         var arguments = ImmutableList<Argument>.Empty;
         arguments = arguments.Add(new Argument("name", new StringValue(name)));
+        if (description is string description_)
+        {
+            arguments = arguments.Add(new Argument("description", new StringValue(description_)));
+        }
+
+        if (labels is PipelineLabel[] labels_)
+        {
+            arguments = arguments.Add(new Argument("labels", new ListValue([])));
+        }
+
         var queryBuilder = QueryBuilder.Select("pipeline", arguments);
         return new Query(queryBuilder, GraphQLClient);
     }
@@ -3462,6 +3927,11 @@ public class Query(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object(
     {
         var arguments = ImmutableList<Argument>.Empty;
         arguments = arguments.Add(new Argument("name", new StringValue(name)));
+        if (accessor is string accessor_)
+        {
+            arguments = arguments.Add(new Argument("accessor", new StringValue(accessor_)));
+        }
+
         var queryBuilder = QueryBuilder.Select("secret", arguments);
         return new Secret(queryBuilder, GraphQLClient);
     }
@@ -3610,9 +4080,19 @@ public class Service(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Objec
     ///
     /// If a scheme is specified, a URL is returned. Otherwise, a host:port pair is returned.
     /// </summary>
-    public async Task<string> Endpoint(int? port = null, string scheme = "")
+    public async Task<string> Endpoint(int? port = null, string? scheme = null)
     {
         var arguments = ImmutableList<Argument>.Empty;
+        if (port is int port_)
+        {
+            arguments = arguments.Add(new Argument("port", new IntValue(port_)));
+        }
+
+        if (scheme is string scheme_)
+        {
+            arguments = arguments.Add(new Argument("scheme", new StringValue(scheme_)));
+        }
+
         var queryBuilder = QueryBuilder.Select("endpoint", arguments);
         return await Engine.Execute<string>(GraphQLClient, queryBuilder);
     }
@@ -3658,9 +4138,14 @@ public class Service(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Objec
     /// <summary>
     /// Stop the service.
     /// </summary>
-    public async Task<ServiceID> Stop(bool kill = false)
+    public async Task<ServiceID> Stop(bool? kill = null)
     {
         var arguments = ImmutableList<Argument>.Empty;
+        if (kill is bool kill_)
+        {
+            arguments = arguments.Add(new Argument("kill", new BooleanValue(kill_)));
+        }
+
         var queryBuilder = QueryBuilder.Select("stop", arguments);
         return await Engine.Execute<ServiceID>(GraphQLClient, queryBuilder);
     }
@@ -3668,9 +4153,19 @@ public class Service(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Objec
     /// <summary>
     /// Creates a tunnel that forwards traffic from the caller's network to this service.
     /// </summary>
-    public async Task<Void> Up(PortForward[] ports = null, bool random = false)
+    public async Task<Void> Up(PortForward[]? ports = null, bool? random = null)
     {
         var arguments = ImmutableList<Argument>.Empty;
+        if (ports is PortForward[] ports_)
+        {
+            arguments = arguments.Add(new Argument("ports", new ListValue([])));
+        }
+
+        if (random is bool random_)
+        {
+            arguments = arguments.Add(new Argument("random", new BooleanValue(random_)));
+        }
+
         var queryBuilder = QueryBuilder.Select("up", arguments);
         return await Engine.Execute<Void>(GraphQLClient, queryBuilder);
     }
@@ -3827,10 +4322,15 @@ public class TypeDef(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Objec
     /// <summary>
     /// Adds a static field for an Object TypeDef, failing if the type is not an object.
     /// </summary>
-    public TypeDef WithField(string name, TypeDefID typeDef, string description = "")
+    public TypeDef WithField(string name, TypeDefID typeDef, string? description = null)
     {
         var arguments = ImmutableList<Argument>.Empty;
         arguments = arguments.Add(new Argument("name", new StringValue(name))).Add(new Argument("typeDef", new StringValue(typeDef.Value)));
+        if (description is string description_)
+        {
+            arguments = arguments.Add(new Argument("description", new StringValue(description_)));
+        }
+
         var queryBuilder = QueryBuilder.Select("withField", arguments);
         return new TypeDef(queryBuilder, GraphQLClient);
     }
@@ -3849,10 +4349,15 @@ public class TypeDef(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Objec
     /// <summary>
     /// Returns a TypeDef of kind Interface with the provided name.
     /// </summary>
-    public TypeDef WithInterface(string name, string description = "")
+    public TypeDef WithInterface(string name, string? description = null)
     {
         var arguments = ImmutableList<Argument>.Empty;
         arguments = arguments.Add(new Argument("name", new StringValue(name)));
+        if (description is string description_)
+        {
+            arguments = arguments.Add(new Argument("description", new StringValue(description_)));
+        }
+
         var queryBuilder = QueryBuilder.Select("withInterface", arguments);
         return new TypeDef(queryBuilder, GraphQLClient);
     }
@@ -3884,10 +4389,15 @@ public class TypeDef(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Objec
     ///
     /// Note that an object's fields and functions may be omitted if the intent is only to refer to an object. This is how functions are able to return their own object, or any other circular reference.
     /// </summary>
-    public TypeDef WithObject(string name, string description = "")
+    public TypeDef WithObject(string name, string? description = null)
     {
         var arguments = ImmutableList<Argument>.Empty;
         arguments = arguments.Add(new Argument("name", new StringValue(name)));
+        if (description is string description_)
+        {
+            arguments = arguments.Add(new Argument("description", new StringValue(description_)));
+        }
+
         var queryBuilder = QueryBuilder.Select("withObject", arguments);
         return new TypeDef(queryBuilder, GraphQLClient);
     }
@@ -3906,10 +4416,15 @@ public class TypeDef(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Objec
     /// <summary>
     /// Returns a TypeDef of kind Scalar with the provided name.
     /// </summary>
-    public TypeDef WithScalar(string name, string description = "")
+    public TypeDef WithScalar(string name, string? description = null)
     {
         var arguments = ImmutableList<Argument>.Empty;
         arguments = arguments.Add(new Argument("name", new StringValue(name)));
+        if (description is string description_)
+        {
+            arguments = arguments.Add(new Argument("description", new StringValue(description_)));
+        }
+
         var queryBuilder = QueryBuilder.Select("withScalar", arguments);
         return new TypeDef(queryBuilder, GraphQLClient);
     }

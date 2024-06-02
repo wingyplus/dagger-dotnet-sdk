@@ -149,8 +149,7 @@ public class CodeRenderer : Codegen.CodeRenderer
 
     private static string RenderOptionalArgument(InputValue argument)
     {
-        var nullableType = argument.DefaultValue == null ? "?" : "";
-        return $"{RenderType(argument.Type)}{nullableType} {Formatter.FormatVarName(argument.Name)} = {RenderDefaultValue(argument)}";
+        return $"{RenderType(argument.Type)}? {Formatter.FormatVarName(argument.Name)} = null";
     }
 
     private static string RenderDefaultValue(InputValue argument)
@@ -214,22 +213,42 @@ public class CodeRenderer : Codegen.CodeRenderer
             return "";
         }
 
-        var requiredArgs = field.RequiredArgs();
+
         var builder = new StringBuilder("var arguments = ImmutableList<Argument>.Empty;");
         builder.Append('\n');
 
+        var requiredArgs = field.RequiredArgs();
         if (requiredArgs.Count() > 0)
         {
             builder.Append("arguments = arguments.").Append(string.Join(".", requiredArgs.Select(arg => $$"""Add(new Argument("{{arg.Name}}", {{RenderArgumentValue(arg)}}))"""))).Append(';');
             builder.Append('\n');
         }
 
+        var optionalArgs = field.OptionalArgs();
+        if (optionalArgs.Count() > 0)
+        {
+            optionalArgs.Aggregate(builder, (builder, arg) =>
+            {
+                var varName = Formatter.FormatVarName(arg.Name);
+                return builder
+                    .Append($"""if ({varName} is {RenderType(arg.Type)} {varName}_)""")
+                    .Append("{\n")
+                    .Append($$"""    arguments = arguments.Add(new Argument("{{arg.Name}}", {{RenderArgumentValue(arg, addVarSuffix: true)}}));""")
+                    .Append("}\n");
+            })
+            .Append("\n");
+        }
+
         return builder.ToString();
     }
 
-    private static string RenderArgumentValue(InputValue arg)
+    private static string RenderArgumentValue(InputValue arg, bool addVarSuffix = false)
     {
         var argName = Formatter.FormatVarName(arg.Name);
+        if (addVarSuffix)
+        {
+            argName = $"{argName}_";
+        }
 
         if (arg.Type.IsScalar())
         {

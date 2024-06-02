@@ -18,4 +18,19 @@ public class ClientTest
 
         Assert.Equal("hello\n", output);
     }
+
+    [Fact]
+    public async void TestOptionalArguments()
+    {
+        var client = new Query(QueryBuilder.Builder(), new GraphQLClient());
+        var env = await client
+            .Container()
+            .From("debian")
+            .WithEnvVariable("A", "a")
+            .WithEnvVariable("B", "b")
+            .WithEnvVariable("C", "$A:$B", expand: true)
+            .EnvVariable("C");
+
+        Assert.Equal("a:b", env);
+    }
 }
