@@ -98,4 +98,16 @@ internal class Formatter
     {
         return Keywords.Contains(name) ? $"{name}_" : name;
     }
+
+    public static string FormatType(string typeName)
+    {
+        return typeName switch
+        {
+            "String" => "string",
+            "Boolean" => "bool",
+            "Int" => "int",
+            "Float" => "float",
+            _ => typeName,
+        };
+    }
 }

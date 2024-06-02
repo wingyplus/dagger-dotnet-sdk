@@ -172,19 +172,7 @@ public class CodeRenderer : Codegen.CodeRenderer
         {
             return $"{RenderType(tr.OfType)}[]";
         }
-        return ToCSharpType(tr.Name);
-    }
-
-    private static string ToCSharpType(string name)
-    {
-        return name switch
-        {
-            "String" => "string",
-            "Boolean" => "bool",
-            "Int" => "int",
-            "Float" => "float",
-            _ => name,
-        };
+        return Formatter.FormatType(tr.Name);
     }
 
     private static string RenderReturnType(TypeRef type)
