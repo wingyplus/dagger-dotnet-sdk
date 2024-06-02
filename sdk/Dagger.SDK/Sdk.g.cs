@@ -1102,39 +1102,6 @@ public class DirectoryID : Scalar
 {
 }
 
-public class DotnetSdk(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object(queryBuilder, gqlClient)
-{
-    /// <summary>
-    /// A unique identifier for this DotnetSdk.
-    /// </summary>
-    public async Task<DotnetSdkID> Id()
-    {
-        var queryBuilder = QueryBuilder.Select("id");
-        return await Engine.Execute<DotnetSdkID>(GraphQLClient, queryBuilder);
-    }
-
-    /// <summary>
-    ///
-    /// Fetch introspection json from the Engine.
-    ///
-    /// This function forked from https://github.com/helderco/daggerverse/blob/main/codegen/main.go but
-    /// didn't modify anything in the data.
-    ///
-    /// </summary>
-    public File Introspect()
-    {
-        var queryBuilder = QueryBuilder.Select("introspect");
-        return new File(queryBuilder, GraphQLClient);
-    }
-}
-
-/// <summary>
-/// The `DotnetSdkID` scalar type represents an identifier for an object of type DotnetSdk.
-/// </summary>
-public class DotnetSdkID : Scalar
-{
-}
-
 /// <summary>
 /// An environment variable name and value.
 /// </summary>
@@ -3022,12 +2989,6 @@ public class Query(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object(
         return new Directory(queryBuilder, GraphQLClient);
     }
 
-    public DotnetSdk DotnetSdk()
-    {
-        var queryBuilder = QueryBuilder.Select("dotnetSdk");
-        return new DotnetSdk(queryBuilder, GraphQLClient);
-    }
-
     public File File(FileID id)
     {
         var arguments = ImmutableList<Argument>.Empty;
@@ -3131,17 +3092,6 @@ public class Query(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object(
         arguments = arguments.Add(new Argument("id", new StringValue(id.Value)));
         var queryBuilder = QueryBuilder.Select("loadDirectoryFromID", arguments);
         return new Directory(queryBuilder, GraphQLClient);
-    }
-
-    /// <summary>
-    /// Load a DotnetSdk from its ID.
-    /// </summary>
-    public DotnetSdk LoadDotnetSdkFromID(DotnetSdkID id)
-    {
-        var arguments = ImmutableList<Argument>.Empty;
-        arguments = arguments.Add(new Argument("id", new StringValue(id.Value)));
-        var queryBuilder = QueryBuilder.Select("loadDotnetSdkFromID", arguments);
-        return new DotnetSdk(queryBuilder, GraphQLClient);
     }
 
     /// <summary>

@@ -2,17 +2,13 @@
 package main
 
 import (
-	"context"
 	_ "embed"
-	"encoding/json"
-
-	"github.com/Khan/genqlient/graphql"
 )
 
 //go:embed introspection.graphql
-var introspectionQuery string
+var introspectionGraphql string
 
-var introspectionPath = "/introspection.json"
+const introspectionJsonPath = "/introspection.json"
 
 type DotnetSdk struct{}
 
@@ -22,21 +18,18 @@ type DotnetSdk struct{}
 // didn't modify anything in the data.
 //
 // It's uses for test for the codegen only.
-func (m *DotnetSdk) Introspect(ctx context.Context) (*File, error) {
-	var resp json.RawMessage
-	err := dag.GraphQLClient().MakeRequest(ctx, &graphql.Request{
-		Query:  introspectionQuery,
-		OpName: "IntrospectionQuery",
-	}, &graphql.Response{
-		Data: &resp,
-	})
-	if err != nil {
-		return nil, err
-	}
-	return dag.
-		Container().
-		WithNewFile(introspectionPath, ContainerWithNewFileOpts{
-			Contents: string(resp),
+func (m *DotnetSdk) Introspect() *File {
+	return dag.Docker().
+		Cli(DockerCliOpts{
+			Version: "26",
+			Engine:  dag.Docker().Engine(DockerEngineOpts{Version: "26"}),
 		}).
-		File(introspectionPath), nil
+		Container().
+		WithExec([]string{"apk", "add", "--no-cache", "curl"}).
+		WithExec([]string{"sh", "-c", "curl -L https://dl.dagger.io/dagger/install.sh | BIN_DIR=/usr/local/bin sh"}).
+		WithNewFile("/introspection.graphql", ContainerWithNewFileOpts{Contents: introspectionGraphql}).
+		WithExec([]string{"sh", "-c", "dagger query < /introspection.graphql > " + introspectionJsonPath}, ContainerWithExecOpts{
+			ExperimentalPrivilegedNesting: true,
+		}).
+		File(introspectionJsonPath)
 }
