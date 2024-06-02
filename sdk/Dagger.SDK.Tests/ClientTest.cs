@@ -33,4 +33,17 @@ public class ClientTest
 
         Assert.Equal("a:b", env);
     }
+    
+    [Fact]
+    public async void TestConnect()
+    {
+        var dag = Dagger.Connect();
+
+        var output = await dag.Container()
+            .From("debian")
+            .WithExec(["echo", "hello"])
+            .Stdout();
+        
+        Assert.Equal("hello\n", output);
+    }
 }
