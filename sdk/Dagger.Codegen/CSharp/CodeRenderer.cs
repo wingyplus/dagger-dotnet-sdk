@@ -144,12 +144,12 @@ public class CodeRenderer : Codegen.CodeRenderer
 
     private static string RenderArgument(InputValue argument)
     {
-        return $"{RenderType(argument.Type)} {Formatter.FormatVarName(argument.Name)}";
+        return $"{RenderType(argument.Type)} {argument.VarName()}";
     }
 
     private static string RenderOptionalArgument(InputValue argument)
     {
-        return $"{RenderType(argument.Type)}? {Formatter.FormatVarName(argument.Name)} = null";
+        return $"{RenderType(argument.Type)}? {argument.VarName()} = null";
     }
 
     private static string RenderDefaultValue(InputValue argument)
@@ -229,7 +229,7 @@ public class CodeRenderer : Codegen.CodeRenderer
         {
             optionalArgs.Aggregate(builder, (builder, arg) =>
             {
-                var varName = Formatter.FormatVarName(arg.Name);
+                var varName = arg.VarName();
                 return builder
                     .Append($"""if ({varName} is {RenderType(arg.Type)} {varName}_)""")
                     .Append("{\n")
@@ -244,7 +244,7 @@ public class CodeRenderer : Codegen.CodeRenderer
 
     private static string RenderArgumentValue(InputValue arg, bool addVarSuffix = false)
     {
-        var argName = Formatter.FormatVarName(arg.Name);
+        var argName = arg.VarName();
         if (addVarSuffix)
         {
             argName = $"{argName}_";
