@@ -1,16 +1,12 @@
-
-
 using System;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
 
 using Dagger.SDK.SourceGenerator.Code;
-
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Text;
-using Dagger.SDK.SourceGenerator.Types;
+
 namespace Dagger.SDK.SourceGenerator;
 
 [Generator]

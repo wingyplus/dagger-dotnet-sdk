@@ -1,5 +1,3 @@
-using Dagger.SDK.SourceGenerator.Types;
-
 namespace Dagger.SDK.SourceGenerator.Code;
 
 public interface ICodeRenderer

@@ -1,12 +1,16 @@
 using System.Text.Json.Serialization;
-namespace Dagger.SDK.SourceGenerator.Types;
+
+namespace Dagger.SDK;
+
 public class TypeRef
 {
     // TODO: use TypeKind.
     [JsonPropertyName("kind")]
     public required string Kind { get; set; }
+    
     [JsonPropertyName("name")]
     public required string Name { get; set; }
+    
     [JsonPropertyName("ofType")]
     public required TypeRef OfType { get; set; }
 

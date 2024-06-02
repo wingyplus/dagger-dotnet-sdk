@@ -1,5 +1,5 @@
 ﻿
-namespace Dagger.SDK.SourceGenerator.Types;
+namespace Dagger.SDK;
 
 enum TypeKind
 {

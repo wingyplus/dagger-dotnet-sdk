@@ -146,13 +146,12 @@ public class CodeRenderer : Codegen.CodeRenderer
 
     private static string RenderArgument(InputValue argument)
     {
-        return $"{RenderType(argument.Type)} {Formatter.FormatVarName(argument.Name)}";
+        return $"{argument.Type.Type()} {argument.VarName()}";
     }
 
     private static string RenderOptionalArgument(InputValue argument)
     {
-        var nullableType = argument.DefaultValue == null ? "?" : "";
-        return $"{RenderType(argument.Type)}{nullableType} {Formatter.FormatVarName(argument.Name)} = {RenderDefaultValue(argument)}";
+        return $"{argument.Type.Type()}? {argument.VarName()} = null";
     }
 
     private static string RenderDefaultValue(InputValue argument)
@@ -168,35 +167,13 @@ public class CodeRenderer : Codegen.CodeRenderer
         return argument.DefaultValue ?? "null";
     }
 
-    private static string RenderType(TypeRef type)
-    {
-        var tr = type.GetType_();
-        if (tr.IsList())
-        {
-            return $"{RenderType(tr.OfType)}[]";
-        }
-        return ToCSharpType(tr.Name);
-    }
-
-    private static string ToCSharpType(string name)
-    {
-        return name switch
-        {
-            "String" => "string",
-            "Boolean" => "bool",
-            "Int" => "int",
-            "Float" => "float",
-            _ => name,
-        };
-    }
-
     private static string RenderReturnType(TypeRef type)
     {
         if (type.IsLeaf() || type.IsList())
         {
-            return $"async Task<{RenderType(type)}>";
+            return $"async Task<{type.Type()}>";
         }
-        return RenderType(type);
+        return type.Type();
     }
 
     private static string RenderReturnValue(Field field)
@@ -204,9 +181,9 @@ public class CodeRenderer : Codegen.CodeRenderer
         var type = field.Type;
         if (type.IsLeaf() || type.IsList())
         {
-            return $"await Engine.Execute<{RenderType(field.Type)}>(GraphQLClient, queryBuilder)";
+            return $"await Engine.Execute<{field.Type.Type()}>(GraphQLClient, queryBuilder)";
         }
-        return $"new {RenderType(field.Type)}(queryBuilder, GraphQLClient)";
+        return $"new {field.Type.Type()}(queryBuilder, GraphQLClient)";
     }
 
     private object RenderArgumentBuilder(Field field)
@@ -216,26 +193,46 @@ public class CodeRenderer : Codegen.CodeRenderer
             return "";
         }
 
-        var requiredArgs = field.RequiredArgs();
+
         var builder = new StringBuilder("var arguments = ImmutableList<Argument>.Empty;");
         builder.Append('\n');
 
+        var requiredArgs = field.RequiredArgs();
         if (requiredArgs.Count() > 0)
         {
             builder.Append("arguments = arguments.").Append(string.Join(".", requiredArgs.Select(arg => $$"""Add(new Argument("{{arg.Name}}", {{RenderArgumentValue(arg)}}))"""))).Append(';');
             builder.Append('\n');
         }
 
+        var optionalArgs = field.OptionalArgs();
+        if (optionalArgs.Count() > 0)
+        {
+            optionalArgs.Aggregate(builder, (builder, arg) =>
+            {
+                var varName = arg.VarName();
+                return builder
+                    .Append($"""if ({varName} is {arg.Type.Type()} {varName}_)""")
+                    .Append("{\n")
+                    .Append($$"""    arguments = arguments.Add(new Argument("{{arg.Name}}", {{RenderArgumentValue(arg, addVarSuffix: true)}}));""")
+                    .Append("}\n");
+            })
+            .Append("\n");
+        }
+
         return builder.ToString();
     }
 
-    private static string RenderArgumentValue(InputValue arg)
+    private static string RenderArgumentValue(InputValue arg, bool addVarSuffix = false)
     {
-        var argName = Formatter.FormatVarName(arg.Name);
+        var argName = arg.VarName();
+        if (addVarSuffix)
+        {
+            argName = $"{argName}_";
+        }
 
         if (arg.Type.IsScalar())
         {
-            var type = RenderType(arg.Type);
+            var type = arg.Type.Type();
             switch (type)
             {
                 case "string": return $"new StringValue({argName})";

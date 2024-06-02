@@ -5,39 +5,35 @@ using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
-using Dagger.SDK.SourceGenerator.Types;
-
-using Type = Dagger.SDK.SourceGenerator.Types.Type;
-
 namespace Dagger.SDK.SourceGenerator.Code;
 
 public class CodeRenderer : ICodeRenderer
 {
-     public string RenderPre()
+    public string RenderPre()
     {
         return """
-        #nullable enable
-        
-        using System.Collections.Immutable;
-        using System.Text.Json.Serialization;
+               #nullable enable
+               
+               using System.Collections.Immutable;
+               using System.Text.Json.Serialization;
 
-        using Dagger.SDK.GraphQL;
+               using Dagger.SDK.GraphQL;
 
-        namespace Dagger.SDK;
+               namespace Dagger.SDK;
 
-        public class Scalar
-        {
-            public readonly string Value;
+               public class Scalar
+               {
+                   public readonly string Value;
+               
+                   public override string ToString() => Value;
+               }
 
-            public override string ToString() => Value;
-        }
-
-        public class Object(QueryBuilder queryBuilder, GraphQLClient gqlClient)
-        {
-            public QueryBuilder QueryBuilder { get; } = queryBuilder;
-            public GraphQLClient GraphQLClient { get; } = gqlClient;
-        }
-        """;
+               public class Object(QueryBuilder queryBuilder, GraphQLClient gqlClient)
+               {
+                   public QueryBuilder QueryBuilder { get; } = queryBuilder;
+                   public GraphQLClient GraphQLClient { get; } = gqlClient;
+               }
+               """;
     }
 
     // TODO: test value converter.
@@ -45,30 +41,28 @@ public class CodeRenderer : ICodeRenderer
     {
         var evs = type.EnumValues.Select(ev => ev.Name);
         return $$"""
-        {{RenderDocComment(type)}}
-        [JsonConverter(typeof(JsonStringEnumConverter<{{type.Name}}>))]
-        public enum {{type.Name}} 
-        {
-            {{string.Join(",", evs)}}
-        }
-        """;
+                 {{RenderDocComment(type)}}
+                 [JsonConverter(typeof(JsonStringEnumConverter<{{type.Name}}>))]
+                 public enum {{type.Name}} {
+                     {{string.Join(",", evs)}}
+                 }
+                 """;
     }
 
     public string RenderInputObject(Type type)
     {
-        var properties = type.InputFields.Select(field => 
-            $$"""
-                {{RenderDocComment(field)}}
-                public string {{Formatter.FormatProperty(field.Name)}};
-            """);
+        var properties = type.InputFields.Select(field => $$"""
+                                                            {{RenderDocComment(field)}}
+                                                            public string {{Formatter.FormatProperty(field.Name)}};
+                                                            """);
 
         return $$"""
-        {{RenderDocComment(type)}}
-        public struct {{type.Name}}
-        {
-            {{string.Join("\n\n", properties)}}
-        }
-        """;
+                 {{RenderDocComment(type)}}
+                 public struct {{type.Name}}
+                 {
+                     {{string.Join("\n\n", properties)}}
+                 }
+                 """;
     }
 
     public string RenderObject(Type type)
@@ -86,31 +80,31 @@ public class CodeRenderer : ICodeRenderer
             var args = requiredArgs.Select(RenderArgument).Concat(optionalArgs.Select(RenderOptionalArgument));
 
             return $$"""
-            {{RenderDocComment(field)}}
-            public {{RenderReturnType(field.Type)}} {{methodName}}({{string.Join(",", args)}})
-            {
-                {{RenderArgumentBuilder(field)}}
-                {{RenderQueryBuilder(field)}}
-                return {{RenderReturnValue(field)}};
-            }
-            """;
+                     {{RenderDocComment(field)}}
+                     public {{RenderReturnType(field.Type)}} {{methodName}}({{string.Join(",", args)}})
+                     {
+                         {{RenderArgumentBuilder(field)}}
+                         {{RenderQueryBuilder(field)}}
+                         return {{RenderReturnValue(field)}};
+                     }
+                     """;
         });
 
         return $$"""
-        {{RenderDocComment(type)}}
-        public class {{type.Name}}(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object(queryBuilder, gqlClient)
-        {
-            {{string.Join("\n\n", methods)}}
-        }
-        """;
+                 {{RenderDocComment(type)}}
+                 public class {{type.Name}}(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object(queryBuilder, gqlClient)
+                 {
+                     {{string.Join("\n\n", methods)}}
+                 }
+                 """;
     }
 
     public string RenderScalar(Type type)
     {
         return $$"""
-        {{RenderDocComment(type)}}
-        public class {{type.Name}} : Scalar {}
-        """;
+                 {{RenderDocComment(type)}}
+                 public class {{type.Name}} : Scalar {}
+                 """;
     }
 
     public string Format(string source)
@@ -118,11 +112,20 @@ public class CodeRenderer : ICodeRenderer
         return CSharpSyntaxTree.ParseText(source).GetRoot().NormalizeWhitespace(eol: "\n").ToFullString();
     }
 
-    private static string RenderDocComment(Type type) => RenderDocComment(type.Description);
+    private static string RenderDocComment(Type type)
+    {
+        return RenderDocComment(type.Description);
+    }
 
-    private static string RenderDocComment(Field field) => RenderDocComment(field.Description);
+    private static string RenderDocComment(Field field)
+    {
+        return RenderDocComment(field.Description);
+    }
 
-    private static string RenderDocComment(InputValue field) => RenderDocComment(field.Description);
+    private static string RenderDocComment(InputValue field)
+    {
+        return RenderDocComment(field.Description);
+    }
 
     private static string RenderDocComment(string doc)
     {
@@ -130,27 +133,26 @@ public class CodeRenderer : ICodeRenderer
         {
             return "";
         }
-        
+
         var description = doc
             .Split('\n')
             .Select(line => $"/// {line}")
             .Select(line => line.Trim());
         return $$"""
-        /// <summary>
-        {{string.Join("\n", description)}}
-        /// </summary>
-        """;
+                 /// <summary>
+                 {{string.Join("\n", description)}}
+                 /// </summary>
+                 """;
     }
 
     private static string RenderArgument(InputValue argument)
     {
-        return $"{RenderType(argument.Type)} {Formatter.FormatVarName(argument.Name)}";
+        return $"{argument.Type.GetTypeName()} {argument.GetVarName()}";
     }
 
     private static string RenderOptionalArgument(InputValue argument)
     {
-        var nullableType = argument.DefaultValue == null ? "?" : "";
-        return $"{RenderType(argument.Type)}{nullableType} {Formatter.FormatVarName(argument.Name)} = {RenderDefaultValue(argument)}";
+        return $"{argument.Type.GetTypeName()}? {argument.GetVarName()} = null";
     }
 
     private static string RenderDefaultValue(InputValue argument)
@@ -159,42 +161,23 @@ public class CodeRenderer : ICodeRenderer
         {
             return "null";
         }
+
         if (argument.Type.IsEnum() && argument.DefaultValue != null)
         {
             return $"{argument.Type.Name}.{argument.DefaultValue}";
         }
+
         return argument.DefaultValue ?? "null";
-    }
-
-    private static string RenderType(TypeRef type)
-    {
-        var tr = type.GetType_();
-        if (tr.IsList())
-        {
-            return $"{RenderType(tr.OfType)}[]";
-        }
-        return ToCSharpType(tr.Name);
-    }
-
-    private static string ToCSharpType(string name)
-    {
-        return name switch
-        {
-            "String" => "string",
-            "Boolean" => "bool",
-            "Int" => "int",
-            "Float" => "float",
-            _ => name,
-        };
     }
 
     private static string RenderReturnType(TypeRef type)
     {
         if (type.IsLeaf() || type.IsList())
         {
-            return $"async Task<{RenderType(type)}>";
+            return $"async Task<{type.GetTypeName()}>";
         }
-        return RenderType(type);
+
+        return type.GetTypeName();
     }
 
     private static string RenderReturnValue(Field field)
@@ -202,9 +185,10 @@ public class CodeRenderer : ICodeRenderer
         var type = field.Type;
         if (type.IsLeaf() || type.IsList())
         {
-            return $"await Engine.Execute<{RenderType(field.Type)}>(GraphQLClient, queryBuilder)";
+            return $"await Engine.Execute<{field.Type.GetTypeName()}>(GraphQLClient, queryBuilder)";
         }
-        return $"new {RenderType(field.Type)}(queryBuilder, GraphQLClient)";
+
+        return $"new {field.Type.GetTypeName()}(queryBuilder, GraphQLClient)";
     }
 
     private object RenderArgumentBuilder(Field field)
@@ -214,26 +198,47 @@ public class CodeRenderer : ICodeRenderer
             return "";
         }
 
-        var requiredArgs = field.RequiredArgs();
+
         var builder = new StringBuilder("var arguments = ImmutableList<Argument>.Empty;");
         builder.Append('\n');
 
-        if (requiredArgs.Any())
+        var requiredArgs = field.RequiredArgs();
+        if (requiredArgs.Count() > 0)
         {
-            builder.Append("arguments = arguments.").Append(string.Join(".", requiredArgs.Select(arg => $$"""Add(new Argument("{{arg.Name}}", {{RenderArgumentValue(arg)}}))"""))).Append(';');
+            builder.Append("arguments = arguments.")
+                .Append(string.Join(".", requiredArgs.Select(arg => $$"""Add(new Argument("{{arg.Name}}", {{RenderArgumentValue(arg)}}))"""))).Append(';');
             builder.Append('\n');
+        }
+
+        var optionalArgs = field.OptionalArgs();
+        if (optionalArgs.Count() > 0)
+        {
+            optionalArgs.Aggregate(builder, (builder, arg) =>
+                {
+                    var varName = arg.GetVarName();
+                    return builder
+                        .Append($"""if ({varName} is {arg.Type.GetTypeName()} {varName}_)""")
+                        .Append("{\n")
+                        .Append($$"""    arguments = arguments.Add(new Argument("{{arg.Name}}", {{RenderArgumentValue(arg, addVarSuffix: true)}}));""")
+                        .Append("}\n");
+                })
+                .Append("\n");
         }
 
         return builder.ToString();
     }
 
-    private static string RenderArgumentValue(InputValue arg)
+    private static string RenderArgumentValue(InputValue arg, bool addVarSuffix = false)
     {
-        var argName = Formatter.FormatVarName(arg.Name);
+        var argName = arg.GetVarName();
+        if (addVarSuffix)
+        {
+            argName = $"{argName}_";
+        }
 
         if (arg.Type.IsScalar())
         {
-            var type = RenderType(arg.Type);
+            var type = arg.Type.GetTypeName();
             switch (type)
             {
                 case "string": return $"new StringValue({argName})";
@@ -286,11 +291,13 @@ public class CodeRenderer : ICodeRenderer
         {
             builder.Append(", arguments");
         }
+
         builder.Append(')');
         if (field.Type.IsList())
         {
             builder.Append(".Select(\"id\")");
         }
+
         builder.Append(';');
         return builder.ToString();
     }

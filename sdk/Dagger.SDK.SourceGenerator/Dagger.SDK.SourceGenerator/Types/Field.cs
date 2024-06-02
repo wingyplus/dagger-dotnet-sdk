@@ -1,6 +1,6 @@
 ﻿using System.Linq;
 using System.Text.Json.Serialization;
-namespace Dagger.SDK.SourceGenerator.Types;
+namespace Dagger.SDK;
 public class Field
 {
     [JsonPropertyName("name")]

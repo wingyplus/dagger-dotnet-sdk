@@ -3,9 +3,6 @@ using System;
 using System.Linq;
 using System.Text;
 
-using Dagger.SDK.SourceGenerator.Types;
-
-using Type = Dagger.SDK.SourceGenerator.Types.Type;
 
 namespace Dagger.SDK.SourceGenerator.Code;
 

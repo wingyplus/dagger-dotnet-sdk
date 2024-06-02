@@ -2,7 +2,7 @@ using System.Linq;
 
 namespace Dagger.SDK.SourceGenerator.Code;
 
-internal abstract class Formatter
+public static class Formatter
 {
     private static readonly string[] Keywords = [
         "abstract",
@@ -89,4 +89,16 @@ internal abstract class Formatter
     public static string FormatProperty(string name) => name.ToPascalCase();
 
     public static string FormatVarName(string name) => Keywords.Contains(name) ? $"{name}_" : name;
+    
+    public static string FormatType(string typeName)
+    {
+        return typeName switch
+        {
+            "String" => "string",
+            "Boolean" => "bool",
+            "Int" => "int",
+            "Float" => "float",
+            _ => typeName,
+        };
+    }
 }
