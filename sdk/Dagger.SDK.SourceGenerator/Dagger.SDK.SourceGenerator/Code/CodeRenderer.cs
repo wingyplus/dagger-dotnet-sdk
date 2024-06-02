@@ -1,19 +1,23 @@
+using System;
+using System.Linq;
 using System.Text;
 
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
-namespace Dagger.Codegen.CSharp;
+using Dagger.SDK.SourceGenerator.Types;
 
-// TODO: rename Query -> Client.
-// TODO: deprecated message.
+using Type = Dagger.SDK.SourceGenerator.Types.Type;
 
-[Obsolete]
-public class CodeRenderer : Codegen.CodeRenderer
+namespace Dagger.SDK.SourceGenerator.Code;
+
+public class CodeRenderer : ICodeRenderer
 {
-    public override string RenderPre()
+     public string RenderPre()
     {
         return """
+        #nullable enable
+        
         using System.Collections.Immutable;
         using System.Text.Json.Serialization;
 
@@ -37,24 +41,26 @@ public class CodeRenderer : Codegen.CodeRenderer
     }
 
     // TODO: test value converter.
-    public override string RenderEnum(Type type)
+    public string RenderEnum(Type type)
     {
         var evs = type.EnumValues.Select(ev => ev.Name);
         return $$"""
         {{RenderDocComment(type)}}
         [JsonConverter(typeof(JsonStringEnumConverter<{{type.Name}}>))]
-        public enum {{type.Name}} {
+        public enum {{type.Name}} 
+        {
             {{string.Join(",", evs)}}
         }
         """;
     }
 
-    public override string RenderInputObject(Type type)
+    public string RenderInputObject(Type type)
     {
-        var properties = type.InputFields.Select(field => $$"""
-        {{RenderDocComment(field)}}
-        public string {{Formatter.FormatProperty(field.Name)}};
-        """);
+        var properties = type.InputFields.Select(field => 
+            $$"""
+                {{RenderDocComment(field)}}
+                public string {{Formatter.FormatProperty(field.Name)}};
+            """);
 
         return $$"""
         {{RenderDocComment(type)}}
@@ -65,7 +71,7 @@ public class CodeRenderer : Codegen.CodeRenderer
         """;
     }
 
-    public override string RenderObject(Type type)
+    public string RenderObject(Type type)
     {
         var methods = type.Fields.Select(field =>
         {
@@ -99,7 +105,7 @@ public class CodeRenderer : Codegen.CodeRenderer
         """;
     }
 
-    public override string RenderScalar(Type type)
+    public string RenderScalar(Type type)
     {
         return $$"""
         {{RenderDocComment(type)}}
@@ -107,25 +113,16 @@ public class CodeRenderer : Codegen.CodeRenderer
         """;
     }
 
-    public override string Format(string source)
+    public string Format(string source)
     {
         return CSharpSyntaxTree.ParseText(source).GetRoot().NormalizeWhitespace(eol: "\n").ToFullString();
     }
 
-    private static string RenderDocComment(Type type)
-    {
-        return RenderDocComment(type.Description);
-    }
+    private static string RenderDocComment(Type type) => RenderDocComment(type.Description);
 
-    private static string RenderDocComment(Field field)
-    {
-        return RenderDocComment(field.Description);
-    }
+    private static string RenderDocComment(Field field) => RenderDocComment(field.Description);
 
-    private static string RenderDocComment(InputValue field)
-    {
-        return RenderDocComment(field.Description);
-    }
+    private static string RenderDocComment(InputValue field) => RenderDocComment(field.Description);
 
     private static string RenderDocComment(string doc)
     {
@@ -133,8 +130,9 @@ public class CodeRenderer : Codegen.CodeRenderer
         {
             return "";
         }
+        
         var description = doc
-            .Split("\n")
+            .Split('\n')
             .Select(line => $"/// {line}")
             .Select(line => line.Trim());
         return $$"""
@@ -220,7 +218,7 @@ public class CodeRenderer : Codegen.CodeRenderer
         var builder = new StringBuilder("var arguments = ImmutableList<Argument>.Empty;");
         builder.Append('\n');
 
-        if (requiredArgs.Count() > 0)
+        if (requiredArgs.Any())
         {
             builder.Append("arguments = arguments.").Append(string.Join(".", requiredArgs.Select(arg => $$"""Add(new Argument("{{arg.Name}}", {{RenderArgumentValue(arg)}}))"""))).Append(';');
             builder.Append('\n');
