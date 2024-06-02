@@ -144,12 +144,12 @@ public class CodeRenderer : Codegen.CodeRenderer
 
     private static string RenderArgument(InputValue argument)
     {
-        return $"{RenderType(argument.Type)} {argument.VarName()}";
+        return $"{argument.Type.Type()} {argument.VarName()}";
     }
 
     private static string RenderOptionalArgument(InputValue argument)
     {
-        return $"{RenderType(argument.Type)}? {argument.VarName()} = null";
+        return $"{argument.Type.Type()}? {argument.VarName()} = null";
     }
 
     private static string RenderDefaultValue(InputValue argument)
@@ -165,23 +165,13 @@ public class CodeRenderer : Codegen.CodeRenderer
         return argument.DefaultValue ?? "null";
     }
 
-    private static string RenderType(TypeRef type)
-    {
-        var tr = type.GetType_();
-        if (tr.IsList())
-        {
-            return $"{RenderType(tr.OfType)}[]";
-        }
-        return Formatter.FormatType(tr.Name);
-    }
-
     private static string RenderReturnType(TypeRef type)
     {
         if (type.IsLeaf() || type.IsList())
         {
-            return $"async Task<{RenderType(type)}>";
+            return $"async Task<{type.Type()}>";
         }
-        return RenderType(type);
+        return type.Type();
     }
 
     private static string RenderReturnValue(Field field)
@@ -189,9 +179,9 @@ public class CodeRenderer : Codegen.CodeRenderer
         var type = field.Type;
         if (type.IsLeaf() || type.IsList())
         {
-            return $"await Engine.Execute<{RenderType(field.Type)}>(GraphQLClient, queryBuilder)";
+            return $"await Engine.Execute<{field.Type.Type()}>(GraphQLClient, queryBuilder)";
         }
-        return $"new {RenderType(field.Type)}(queryBuilder, GraphQLClient)";
+        return $"new {field.Type.Type()}(queryBuilder, GraphQLClient)";
     }
 
     private object RenderArgumentBuilder(Field field)
@@ -219,7 +209,7 @@ public class CodeRenderer : Codegen.CodeRenderer
             {
                 var varName = arg.VarName();
                 return builder
-                    .Append($"""if ({varName} is {RenderType(arg.Type)} {varName}_)""")
+                    .Append($"""if ({varName} is {arg.Type.Type()} {varName}_)""")
                     .Append("{\n")
                     .Append($$"""    arguments = arguments.Add(new Argument("{{arg.Name}}", {{RenderArgumentValue(arg, addVarSuffix: true)}}));""")
                     .Append("}\n");
@@ -240,7 +230,7 @@ public class CodeRenderer : Codegen.CodeRenderer
 
         if (arg.Type.IsScalar())
         {
-            var type = RenderType(arg.Type);
+            var type = arg.Type.Type();
             switch (type)
             {
                 case "string": return $"new StringValue({argName})";
