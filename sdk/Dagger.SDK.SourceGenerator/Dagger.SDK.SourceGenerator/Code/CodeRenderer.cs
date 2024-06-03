@@ -56,15 +56,15 @@ public class CodeRenderer : ICodeRenderer
 
     public string RenderInputObject(Type type)
     {
-        var properties = type.InputFields.Select(field => $"""
-                                                            {RenderDocComment(field)}
-                                                            public string {Formatter.FormatProperty(field.Name)} = {field.GetVarName()};
+        var properties = type.InputFields.Select(field => $$"""
+                                                            {{RenderDocComment(field)}}
+                                                            public {{field.Type.GetTypeName()}} {{Formatter.FormatProperty(field.Name)}} { get; } = {{field.GetVarName()}};
                                                             """);
 
         var constructorFields = type.InputFields.Select(field => $"""{field.Type.GetTypeName()} {field.GetVarName()}""");
 
         var toKeyValuePairsProperties = type.InputFields.Select(field => $"""
-                kvPairs.Add(new KeyValuePair("{field.Name}", {RenderArgumentValue(field)}); 
+                kvPairs.Add(KeyValuePair.Create("{field.Name}", {RenderArgumentValue(field)} as Value));
                 """);
 
         var toKeyValuePairsMethod = $$"""
@@ -72,6 +72,7 @@ public class CodeRenderer : ICodeRenderer
             {
                 var kvPairs = new List<KeyValuePair<string, Value>>();
                 {{string.Join("\n", toKeyValuePairsProperties)}}
+                return kvPairs;
             }
             """;
         return $$"""

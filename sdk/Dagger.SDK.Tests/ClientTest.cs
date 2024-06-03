@@ -42,4 +42,23 @@ public class ClientTest
         var id = await cache.Id();
         Assert.True(id.Value.Length > 0);
     }
+
+    [Fact]
+    public async void TestInputObject()
+    {
+        var dockerfile = """
+            FROM alpine:3.20.0
+            ARG SPAM=spam
+            ENV SPAM=$SPAM
+            CMD printenv
+            """;
+
+        var dag = Dagger.Connect();
+
+        var output = await dag.Container()
+            .Build(await dag.Directory().WithNewFile(dockerfile, "Dockerfile").Id(), buildArgs: [new BuildArg("SPAM", "egg")])
+            .Stdout();
+
+        Assert.Matches("SPAM=egg", output);
+    }
 }
