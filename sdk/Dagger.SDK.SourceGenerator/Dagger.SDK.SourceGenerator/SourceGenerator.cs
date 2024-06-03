@@ -20,8 +20,10 @@ public class SourceGenerator(CodeGenerator codeGenerator) : ISourceGenerator
             messageFormat: "Failed to read introspection.json file. The source generator will not generate any code.",
             category: "Dagger.SDK.SourceGenerator",
             DiagnosticSeverity.Warning,
-            isEnabledByDefault: true),
-        location: null);
+            isEnabledByDefault: true
+        ),
+        location: null
+    );
 
     private static readonly Diagnostic NoSchemaFileFound = Diagnostic.Create(
         new DiagnosticDescriptor(
@@ -30,28 +32,17 @@ public class SourceGenerator(CodeGenerator codeGenerator) : ISourceGenerator
             messageFormat: "No introspection.json file was found in the additional files. The source generator will not generate any code.",
             category: "Dagger.SDK.SourceGenerator",
             DiagnosticSeverity.Warning,
-            isEnabledByDefault: true),
-
-        location: null);
-
-    private static readonly Diagnostic FailedToGenerateCode = Diagnostic.Create(
-        new DiagnosticDescriptor(
-            id: "DAG003",
-            title: "Failed to generate SDK code",
-            messageFormat: "Failed to generate code. The source generator will not generate any code.",
-            category: "Dagger.SDK.SourceGenerator",
-            DiagnosticSeverity.Warning,
-            isEnabledByDefault: true),
-        location: null);
+            isEnabledByDefault: true
+        ),
+        location: null
+    );
 
     public SourceGenerator() : this(new CodeGenerator(new CodeRenderer()))
     {
-
     }
 
     public void Initialize(GeneratorInitializationContext context)
     {
-
     }
 
     public void Execute(GeneratorExecutionContext context)
@@ -74,13 +65,28 @@ public class SourceGenerator(CodeGenerator codeGenerator) : ISourceGenerator
 
         try
         {
-            Introspection introspection = JsonDocument.Parse(sourceText.ToString()).RootElement!.GetProperty("data").Deserialize<Introspection>()!;
+            Introspection introspection = JsonSerializer.Deserialize<Introspection>(sourceText.ToString())!;
             string code = codeGenerator.Generate(introspection);
             context.AddSource("Dagger.SDK.g.cs", SourceText.From(code, Encoding.UTF8));
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            context.ReportDiagnostic(FailedToGenerateCode);
+            context.ReportDiagnostic(FailedToGenerateCode(ex));
         }
+    }
+
+    private static Diagnostic FailedToGenerateCode(Exception ex)
+    {
+        return Diagnostic.Create(
+                new DiagnosticDescriptor(
+                    id: "DAG003",
+                    title: "Failed to generate SDK code",
+                    messageFormat: $"Failed to generate code. The source generator will not generate any code. Cause: {ex.Message}",
+                    category: "Dagger.SDK.SourceGenerator",
+                    DiagnosticSeverity.Error,
+                    isEnabledByDefault: true
+                ),
+                location: null
+            );
     }
 }
