@@ -13,17 +13,17 @@ public class CodeGenerator(ICodeRenderer renderer)
     public string Generate(Introspection introspection)
     {
         var builder = new StringBuilder(renderer.RenderPre());
-        
+
         builder.AppendLine();
-        
-       _ = introspection
-            .Schema
-            .Types
-            .ExceptBy(_primitiveTypes, type => type.Name)
-            .Where(NotInternalTypes)
-            .Select(Render)
-            .Aggregate(builder, (b, code) => b.Append(code).AppendLine());
-        
+
+        _ = introspection
+             .Schema
+             .Types
+             .ExceptBy(_primitiveTypes, type => type.Name)
+             .Where(NotInternalTypes)
+             .Select(Render)
+             .Aggregate(builder, (b, code) => b.Append(code).AppendLine());
+
         return renderer.Format(builder.ToString());
     }
 

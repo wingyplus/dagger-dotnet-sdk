@@ -89,7 +89,7 @@ public static class Formatter
     public static string FormatProperty(string name) => name.ToPascalCase();
 
     public static string FormatVarName(string name) => Keywords.Contains(name) ? $"{name}_" : name;
-    
+
     public static string FormatType(string typeName)
     {
         return typeName switch

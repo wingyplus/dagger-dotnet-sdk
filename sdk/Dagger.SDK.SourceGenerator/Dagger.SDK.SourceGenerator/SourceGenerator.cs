@@ -4,6 +4,7 @@ using System.Text;
 using System.Text.Json;
 
 using Dagger.SDK.SourceGenerator.Code;
+
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
 
@@ -32,7 +33,7 @@ public class SourceGenerator(CodeGenerator codeGenerator) : ISourceGenerator
             isEnabledByDefault: true),
 
         location: null);
-    
+
     private static readonly Diagnostic FailedToGenerateCode = Diagnostic.Create(
         new DiagnosticDescriptor(
             id: "DAG003",
@@ -42,15 +43,15 @@ public class SourceGenerator(CodeGenerator codeGenerator) : ISourceGenerator
             DiagnosticSeverity.Warning,
             isEnabledByDefault: true),
         location: null);
-    
+
     public SourceGenerator() : this(new CodeGenerator(new CodeRenderer()))
     {
-        
+
     }
 
     public void Initialize(GeneratorInitializationContext context)
     {
-        
+
     }
 
     public void Execute(GeneratorExecutionContext context)
@@ -62,10 +63,10 @@ public class SourceGenerator(CodeGenerator codeGenerator) : ISourceGenerator
             context.ReportDiagnostic(NoSchemaFileFound);
             return;
         }
-        
+
         var sourceText = schemaFile.GetText();
-        
-        if(sourceText is null)
+
+        if (sourceText is null)
         {
             context.ReportDiagnostic(FailedToReadSchemaFile);
             return;
@@ -75,7 +76,7 @@ public class SourceGenerator(CodeGenerator codeGenerator) : ISourceGenerator
         {
             Introspection introspection = JsonDocument.Parse(sourceText.ToString()).RootElement!.GetProperty("data").Deserialize<Introspection>()!;
             string code = codeGenerator.Generate(introspection);
-            context.AddSource("Dagger.SDK.g.cs", SourceText.From(code, Encoding.UTF8));    
+            context.AddSource("Dagger.SDK.g.cs", SourceText.From(code, Encoding.UTF8));
         }
         catch (Exception)
         {

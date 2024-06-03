@@ -15,16 +15,16 @@ public class SourceGeneratorTests
     public void GenerateCodeBasedOnSchema()
     {
         var generator = new SourceGenerator();
-        
+
         var driver = CSharpGeneratorDriver.Create(new[] { generator },
             new[]
             {
                 new TestAdditionalFile("./introspection.json", TestData.Schema)
             });
-        
+
         var compilation = CSharpCompilation.Create(nameof(SourceGeneratorTests));
         driver.RunGeneratorsAndUpdateCompilation(compilation, out var newCompilation, out _);
-        
+
         var generatedFiles = newCompilation.SyntaxTrees
             .Select(t => Path.GetFileName(t.FilePath))
             .ToArray();

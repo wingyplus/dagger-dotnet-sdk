@@ -1,5 +1,5 @@
 using Dagger.SDK.SourceGenerator.Code;
-namespace  Dagger.SDK.SourceGenerator;
+namespace Dagger.SDK.SourceGenerator;
 
 public static class TypeRefExtension
 {

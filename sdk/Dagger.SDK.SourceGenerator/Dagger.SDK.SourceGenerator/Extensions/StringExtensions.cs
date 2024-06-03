@@ -1,4 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -23,4 +23,4 @@ public static class StringExtensions
         return string.Concat(words.Select(word => CultureInfo.CurrentCulture.TextInfo.ToTitleCase(word)));
     }
 }
-                                         
+

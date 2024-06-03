@@ -7,10 +7,10 @@ public class TypeRef
     // TODO: use TypeKind.
     [JsonPropertyName("kind")]
     public required string Kind { get; set; }
-    
+
     [JsonPropertyName("name")]
     public required string Name { get; set; }
-    
+
     [JsonPropertyName("ofType")]
     public required TypeRef OfType { get; set; }
 
