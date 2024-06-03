@@ -24,7 +24,7 @@ public class CodeRenderer : ICodeRenderer
 
                public class Scalar
                {
-                   public required string Value;
+                   public string Value;
                
                    public override string ToString() => Value;
                }
@@ -33,6 +33,10 @@ public class CodeRenderer : ICodeRenderer
                {
                    public QueryBuilder QueryBuilder { get; } = queryBuilder;
                    public GraphQLClient GraphQLClient { get; } = gqlClient;
+               }
+
+               public interface IInputObject {
+                   List<KeyValuePair<string, Value>> ToKeyValuePairs();
                }
                """;
     }
@@ -52,16 +56,31 @@ public class CodeRenderer : ICodeRenderer
 
     public string RenderInputObject(Type type)
     {
-        var properties = type.InputFields.Select(field => $$"""
-                                                            {{RenderDocComment(field)}}
-                                                            public string {{Formatter.FormatProperty(field.Name)}};
+        var properties = type.InputFields.Select(field => $"""
+                                                            {RenderDocComment(field)}
+                                                            public string {Formatter.FormatProperty(field.Name)} = {field.GetVarName()};
                                                             """);
 
+        var constructorFields = type.InputFields.Select(field => $"""{field.Type.GetTypeName()} {field.GetVarName()}""");
+
+        var toKeyValuePairsProperties = type.InputFields.Select(field => $"""
+                kvPairs.Add(new KeyValuePair("{field.Name}", {RenderArgumentValue(field)}); 
+                """);
+
+        var toKeyValuePairsMethod = $$"""
+            public List<KeyValuePair<string,Value>> ToKeyValuePairs()
+            {
+                var kvPairs = new List<KeyValuePair<string, Value>>();
+                {{string.Join("\n", toKeyValuePairsProperties)}}
+            }
+            """;
         return $$"""
                  {{RenderDocComment(type)}}
-                 public struct {{type.Name}}
+                 public struct {{type.Name}}({{string.Join(", ", constructorFields)}}) : IInputObject
                  {
                      {{string.Join("\n\n", properties)}}
+
+                     {{toKeyValuePairsMethod}}
                  }
                  """;
     }
@@ -105,7 +124,9 @@ public class CodeRenderer : ICodeRenderer
         return $$"""
                  {{RenderDocComment(type)}}
                  [JsonConverter(typeof(ScalarIDConverter<{{type.Name}}>))]
-                 public class {{type.Name}} : Scalar {}
+                 public class {{type.Name}} : Scalar 
+                 {
+                 }
                  """;
     }
 
