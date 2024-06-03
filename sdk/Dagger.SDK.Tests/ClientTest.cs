@@ -9,7 +9,7 @@ public class ClientTest
     [Fact]
     public async void TestSimple()
     {
-        var client = new Query(QueryBuilder.Builder(), new GraphQLClient());
+        var client = Dagger.Connect();
         var output = await client
             .Container()
             .From("debian")
@@ -22,7 +22,7 @@ public class ClientTest
     [Fact]
     public async void TestOptionalArguments()
     {
-        var client = new Query(QueryBuilder.Builder(), new GraphQLClient());
+        var client = Dagger.Connect();
         var env = await client
             .Container()
             .From("debian")
@@ -35,15 +35,11 @@ public class ClientTest
     }
 
     [Fact]
-    public async void TestConnect()
+    public async void TestScalarIdSerialization()
     {
         var dag = Dagger.Connect();
-
-        var output = await dag.Container()
-            .From("debian")
-            .WithExec(["echo", "hello"])
-            .Stdout();
-
-        Assert.Equal("hello\n", output);
+        var cache = dag.CacheVolume("hello");
+        var id = await cache.Id();
+        Assert.True(id.Value.Length > 0);
     }
 }

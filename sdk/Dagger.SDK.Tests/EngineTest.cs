@@ -1,8 +1,10 @@
-using Dagger.SDK;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+
 using Dagger.SDK.GraphQL;
+using Dagger.SDK.JsonConverters;
 
 namespace Dagger.SDK.Tests;
-
 
 public class EngineTest
 {

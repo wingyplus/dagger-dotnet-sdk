@@ -18,12 +18,13 @@ public class CodeRenderer : ICodeRenderer
                using System.Text.Json.Serialization;
 
                using Dagger.SDK.GraphQL;
+               using Dagger.SDK.JsonConverters;
 
                namespace Dagger.SDK;
 
                public class Scalar
                {
-                   public readonly string Value;
+                   public required string Value;
                
                    public override string ToString() => Value;
                }
@@ -103,6 +104,7 @@ public class CodeRenderer : ICodeRenderer
     {
         return $$"""
                  {{RenderDocComment(type)}}
+                 [JsonConverter(typeof(ScalarIDConverter<{{type.Name}}>))]
                  public class {{type.Name}} : Scalar {}
                  """;
     }
