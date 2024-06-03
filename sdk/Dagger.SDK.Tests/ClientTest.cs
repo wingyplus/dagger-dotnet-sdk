@@ -1,5 +1,5 @@
-using Dagger.SDK.GraphQL;
 using Dagger.SDK;
+using Dagger.SDK.GraphQL;
 
 namespace Dagger.SDK.Tests;
 
@@ -32,5 +32,18 @@ public class ClientTest
             .EnvVariable("C");
 
         Assert.Equal("a:b", env);
+    }
+
+    [Fact]
+    public async void TestConnect()
+    {
+        var dag = Dagger.Connect();
+
+        var output = await dag.Container()
+            .From("debian")
+            .WithExec(["echo", "hello"])
+            .Stdout();
+
+        Assert.Equal("hello\n", output);
     }
 }

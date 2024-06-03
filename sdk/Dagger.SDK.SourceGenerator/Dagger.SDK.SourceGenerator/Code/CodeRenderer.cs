@@ -1,71 +1,71 @@
+using System;
+using System.Linq;
 using System.Text;
 
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
-namespace Dagger.Codegen.CSharp;
+namespace Dagger.SDK.SourceGenerator.Code;
 
-// TODO: rename Query -> Client.
-// TODO: deprecated message.
-
-[Obsolete]
-public class CodeRenderer : Codegen.CodeRenderer
+public class CodeRenderer : ICodeRenderer
 {
-    public override string RenderPre()
+    public string RenderPre()
     {
         return """
-        using System.Collections.Immutable;
-        using System.Text.Json.Serialization;
+               #nullable enable
+               
+               using System.Collections.Immutable;
+               using System.Text.Json.Serialization;
 
-        using Dagger.SDK.GraphQL;
+               using Dagger.SDK.GraphQL;
 
-        namespace Dagger.SDK;
+               namespace Dagger.SDK;
 
-        public class Scalar
-        {
-            public readonly string Value;
+               public class Scalar
+               {
+                   public readonly string Value;
+               
+                   public override string ToString() => Value;
+               }
 
-            public override string ToString() => Value;
-        }
-
-        public class Object(QueryBuilder queryBuilder, GraphQLClient gqlClient)
-        {
-            public QueryBuilder QueryBuilder { get; } = queryBuilder;
-            public GraphQLClient GraphQLClient { get; } = gqlClient;
-        }
-        """;
+               public class Object(QueryBuilder queryBuilder, GraphQLClient gqlClient)
+               {
+                   public QueryBuilder QueryBuilder { get; } = queryBuilder;
+                   public GraphQLClient GraphQLClient { get; } = gqlClient;
+               }
+               """;
     }
 
     // TODO: test value converter.
-    public override string RenderEnum(Type type)
+    public string RenderEnum(Type type)
     {
         var evs = type.EnumValues.Select(ev => ev.Name);
         return $$"""
-        {{RenderDocComment(type)}}
-        [JsonConverter(typeof(JsonStringEnumConverter<{{type.Name}}>))]
-        public enum {{type.Name}} {
-            {{string.Join(",", evs)}}
-        }
-        """;
+                 {{RenderDocComment(type)}}
+                 [JsonConverter(typeof(JsonStringEnumConverter<{{type.Name}}>))]
+                 public enum {{type.Name}} {
+                     {{string.Join(",", evs)}}
+                 }
+                 """;
     }
 
-    public override string RenderInputObject(Type type)
+    public string RenderInputObject(Type type)
     {
         var properties = type.InputFields.Select(field => $$"""
-        {{RenderDocComment(field)}}
-        public string {{Formatter.FormatProperty(field.Name)}};
-        """);
+                                                            {{RenderDocComment(field)}}
+                                                            public string {{Formatter.FormatProperty(field.Name)}};
+                                                            """);
 
         return $$"""
-        {{RenderDocComment(type)}}
-        public struct {{type.Name}}
-        {
-            {{string.Join("\n\n", properties)}}
-        }
-        """;
+                 {{RenderDocComment(type)}}
+                 public struct {{type.Name}}
+                 {
+                     {{string.Join("\n\n", properties)}}
+                 }
+                 """;
     }
 
-    public override string RenderObject(Type type)
+    public string RenderObject(Type type)
     {
         var methods = type.Fields.Select(field =>
         {
@@ -80,34 +80,34 @@ public class CodeRenderer : Codegen.CodeRenderer
             var args = requiredArgs.Select(RenderArgument).Concat(optionalArgs.Select(RenderOptionalArgument));
 
             return $$"""
-            {{RenderDocComment(field)}}
-            public {{RenderReturnType(field.Type)}} {{methodName}}({{string.Join(",", args)}})
-            {
-                {{RenderArgumentBuilder(field)}}
-                {{RenderQueryBuilder(field)}}
-                return {{RenderReturnValue(field)}};
-            }
-            """;
+                     {{RenderDocComment(field)}}
+                     public {{RenderReturnType(field.Type)}} {{methodName}}({{string.Join(",", args)}})
+                     {
+                         {{RenderArgumentBuilder(field)}}
+                         {{RenderQueryBuilder(field)}}
+                         return {{RenderReturnValue(field)}};
+                     }
+                     """;
         });
 
         return $$"""
-        {{RenderDocComment(type)}}
-        public class {{type.Name}}(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object(queryBuilder, gqlClient)
-        {
-            {{string.Join("\n\n", methods)}}
-        }
-        """;
+                 {{RenderDocComment(type)}}
+                 public class {{type.Name}}(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object(queryBuilder, gqlClient)
+                 {
+                     {{string.Join("\n\n", methods)}}
+                 }
+                 """;
     }
 
-    public override string RenderScalar(Type type)
+    public string RenderScalar(Type type)
     {
         return $$"""
-        {{RenderDocComment(type)}}
-        public class {{type.Name}} : Scalar {}
-        """;
+                 {{RenderDocComment(type)}}
+                 public class {{type.Name}} : Scalar {}
+                 """;
     }
 
-    public override string Format(string source)
+    public string Format(string source)
     {
         return CSharpSyntaxTree.ParseText(source).GetRoot().NormalizeWhitespace(eol: "\n").ToFullString();
     }
@@ -133,25 +133,26 @@ public class CodeRenderer : Codegen.CodeRenderer
         {
             return "";
         }
+
         var description = doc
-            .Split("\n")
+            .Split('\n')
             .Select(line => $"/// {line}")
             .Select(line => line.Trim());
         return $$"""
-        /// <summary>
-        {{string.Join("\n", description)}}
-        /// </summary>
-        """;
+                 /// <summary>
+                 {{string.Join("\n", description)}}
+                 /// </summary>
+                 """;
     }
 
     private static string RenderArgument(InputValue argument)
     {
-        return $"{argument.Type.Type()} {argument.VarName()}";
+        return $"{argument.Type.GetTypeName()} {argument.GetVarName()}";
     }
 
     private static string RenderOptionalArgument(InputValue argument)
     {
-        return $"{argument.Type.Type()}? {argument.VarName()} = null";
+        return $"{argument.Type.GetTypeName()}? {argument.GetVarName()} = null";
     }
 
     private static string RenderDefaultValue(InputValue argument)
@@ -160,10 +161,12 @@ public class CodeRenderer : Codegen.CodeRenderer
         {
             return "null";
         }
+
         if (argument.Type.IsEnum() && argument.DefaultValue != null)
         {
             return $"{argument.Type.Name}.{argument.DefaultValue}";
         }
+
         return argument.DefaultValue ?? "null";
     }
 
@@ -171,9 +174,10 @@ public class CodeRenderer : Codegen.CodeRenderer
     {
         if (type.IsLeaf() || type.IsList())
         {
-            return $"async Task<{type.Type()}>";
+            return $"async Task<{type.GetTypeName()}>";
         }
-        return type.Type();
+
+        return type.GetTypeName();
     }
 
     private static string RenderReturnValue(Field field)
@@ -181,9 +185,10 @@ public class CodeRenderer : Codegen.CodeRenderer
         var type = field.Type;
         if (type.IsLeaf() || type.IsList())
         {
-            return $"await Engine.Execute<{field.Type.Type()}>(GraphQLClient, queryBuilder)";
+            return $"await Engine.Execute<{field.Type.GetTypeName()}>(GraphQLClient, queryBuilder)";
         }
-        return $"new {field.Type.Type()}(queryBuilder, GraphQLClient)";
+
+        return $"new {field.Type.GetTypeName()}(queryBuilder, GraphQLClient)";
     }
 
     private object RenderArgumentBuilder(Field field)
@@ -200,7 +205,8 @@ public class CodeRenderer : Codegen.CodeRenderer
         var requiredArgs = field.RequiredArgs();
         if (requiredArgs.Count() > 0)
         {
-            builder.Append("arguments = arguments.").Append(string.Join(".", requiredArgs.Select(arg => $$"""Add(new Argument("{{arg.Name}}", {{RenderArgumentValue(arg)}}))"""))).Append(';');
+            builder.Append("arguments = arguments.")
+                .Append(string.Join(".", requiredArgs.Select(arg => $$"""Add(new Argument("{{arg.Name}}", {{RenderArgumentValue(arg)}}))"""))).Append(';');
             builder.Append('\n');
         }
 
@@ -208,15 +214,15 @@ public class CodeRenderer : Codegen.CodeRenderer
         if (optionalArgs.Count() > 0)
         {
             optionalArgs.Aggregate(builder, (builder, arg) =>
-            {
-                var varName = arg.VarName();
-                return builder
-                    .Append($"""if ({varName} is {arg.Type.Type()} {varName}_)""")
-                    .Append("{\n")
-                    .Append($$"""    arguments = arguments.Add(new Argument("{{arg.Name}}", {{RenderArgumentValue(arg, addVarSuffix: true)}}));""")
-                    .Append("}\n");
-            })
-            .Append("\n");
+                {
+                    var varName = arg.GetVarName();
+                    return builder
+                        .Append($"""if ({varName} is {arg.Type.GetTypeName()} {varName}_)""")
+                        .Append("{\n")
+                        .Append($$"""    arguments = arguments.Add(new Argument("{{arg.Name}}", {{RenderArgumentValue(arg, addVarSuffix: true)}}));""")
+                        .Append("}\n");
+                })
+                .Append("\n");
         }
 
         return builder.ToString();
@@ -224,7 +230,7 @@ public class CodeRenderer : Codegen.CodeRenderer
 
     private static string RenderArgumentValue(InputValue arg, bool addVarSuffix = false)
     {
-        var argName = arg.VarName();
+        var argName = arg.GetVarName();
         if (addVarSuffix)
         {
             argName = $"{argName}_";
@@ -232,7 +238,7 @@ public class CodeRenderer : Codegen.CodeRenderer
 
         if (arg.Type.IsScalar())
         {
-            var type = arg.Type.Type();
+            var type = arg.Type.GetTypeName();
             switch (type)
             {
                 case "string": return $"new StringValue({argName})";
@@ -285,11 +291,13 @@ public class CodeRenderer : Codegen.CodeRenderer
         {
             builder.Append(", arguments");
         }
+
         builder.Append(')');
         if (field.Type.IsList())
         {
             builder.Append(".Select(\"id\")");
         }
+
         builder.Append(';');
         return builder.ToString();
     }

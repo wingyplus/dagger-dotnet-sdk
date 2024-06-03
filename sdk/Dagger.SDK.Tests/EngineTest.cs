@@ -1,5 +1,5 @@
-using Dagger.SDK.GraphQL;
 using Dagger.SDK;
+using Dagger.SDK.GraphQL;
 
 namespace Dagger.SDK.Tests;
 

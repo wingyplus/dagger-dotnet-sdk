@@ -11,7 +11,7 @@ using Dagger.SDK.GraphQL;
 
 namespace Dagger.SDK;
 
-public class Engine
+public static class Engine
 {
     /// <summary>
     /// Execute a GraphQL request and deserialize data into `T`.

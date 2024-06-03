@@ -1,5 +1,6 @@
 namespace Dagger.Codegen;
 
+[Obsolete]
 public abstract class CodeRenderer
 {
     abstract public string RenderPre();

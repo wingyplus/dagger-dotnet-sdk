@@ -3,7 +3,7 @@ using System.Text;
 namespace Dagger.Codegen;
 
 
-
+[Obsolete]
 class CodeGenerator(CodeRenderer renderer)
 {
     private readonly CodeRenderer _renderer = renderer;

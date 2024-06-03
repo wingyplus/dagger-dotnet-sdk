@@ -1,9 +1,8 @@
-using CaseExtensions;
+using System.Linq;
 
-namespace Dagger.Codegen.CSharp;
+namespace Dagger.SDK.SourceGenerator.Code;
 
-[Obsolete]
-internal class Formatter
+public static class Formatter
 {
     private static readonly string[] Keywords = [
         "abstract",
@@ -85,20 +84,11 @@ internal class Formatter
         "while",
     ];
 
-    public static string FormatMethod(string name)
-    {
-        return name.ToPascalCase();
-    }
+    public static string FormatMethod(string name) => name.ToPascalCase();
 
-    public static string FormatProperty(string name)
-    {
-        return name.ToPascalCase();
-    }
+    public static string FormatProperty(string name) => name.ToPascalCase();
 
-    public static string FormatVarName(string name)
-    {
-        return Keywords.Contains(name) ? $"{name}_" : name;
-    }
+    public static string FormatVarName(string name) => Keywords.Contains(name) ? $"{name}_" : name;
 
     public static string FormatType(string typeName)
     {
