@@ -13,7 +13,7 @@ public class CodeRenderer : ICodeRenderer
     {
         return """
                #nullable enable
-               
+
                using System.Collections.Immutable;
                using System.Text.Json.Serialization;
 
@@ -61,26 +61,26 @@ public class CodeRenderer : ICodeRenderer
                                                             public {{field.Type.GetTypeName()}} {{Formatter.FormatProperty(field.Name)}} { get; } = {{field.GetVarName()}};
                                                             """);
 
-        var constructorFields = type.InputFields.Select(field => $"""{field.Type.GetTypeName()} {field.GetVarName()}""");
+        var constructorFields =
+            type.InputFields.Select(field => $"""{field.Type.GetTypeName()} {field.GetVarName()}""");
 
         var toKeyValuePairsProperties = type.InputFields.Select(field => $"""
-                kvPairs.Add(KeyValuePair.Create("{field.Name}", {RenderArgumentValue(field, asProperty: true)} as Value));
-                """);
+                                                                          kvPairs.Add(KeyValuePair.Create("{field.Name}", {RenderArgumentValue(field, asProperty: true)} as Value));
+                                                                          """);
 
         var toKeyValuePairsMethod = $$"""
-            public List<KeyValuePair<string,Value>> ToKeyValuePairs()
-            {
-                var kvPairs = new List<KeyValuePair<string, Value>>();
-                {{string.Join("\n", toKeyValuePairsProperties)}}
-                return kvPairs;
-            }
-            """;
+                                      public List<KeyValuePair<string,Value>> ToKeyValuePairs()
+                                      {
+                                          var kvPairs = new List<KeyValuePair<string, Value>>();
+                                          {{string.Join("\n", toKeyValuePairsProperties)}}
+                                          return kvPairs;
+                                      }
+                                      """;
         return $$"""
                  {{RenderDocComment(type)}}
                  public struct {{type.Name}}({{string.Join(", ", constructorFields)}}) : IInputObject
                  {
                      {{string.Join("\n\n", properties)}}
-
                      {{toKeyValuePairsMethod}}
                  }
                  """;
@@ -102,6 +102,7 @@ public class CodeRenderer : ICodeRenderer
 
             return $$"""
                      {{RenderDocComment(field)}}
+                     {{RenderObsolete(field)}}
                      public {{RenderReturnType(field.Type)}} {{methodName}}({{string.Join(",", args)}})
                      {
                          {{RenderArgumentBuilder(field)}}
@@ -136,22 +137,41 @@ public class CodeRenderer : ICodeRenderer
         return CSharpSyntaxTree.ParseText(source).GetRoot().NormalizeWhitespace(eol: "\n").ToFullString();
     }
 
+    private static string RenderObsolete(Field field)
+    {
+        return !field.IsDeprecated ? "" : $"[Obsolete(\"{field.DeprecationReason}\")]";
+    }
+
     private static string RenderDocComment(Type type)
     {
-        return RenderDocComment(type.Description);
+        return RenderSummaryDocComment(type.Description);
     }
 
     private static string RenderDocComment(Field field)
     {
-        return RenderDocComment(field.Description);
+        var builder = new StringBuilder();
+        builder.AppendLine(RenderSummaryDocComment(field.Description));
+        var parameters = field.Args.Aggregate(builder, (sb, arg) =>
+        {
+            string[] lines = arg.Description.Split('\n');
+            sb.AppendLine($"/// <param name=\"{arg.GetVarName()}\">");
+            foreach (var line in lines)
+            {
+                sb.AppendLine($"/// {line}");
+            }
+
+            sb.AppendLine($"/// </param>");
+            return sb;
+        });
+        return builder.ToString();
     }
 
     private static string RenderDocComment(InputValue field)
     {
-        return RenderDocComment(field.Description);
+        return RenderSummaryDocComment(field.Description);
     }
 
-    private static string RenderDocComment(string doc)
+    private static string RenderSummaryDocComment(string doc)
     {
         if (string.IsNullOrEmpty(doc))
         {
@@ -162,11 +182,11 @@ public class CodeRenderer : ICodeRenderer
             .Split('\n')
             .Select(line => $"/// {line}")
             .Select(line => line.Trim());
-        return $$"""
-                 /// <summary>
-                 {{string.Join("\n", description)}}
-                 /// </summary>
-                 """;
+        return $"""
+                /// <summary>
+                {string.Join("\n", description)}
+                /// </summary>
+                """;
     }
 
     private static string RenderArgument(InputValue argument)
@@ -177,21 +197,6 @@ public class CodeRenderer : ICodeRenderer
     private static string RenderOptionalArgument(InputValue argument)
     {
         return $"{argument.Type.GetTypeName()}? {argument.GetVarName()} = null";
-    }
-
-    private static string RenderDefaultValue(InputValue argument)
-    {
-        if (argument.Type.IsList())
-        {
-            return "null";
-        }
-
-        if (argument.Type.IsEnum() && argument.DefaultValue != null)
-        {
-            return $"{argument.Type.Name}.{argument.DefaultValue}";
-        }
-
-        return argument.DefaultValue ?? "null";
     }
 
     private static string RenderReturnType(TypeRef type)
@@ -230,7 +235,9 @@ public class CodeRenderer : ICodeRenderer
         if (requiredArgs.Count() > 0)
         {
             builder.Append("arguments = arguments.")
-                .Append(string.Join(".", requiredArgs.Select(arg => $$"""Add(new Argument("{{arg.Name}}", {{RenderArgumentValue(arg)}}))"""))).Append(';');
+                .Append(string.Join(".",
+                    requiredArgs.Select(arg =>
+                        $$"""Add(new Argument("{{arg.Name}}", {{RenderArgumentValue(arg)}}))"""))).Append(';');
             builder.Append('\n');
         }
 
@@ -243,7 +250,8 @@ public class CodeRenderer : ICodeRenderer
                     return builder
                         .Append($"""if ({varName} is {arg.Type.GetTypeName()} {varName}_)""")
                         .Append("{\n")
-                        .Append($$"""    arguments = arguments.Add(new Argument("{{arg.Name}}", {{RenderArgumentValue(arg, addVarSuffix: true)}}));""")
+                        .Append(
+                            $$"""    arguments = arguments.Add(new Argument("{{arg.Name}}", {{RenderArgumentValue(arg, addVarSuffix: true)}}));""")
                         .Append("}\n");
                 })
                 .Append("\n");
