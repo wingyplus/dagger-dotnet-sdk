@@ -1,6 +1,5 @@
 namespace Dagger.SDK.Tests;
 
-
 public class ClientTest
 {
     [Fact]
@@ -57,5 +56,24 @@ public class ClientTest
             .Stdout();
 
         Assert.Matches(".*SPAM=egg.*", output);
+    }
+
+    [Fact]
+    public async void TestStringEscape()
+    {
+        var client = Dagger.Connect();
+
+        await client
+            .Container()
+            .From("alpine")
+            .WithNewFile("/a.txt", contents:
+                """
+                  \\  /       Partly cloudy
+                _ /\"\".-.     +29(31) °C
+                  \\_(   ).   ↑ 13 km/h
+                  /(___(__)  10 km
+                             0.0 mm
+                """)
+            .Sync();
     }
 }
