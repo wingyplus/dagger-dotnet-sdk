@@ -17,7 +17,7 @@ public class TypeRef
 
         if (Kind == "NON_NULL")
         {
-            tr = OfType;
+            tr = OfType!;
         }
 
         if (tr.Kind == "ENUM")
@@ -39,7 +39,7 @@ public class TypeRef
 
         if (Kind == "NON_NULL")
         {
-            tr = OfType;
+            tr = OfType!;
         }
 
         if (tr.Kind == "LIST")
@@ -56,7 +56,7 @@ public class TypeRef
 
         if (Kind == "NON_NULL")
         {
-            tr = OfType;
+            tr = OfType!;
         }
 
         if (tr.Kind == "ENUM")
@@ -73,7 +73,7 @@ public class TypeRef
 
         if (Kind == "NON_NULL")
         {
-            tr = OfType;
+            tr = OfType!;
         }
 
         if (tr.Kind == "INPUT_OBJECT")
@@ -90,7 +90,7 @@ public class TypeRef
 
         if (Kind == "NON_NULL")
         {
-            tr = OfType;
+            tr = OfType!;
         }
 
         if (tr.Kind == "SCALAR")
@@ -124,7 +124,7 @@ public class TypeRef
 
         if (Kind == "NON_NULL")
         {
-            tr = OfType;
+            tr = OfType!;
         }
 
         return tr;

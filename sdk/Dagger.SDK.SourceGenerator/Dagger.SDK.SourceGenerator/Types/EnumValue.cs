@@ -9,5 +9,7 @@ public class EnumValue
     [JsonPropertyName("description")]
     public required string Description { get; set; }
     [JsonPropertyName("isDeprecated")]
-    public bool IsDeprecated { get; set; }
+    public required bool IsDeprecated { get; set; }
+    [JsonPropertyName("deprecationReason")]
+    public required string DeprecationReason { get; set; }
 }

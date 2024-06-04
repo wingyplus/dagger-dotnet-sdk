@@ -1,3 +1,5 @@
+using System;
+
 using Dagger.SDK.SourceGenerator.Code;
 using Dagger.SDK.SourceGenerator.Types;
 
@@ -16,8 +18,8 @@ public static class TypeRefExtension
         var tr = typeRef.GetType_();
         if (tr.IsList())
         {
-            return $"{tr.OfType.GetTypeName()}[]";
+            return $"{tr.OfType!.GetTypeName()}[]";
         }
-        return Formatter.FormatType(tr.Name);
+        return Formatter.FormatType(tr.Name ?? throw new InvalidOperationException());
     }
 }
