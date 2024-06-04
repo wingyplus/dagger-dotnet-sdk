@@ -1,6 +1,9 @@
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json.Serialization;
+
 namespace Dagger.SDK;
+
 public class Field
 {
     [JsonPropertyName("name")]
@@ -24,20 +27,10 @@ public class Field
     /// <summary>
     /// Get optional arguments from Args.
     /// </summary>
-    public IOrderedEnumerable<InputValue> OptionalArgs()
-    {
-        return Args
-            .Where(arg => arg.Type.Kind != "NON_NULL")
-            .OrderBy(type => type.Name);
-    }
+    public IEnumerable<InputValue> OptionalArgs() => Args.Where(arg => arg.Type.Kind != "NON_NULL");
 
     /// <summary>
     /// Get required arguments from Args.
     /// </summary>
-    public IOrderedEnumerable<InputValue> RequiredArgs()
-    {
-        return Args
-            .Where(arg => arg.Type.Kind == "NON_NULL")
-            .OrderBy(type => type.Name);
-    }
+    public IEnumerable<InputValue> RequiredArgs() => Args.Where(arg => arg.Type.Kind == "NON_NULL");
 }

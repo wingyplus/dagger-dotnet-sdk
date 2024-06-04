@@ -51,7 +51,7 @@ public class ClientTest
             """;
 
         var dag = Dagger.Connect();
-        var dockerDir = dag.Directory().WithNewFile(dockerfile, "Dockerfile");
+        var dockerDir = dag.Directory().WithNewFile("Dockerfile", dockerfile);
         var output = await dag.Container()
             .Build(await dockerDir.Id(), buildArgs: [new BuildArg("SPAM", "egg")])
             .Stdout();
