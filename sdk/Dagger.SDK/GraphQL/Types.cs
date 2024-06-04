@@ -13,7 +13,13 @@ public class StringValue(string s) : Value
 
     public override string Format()
     {
-        return $"\"{value}\"";
+        var s = value
+            .Replace("\\", "\\\\")
+            .Replace("\r", "\\r")
+            .Replace("\n", "\\n")
+            .Replace("\t", "\\t")
+            .Replace("\"", "\\\"");
+        return $"\"{s}\"";
     }
 }
 

@@ -64,7 +64,7 @@ public class CodeRenderer : ICodeRenderer
         var constructorFields = type.InputFields.Select(field => $"""{field.Type.GetTypeName()} {field.GetVarName()}""");
 
         var toKeyValuePairsProperties = type.InputFields.Select(field => $"""
-                kvPairs.Add(KeyValuePair.Create("{field.Name}", {RenderArgumentValue(field)} as Value));
+                kvPairs.Add(KeyValuePair.Create("{field.Name}", {RenderArgumentValue(field, asProperty: true)} as Value));
                 """);
 
         var toKeyValuePairsMethod = $$"""
@@ -252,12 +252,17 @@ public class CodeRenderer : ICodeRenderer
         return builder.ToString();
     }
 
-    private static string RenderArgumentValue(InputValue arg, bool addVarSuffix = false)
+    private static string RenderArgumentValue(InputValue arg, bool addVarSuffix = false, bool asProperty = false)
     {
         var argName = arg.GetVarName();
         if (addVarSuffix)
         {
             argName = $"{argName}_";
+        }
+
+        if (asProperty)
+        {
+            argName = Formatter.FormatProperty(argName);
         }
 
         if (arg.Type.IsScalar())
@@ -280,12 +285,13 @@ public class CodeRenderer : ICodeRenderer
 
         if (arg.Type.IsInputObject())
         {
-            return $"new ObjectValue({argName}.ToKeyValues())";
+            return $"new ObjectValue({argName}.ToKeyValuePairs())";
         }
 
         if (arg.Type.IsList())
         {
             var tr = arg.Type.GetType_().OfType.GetType_();
+
             if (tr.IsScalar())
             {
                 var value = tr.GetType_().Name switch
@@ -300,11 +306,13 @@ public class CodeRenderer : ICodeRenderer
                 return $"new ListValue({argName}.Select(v => {value} as Value).ToList())";
             }
 
-            // FIXME: put correct value.
-            return $"new ListValue([])";
+            if (tr.IsInputObject())
+            {
+                return $"new ListValue({argName}.Select(v => new ObjectValue(v.ToKeyValuePairs()) as Value).ToList())";
+            }
         }
 
-        throw new Exception($"SHIT! {arg.Type.OfType.Kind}");
+        throw new Exception($"The type {arg.Type.OfType.Kind} should not be enter here.");
     }
 
     private static string RenderQueryBuilder(Field field)

@@ -1,6 +1,3 @@
-using Dagger.SDK;
-using Dagger.SDK.GraphQL;
-
 namespace Dagger.SDK.Tests;
 
 
@@ -54,11 +51,11 @@ public class ClientTest
             """;
 
         var dag = Dagger.Connect();
-
+        var dockerDir = dag.Directory().WithNewFile(dockerfile, "Dockerfile");
         var output = await dag.Container()
-            .Build(await dag.Directory().WithNewFile(dockerfile, "Dockerfile").Id(), buildArgs: [new BuildArg("SPAM", "egg")])
+            .Build(await dockerDir.Id(), buildArgs: [new BuildArg("SPAM", "egg")])
             .Stdout();
 
-        Assert.Matches("SPAM=egg", output);
+        Assert.Matches(".*SPAM=egg.*", output);
     }
 }
