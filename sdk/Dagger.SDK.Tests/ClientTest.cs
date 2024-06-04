@@ -2,11 +2,12 @@ namespace Dagger.SDK.Tests;
 
 public class ClientTest
 {
+    private Query _dag = Dagger.Connect();
+
     [Fact]
     public async void TestSimple()
     {
-        var client = Dagger.Connect();
-        var output = await client
+        var output = await _dag
             .Container()
             .From("debian")
             .WithExec(["echo", "hello"])
@@ -18,8 +19,7 @@ public class ClientTest
     [Fact]
     public async void TestOptionalArguments()
     {
-        var client = Dagger.Connect();
-        var env = await client
+        var env = await _dag
             .Container()
             .From("debian")
             .WithEnvVariable("A", "a")
@@ -33,8 +33,7 @@ public class ClientTest
     [Fact]
     public async void TestScalarIdSerialization()
     {
-        var dag = Dagger.Connect();
-        var cache = dag.CacheVolume("hello");
+        var cache = _dag.CacheVolume("hello");
         var id = await cache.Id();
         Assert.True(id.Value.Length > 0);
     }
@@ -49,9 +48,8 @@ public class ClientTest
                                   CMD printenv
                                   """;
 
-        var dag = Dagger.Connect();
-        var dockerDir = dag.Directory().WithNewFile("Dockerfile", dockerfile);
-        var output = await dag.Container()
+        var dockerDir = _dag.Directory().WithNewFile("Dockerfile", dockerfile);
+        var output = await _dag.Container()
             .Build(await dockerDir.Id(), buildArgs: [new BuildArg("SPAM", "egg")])
             .Stdout();
 
@@ -61,9 +59,7 @@ public class ClientTest
     [Fact]
     public async void TestStringEscape()
     {
-        var client = Dagger.Connect();
-
-        await client
+        await _dag
             .Container()
             .From("alpine")
             .WithNewFile("/a.txt", contents:
