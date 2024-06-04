@@ -43,12 +43,12 @@ public class ClientTest
     [Fact]
     public async void TestInputObject()
     {
-        var dockerfile = """
-            FROM alpine:3.20.0
-            ARG SPAM=spam
-            ENV SPAM=$SPAM
-            CMD printenv
-            """;
+        const string dockerfile = """
+                                  FROM alpine:3.20.0
+                                  ARG SPAM=spam
+                                  ENV SPAM=$SPAM
+                                  CMD printenv
+                                  """;
 
         var dag = Dagger.Connect();
         var dockerDir = dag.Directory().WithNewFile("Dockerfile", dockerfile);
