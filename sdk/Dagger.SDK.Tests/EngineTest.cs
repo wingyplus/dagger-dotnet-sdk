@@ -1,15 +1,11 @@
-using System.Text.Json;
-using System.Text.Json.Serialization;
-
 using Dagger.SDK.GraphQL;
-using Dagger.SDK.JsonConverters;
 
 namespace Dagger.SDK.Tests;
 
 public class EngineTest
 {
-    [Fact]
-    public async void TestExecute()
+    [TestMethod]
+    public async Task TestExecute()
     {
         var gqlClient = new GraphQLClient();
         var queryBuilder = QueryBuilder
@@ -20,11 +16,11 @@ public class EngineTest
 
         string id = await Engine.Execute<string>(gqlClient, queryBuilder);
 
-        Assert.NotEmpty(id);
+        Assert.IsFalse(string.IsNullOrWhiteSpace(id));
     }
 
-    [Fact]
-    public async void TestExecuteList()
+    [TestMethod]
+    public async Task TestExecuteList()
     {
         var gqlClient = new GraphQLClient();
         var queryBuilder = QueryBuilder
@@ -36,6 +32,7 @@ public class EngineTest
 
         var ids = await Engine.ExecuteList<string>(gqlClient, queryBuilder);
 
-        Assert.NotEmpty(ids);
+        Assert.IsTrue(ids.Count > 0);
+        CollectionAssert.AllItemsAreNotNull(ids);
     }
 }

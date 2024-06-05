@@ -4,22 +4,23 @@ using System.Linq;
 using Dagger.SDK.SourceGenerator.Tests.Utils;
 
 using Microsoft.CodeAnalysis.CSharp;
-
-using Xunit;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Dagger.SDK.SourceGenerator.Tests;
 
+[TestClass]
 public class SourceGeneratorTests
 {
-    [Fact]
-    public void GenerateCodeBasedOnSchema()
+    [TestMethod]
+    [DataRow("./introspection.json", TestData.Schema)]
+    public void GenerateCodeBasedOnSchema(string path, string text)
     {
         var generator = new SourceGenerator();
 
         var driver = CSharpGeneratorDriver.Create(new[] { generator },
             new[]
             {
-                new TestAdditionalFile("./introspection.json", TestData.Schema)
+                new TestAdditionalFile(path, text)
             });
 
         var compilation = CSharpCompilation.Create(nameof(SourceGeneratorTests));
@@ -29,6 +30,6 @@ public class SourceGeneratorTests
             .Select(t => Path.GetFileName(t.FilePath))
             .ToArray();
 
-        Assert.Equivalent(new[] { "Dagger.SDK.g.cs" }, generatedFiles);
+        CollectionAssert.Contains(generatedFiles,  "Dagger.SDK.g.cs", "Generated file not found.");
     }
 }
