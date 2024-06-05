@@ -19,16 +19,12 @@ public class GraphQLClient
     public GraphQLClient(string port, string token, string scheme = "http", string host = "localhost")
     {
         _httpClient = new HttpClient();
-        _httpClient.DefaultRequestHeaders.Add("Authorization", BasicAuth(token));
-        _httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
+        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", GetTokenHeaderValue(token));
+        _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         _httpClient.BaseAddress = new Uri($"{scheme}://{host}:{port}");
     }
 
-    private static string BasicAuth(string token)
-    {
-        var usernamePassword = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{token}:"));
-        return $"Basic {usernamePassword}";
-    }
+    private static string GetTokenHeaderValue(string token) => Convert.ToBase64String(Encoding.UTF8.GetBytes($"{token}:"));
 
     /// <summary>
     /// Perform GraphQL request.
