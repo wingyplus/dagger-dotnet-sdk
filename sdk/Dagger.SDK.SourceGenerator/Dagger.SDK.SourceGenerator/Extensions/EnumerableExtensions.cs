@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Dagger.SDK.SourceGenerator;
+namespace Dagger.SDK.SourceGenerator.Extensions;
 
 public static class EnumerableExtensions
 {

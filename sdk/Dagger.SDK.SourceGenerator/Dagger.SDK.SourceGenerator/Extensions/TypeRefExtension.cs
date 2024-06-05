@@ -1,5 +1,7 @@
 using Dagger.SDK.SourceGenerator.Code;
-namespace Dagger.SDK.SourceGenerator;
+using Dagger.SDK.SourceGenerator.Types;
+
+namespace Dagger.SDK.SourceGenerator.Extensions;
 
 public static class TypeRefExtension
 {

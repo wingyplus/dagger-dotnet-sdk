@@ -1,5 +1,7 @@
 using System.Linq;
 
+using Dagger.SDK.SourceGenerator.Extensions;
+
 namespace Dagger.SDK.SourceGenerator.Code;
 
 public static class Formatter

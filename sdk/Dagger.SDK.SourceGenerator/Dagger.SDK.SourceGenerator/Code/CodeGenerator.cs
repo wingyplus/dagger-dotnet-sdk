@@ -1,8 +1,11 @@
-
 using System;
 using System.Linq;
 using System.Text;
 
+using Dagger.SDK.SourceGenerator.Extensions;
+using Dagger.SDK.SourceGenerator.Types;
+
+using Type = Dagger.SDK.SourceGenerator.Types.Type;
 
 namespace Dagger.SDK.SourceGenerator.Code;
 
@@ -17,12 +20,12 @@ public class CodeGenerator(ICodeRenderer renderer)
         builder.AppendLine();
 
         _ = introspection
-             .Schema
-             .Types
-             .ExceptBy(_primitiveTypes, type => type.Name)
-             .Where(NotInternalTypes)
-             .Select(Render)
-             .Aggregate(builder, (b, code) => b.Append(code).AppendLine());
+            .Schema
+            .Types
+            .ExceptBy(_primitiveTypes, type => type.Name)
+            .Where(NotInternalTypes)
+            .Select(Render)
+            .Aggregate(builder, (b, code) => b.Append(code).AppendLine());
 
         return renderer.Format(builder.ToString());
     }

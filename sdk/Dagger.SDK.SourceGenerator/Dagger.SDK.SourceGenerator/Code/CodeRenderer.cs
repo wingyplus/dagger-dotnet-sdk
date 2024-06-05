@@ -2,8 +2,14 @@ using System;
 using System.Linq;
 using System.Text;
 
+using Dagger.SDK.SourceGenerator.Extensions;
+
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+
+using Dagger.SDK.SourceGenerator.Types;
+
+using Type = Dagger.SDK.SourceGenerator.Types.Type;
 
 namespace Dagger.SDK.SourceGenerator.Code;
 

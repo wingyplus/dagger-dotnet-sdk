@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json.Serialization;
 
-namespace Dagger.SDK;
+namespace Dagger.SDK.SourceGenerator.Types;
 
 public class Field
 {

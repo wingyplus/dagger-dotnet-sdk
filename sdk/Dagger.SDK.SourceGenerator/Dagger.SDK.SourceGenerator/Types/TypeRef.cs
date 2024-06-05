@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace Dagger.SDK;
+namespace Dagger.SDK.SourceGenerator.Types;
 
 public class TypeRef
 {

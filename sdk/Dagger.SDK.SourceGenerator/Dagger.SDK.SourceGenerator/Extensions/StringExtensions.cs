@@ -3,7 +3,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace Dagger.SDK.SourceGenerator;
+namespace Dagger.SDK.SourceGenerator.Extensions;
 
 [SuppressMessage("MicrosoftCodeAnalysisCorrectness", "RS1035:Do not use APIs banned for analyzers")]
 public static class StringExtensions

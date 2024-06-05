@@ -1,6 +1,7 @@
 using Dagger.SDK.SourceGenerator.Code;
+using Dagger.SDK.SourceGenerator.Types;
 
-namespace Dagger.SDK.SourceGenerator;
+namespace Dagger.SDK.SourceGenerator.Extensions;
 
 public static class ArgumentExtension
 {
