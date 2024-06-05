@@ -51,7 +51,23 @@ func (m *DotnetSdk) ModuleRuntime(
 	modSource *ModuleSource,
 	introspectionJson string,
 ) (*Container, error) {
-	return m.Container, nil
+	subpath, err := modSource.SourceSubpath(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	modName, err := modSource.ModuleName(ctx)
+	if err != nil {
+		return nil, err
+	}
+	name := strcase.ToCamel(modName)
+
+	m, err = m.codegenBase(ctx, modSource, introspectionJson)
+	if err != nil {
+		return nil, err
+	}
+
+	return m.Container.WithEntrypoint([]string{"dotnet", "run", "--project", path.Join(ModSourceDirPath, subpath, name)}), nil
 }
 
 func (m *DotnetSdk) Codegen(
@@ -59,6 +75,17 @@ func (m *DotnetSdk) Codegen(
 	modSource *ModuleSource,
 	introspectionJson string,
 ) (*GeneratedCode, error) {
+	m, err := m.codegenBase(ctx, modSource, introspectionJson)
+	if err != nil {
+		return nil, err
+	}
+
+	return dag.GeneratedCode(m.Container.Directory(ModSourceDirPath)).
+		WithVCSGeneratedPaths([]string{"Dagger.SDK*/**"}).
+		WithVCSIgnoredPaths([]string{"Dagger.SDK*/**", "obj", "bin"}), nil
+}
+
+func (m *DotnetSdk) codegenBase(ctx context.Context, modSource *ModuleSource, introspectionJson string) (*DotnetSdk, error) {
 	modName, err := modSource.ModuleName(ctx)
 	if err != nil {
 		return nil, err
@@ -68,17 +95,12 @@ func (m *DotnetSdk) Codegen(
 		return nil, err
 	}
 
-	source := m.
+	return m.
 		WithBase(modSource.ContextDirectory(), subpath).
 		WithSln(modName).
 		WithSdk(subpath, introspectionJson).
-		WithProject(subpath, modName).
-		Container.
-		Directory(ModSourceDirPath)
-
-	return dag.GeneratedCode(source).
-		WithVCSGeneratedPaths([]string{"Dagger.SDK*/**"}).
-		WithVCSIgnoredPaths([]string{"Dagger.SDK*/**", "obj", "bin"}), nil
+		WithIntrospection(introspectionJson).
+		WithProject(ctx, subpath, modName)
 }
 
 func (m *DotnetSdk) WithBase(contextDir *Directory, subpath string) *DotnetSdk {
@@ -91,7 +113,7 @@ func (m *DotnetSdk) WithBase(contextDir *Directory, subpath string) *DotnetSdk {
 
 func (m *DotnetSdk) WithSln(modName string) *DotnetSdk {
 	name := strcase.ToCamel(modName)
-	m.Container = m.Container.WithExec([]string{"dotnet", "new", "sln", "--name", name})
+	m.Container = m.Container.WithExec([]string{"dotnet", "new", "sln", "--name", name, "--force"})
 	return m
 }
 
@@ -103,9 +125,6 @@ func (m *DotnetSdk) WithSdk(subpath string, introspectionJson string) *DotnetSdk
 			m.SDKSourceDir.Directory("Dagger.SDK"),
 			ContainerWithDirectoryOpts{Exclude: IgnorePaths},
 		).
-		WithNewFile("Dagger.SDK/introspection.json", ContainerWithNewFileOpts{
-			Contents: introspectionJson,
-		}).
 		WithDirectory(
 			"Dagger.SDK.SourceGenerator/Dagger.SDK.SourceGenerator",
 			m.SDKSourceDir.Directory("Dagger.SDK.SourceGenerator/Dagger.SDK.SourceGenerator"),
@@ -117,13 +136,37 @@ func (m *DotnetSdk) WithSdk(subpath string, introspectionJson string) *DotnetSdk
 	return m
 }
 
-func (m *DotnetSdk) WithProject(subpath string, modName string) *DotnetSdk {
-	name := strcase.ToCamel(modName)
+func (m *DotnetSdk) WithIntrospection(introspectionJson string) *DotnetSdk {
 	m.Container = m.Container.
-		WithExec([]string{"dotnet", "new", "console", "--framework", "net8.0", "--output", name, "-n", name}).
-		WithExec([]string{"dotnet", "sln", "add", name}).
-		WithWorkdir(name).
-		WithExec([]string{"dotnet", "add", "reference", "../Dagger.SDK"})
+		WithNewFile("Dagger.SDK/introspection.json", ContainerWithNewFileOpts{
+			Contents: introspectionJson,
+		})
 
 	return m
+}
+
+func (m *DotnetSdk) WithProject(ctx context.Context, subpath string, modName string) (*DotnetSdk, error) {
+	ctr := m.Container
+	name := strcase.ToCamel(modName)
+
+	ents, err := m.Container.Directory(".").Entries(ctx)
+	if err != nil {
+		return nil, err
+	}
+	created := false
+	for _, ent := range ents {
+		if ent == name {
+			created = true
+			break
+		}
+	}
+
+	if !created {
+		ctr = ctr.
+			WithExec([]string{"dotnet", "new", "console", "--framework", "net8.0", "--output", name, "-n", name}).
+			WithExec([]string{"dotnet", "add", name, "reference", "../Dagger.SDK"})
+	}
+
+	m.Container = ctr.WithExec([]string{"dotnet", "sln", "add", name})
+	return m, nil
 }
