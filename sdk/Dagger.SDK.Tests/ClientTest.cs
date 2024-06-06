@@ -1,11 +1,12 @@
 namespace Dagger.SDK.Tests;
 
+[TestClass]
 public class ClientTest
 {
-    private Query _dag = Dagger.Connect();
+    private static Query _dag = Dagger.Connect();
 
-    [Fact]
-    public async void TestSimple()
+    [TestMethod]
+    public async Task TestSimple()
     {
         var output = await _dag
             .Container()
@@ -13,11 +14,11 @@ public class ClientTest
             .WithExec(["echo", "hello"])
             .Stdout();
 
-        Assert.Equal("hello\n", output);
+        Assert.AreEqual("hello\n", output);
     }
 
-    [Fact]
-    public async void TestOptionalArguments()
+    [TestMethod]
+    public async Task TestOptionalArguments()
     {
         var env = await _dag
             .Container()
@@ -27,19 +28,19 @@ public class ClientTest
             .WithEnvVariable("C", "$A:$B", expand: true)
             .EnvVariable("C");
 
-        Assert.Equal("a:b", env);
+        Assert.AreEqual("a:b", env);
     }
 
-    [Fact]
-    public async void TestScalarIdSerialization()
+    [TestMethod]
+    public async Task TestScalarIdSerialization()
     {
         var cache = _dag.CacheVolume("hello");
         var id = await cache.Id();
-        Assert.True(id.Value.Length > 0);
+        Assert.IsTrue(id.Value.Length > 0);
     }
 
-    [Fact]
-    public async void TestInputObject()
+    [TestMethod]
+    public async Task TestInputObject()
     {
         const string dockerfile = """
                                   FROM alpine:3.20.0
@@ -52,12 +53,12 @@ public class ClientTest
         var output = await _dag.Container()
             .Build(await dockerDir.Id(), buildArgs: [new BuildArg("SPAM", "egg")])
             .Stdout();
-
-        Assert.Matches(".*SPAM=egg.*", output);
+        
+        StringAssert.Contains(output, "SPAM=egg");
     }
 
-    [Fact]
-    public async void TestStringEscape()
+    [TestMethod]
+    public async Task TestStringEscape()
     {
         await _dag
             .Container()

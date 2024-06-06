@@ -5,6 +5,7 @@ using Dagger.SDK.JsonConverters;
 
 namespace Dagger.SDK.Tests;
 
+[TestClass]
 public class ScalarIDConverterTest
 {
     [JsonConverter(typeof(ScalarIDConverter<DemoID>))]
@@ -12,11 +13,11 @@ public class ScalarIDConverterTest
     {
     }
 
-    [Fact]
+    [TestMethod]
     public void TestJsonSerialization()
     {
         var demoId = JsonSerializer.Deserialize<DemoID>("\"hello\"")!;
-        Assert.Equal("hello", demoId.Value);
-        Assert.Equal("\"hello\"", JsonSerializer.Serialize(demoId));
+        Assert.AreEqual("hello", demoId.Value);
+        Assert.AreEqual("\"hello\"", JsonSerializer.Serialize(demoId));
     }
 }

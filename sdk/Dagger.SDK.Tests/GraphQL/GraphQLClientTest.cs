@@ -5,10 +5,11 @@ using Dagger.SDK.GraphQL;
 
 namespace Dagger.SDK.Tests.GraphQL;
 
+[TestClass]
 public class GraphQLClientTest
 {
-    [Fact]
-    public async void TestRequest()
+    [TestMethod]
+    public async Task TestRequest()
     {
         var query = """
         query {
@@ -25,10 +26,10 @@ public class GraphQLClientTest
         var gqlCLient = new GraphQLClient();
         var response = await gqlCLient.RequestAsync(query);
 
-        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
 
         var gqlResponse = await response.Content.ReadFromJsonAsync<GraphQLResponse>();
-        Assert.Null(gqlResponse!.Errors);
-        Assert.Equal("hello\n", gqlResponse!.Data.GetProperty("container").GetProperty("from").GetProperty("withExec").GetProperty("stdout").GetString());
+        Assert.IsNull(gqlResponse!.Errors);
+        Assert.AreEqual("hello\n", gqlResponse!.Data.GetProperty("container").GetProperty("from").GetProperty("withExec").GetProperty("stdout").GetString());
     }
 }
