@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Immutable;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
@@ -11,22 +13,10 @@ using Microsoft.CodeAnalysis.Text;
 
 namespace Dagger.SDK.SourceGenerator;
 
-[Generator]
-public class SourceGenerator(CodeGenerator codeGenerator) : ISourceGenerator
+[Generator(LanguageNames.CSharp)]
+public class SourceGenerator(CodeGenerator codeGenerator) : IIncrementalGenerator
 {
-    private static readonly Diagnostic FailedToReadSchemaFile = Diagnostic.Create(
-        new DiagnosticDescriptor(
-            id: "DAG002",
-            title: "Failed to read introspection.json file",
-            messageFormat: "Failed to read introspection.json file. The source generator will not generate any code.",
-            category: "Dagger.SDK.SourceGenerator",
-            DiagnosticSeverity.Warning,
-            isEnabledByDefault: true
-        ),
-        location: null
-    );
-
-    private static readonly Diagnostic NoSchemaFileFound = Diagnostic.Create(
+    public static readonly Diagnostic NoSchemaFileFound = Diagnostic.Create(
         new DiagnosticDescriptor(
             id: "DAG001",
             title: "No introspection.json file found",
@@ -37,57 +27,92 @@ public class SourceGenerator(CodeGenerator codeGenerator) : ISourceGenerator
         ),
         location: null
     );
+    
+    public static readonly Diagnostic FailedToReadSchemaFile = Diagnostic.Create(
+        new DiagnosticDescriptor(
+            id: "DAG002",
+            title: "Failed to read introspection.json file",
+            messageFormat: "Failed to read introspection.json file. The source generator will not generate any code.",
+            category: "Dagger.SDK.SourceGenerator",
+            DiagnosticSeverity.Warning,
+            isEnabledByDefault: true
+        ),
+        location: null
+    );
+    
+    public static Diagnostic FailedToParseSchemaFile => Diagnostic.Create(
+        new DiagnosticDescriptor(
+            id: "DAG003",
+            title: "Failed to parse introspection.json file",
+            messageFormat: "Failed to parse introspection.json file. The source generator will not generate any code.",
+            category: "Dagger.SDK.SourceGenerator",
+            DiagnosticSeverity.Error,
+            isEnabledByDefault: true
+        ),
+        location: null
+    );
 
     public SourceGenerator() : this(new CodeGenerator(new CodeRenderer()))
     {
     }
 
-    public void Initialize(GeneratorInitializationContext context)
+    public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-    }
-
-    public void Execute(GeneratorExecutionContext context)
-    {
-        var schemaFile = context.AdditionalFiles.FirstOrDefault(x => x.Path.EndsWith("introspection.json"));
-
-        if (schemaFile is null)
+        IncrementalValuesProvider<AdditionalText> additionalText = context.AdditionalTextsProvider;
+        IncrementalValuesProvider<AdditionalText> schemaFiles = additionalText.Where(static x => x.Path.EndsWith("introspection.json"));
+        IncrementalValuesProvider<SourceText?> sourceTexts = schemaFiles.Select((text, ct) => text.GetText(cancellationToken: ct));
+        IncrementalValueProvider<ImmutableArray<SourceText?>> items = sourceTexts.Collect();
+        
+        context.RegisterSourceOutput(items, (spc, sourceTexts) =>
         {
-            context.ReportDiagnostic(NoSchemaFileFound);
-            return;
-        }
+            if (sourceTexts.Length == 0)
+            {
+                spc.ReportDiagnostic(NoSchemaFileFound);
+                return;
+            }
+            
+            if (sourceTexts.Length != 1)
+            {
+                spc.ReportDiagnostic(FailedToReadSchemaFile);
+                return;
+            }
+            
+            if (sourceTexts[0] is null)
+            {
+                spc.ReportDiagnostic(FailedToReadSchemaFile);
+                return;
+            }
 
-        var sourceText = schemaFile.GetText();
-
-        if (sourceText is null)
-        {
-            context.ReportDiagnostic(FailedToReadSchemaFile);
-            return;
-        }
-
-        try
-        {
-            Introspection introspection = JsonSerializer.Deserialize<Introspection>(sourceText.ToString())!;
-            string code = codeGenerator.Generate(introspection);
-            context.AddSource("Dagger.SDK.g.cs", SourceText.From(code, Encoding.UTF8));
-        }
-        catch (Exception ex)
-        {
-            context.ReportDiagnostic(FailedToGenerateCode(ex));
-        }
+            try
+            {
+                Introspection introspection = JsonSerializer.Deserialize<Introspection>(sourceTexts[0]!.ToString())!;
+                string code = codeGenerator.Generate(introspection);
+                spc.AddSource("Dagger.SDK.g.cs", SourceText.From(code, Encoding.UTF8));
+            }
+            catch (JsonException)
+            {
+                spc.ReportDiagnostic(FailedToParseSchemaFile);
+            }
+            catch (Exception ex)
+            {
+                spc.ReportDiagnostic(FailedToGenerateCode(ex));
+            }
+        });
     }
 
     private static Diagnostic FailedToGenerateCode(Exception ex)
     {
         return Diagnostic.Create(
-                new DiagnosticDescriptor(
-                    id: "DAG003",
-                    title: "Failed to generate SDK code",
-                    messageFormat: $"Failed to generate code. The source generator will not generate any code. Cause: {ex.Message}",
-                    category: "Dagger.SDK.SourceGenerator",
-                    DiagnosticSeverity.Error,
-                    isEnabledByDefault: true
-                ),
-                location: null
-            );
+            new DiagnosticDescriptor(
+                id: "DAG004",
+                title: "Failed to generate SDK code",
+                messageFormat: "Failed to generate code. The source generator will not generate any code. Cause: {0}",
+                category: "Dagger.SDK.SourceGenerator",
+                DiagnosticSeverity.Error,
+                isEnabledByDefault: true
+            ),
+            location: null,
+            messageArgs: ex.Message
+        );
     }
 }

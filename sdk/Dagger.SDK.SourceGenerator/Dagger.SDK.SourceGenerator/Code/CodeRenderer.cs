@@ -30,7 +30,7 @@ public class CodeRenderer : ICodeRenderer
 
                public class Scalar
                {
-                   public string Value;
+                   public string Value { get; set; }
                
                    public override string ToString() => Value;
                }
@@ -41,7 +41,8 @@ public class CodeRenderer : ICodeRenderer
                    public GraphQLClient GraphQLClient { get; } = gqlClient;
                }
 
-               public interface IInputObject {
+               public interface IInputObject 
+               {
                    List<KeyValuePair<string, Value>> ToKeyValuePairs();
                }
                """;
@@ -54,7 +55,8 @@ public class CodeRenderer : ICodeRenderer
         return $$"""
                  {{RenderDocComment(type)}}
                  [JsonConverter(typeof(JsonStringEnumConverter<{{type.Name}}>))]
-                 public enum {{type.Name}} {
+                 public enum {{type.Name}} 
+                 {
                      {{string.Join(",", evs)}}
                  }
                  """;
@@ -62,26 +64,30 @@ public class CodeRenderer : ICodeRenderer
 
     public string RenderInputObject(Type type)
     {
-        var properties = type.InputFields.Select(field => $$"""
-                                                            {{RenderDocComment(field)}}
-                                                            public {{field.Type.GetTypeName()}} {{Formatter.FormatProperty(field.Name)}} { get; } = {{field.GetVarName()}};
-                                                            """);
+        var properties = type.InputFields.Select(field => 
+            $$"""
+            {{RenderDocComment(field)}}
+            public {{field.Type.GetTypeName()}} {{Formatter.FormatProperty(field.Name)}} { get; } = {{field.GetVarName()}};
+            """);
 
         var constructorFields =
             type.InputFields.Select(field => $"""{field.Type.GetTypeName()} {field.GetVarName()}""");
 
-        var toKeyValuePairsProperties = type.InputFields.Select(field => $"""
-                                                                          kvPairs.Add(KeyValuePair.Create("{field.Name}", {RenderArgumentValue(field, asProperty: true)} as Value));
-                                                                          """);
+        var toKeyValuePairsProperties = type.InputFields.Select(field => 
+            $"""
+            kvPairs.Add(KeyValuePair.Create("{field.Name}", {RenderArgumentValue(field, asProperty: true)} as Value));
+            """);
 
-        var toKeyValuePairsMethod = $$"""
-                                      public List<KeyValuePair<string,Value>> ToKeyValuePairs()
-                                      {
-                                          var kvPairs = new List<KeyValuePair<string, Value>>();
-                                          {{string.Join("\n", toKeyValuePairsProperties)}}
-                                          return kvPairs;
-                                      }
-                                      """;
+        var toKeyValuePairsMethod = 
+              $$"""
+              public List<KeyValuePair<string,Value>> ToKeyValuePairs()
+              {
+                  var kvPairs = new List<KeyValuePair<string, Value>>();
+                  {{string.Join("\n", toKeyValuePairsProperties)}}
+                  return kvPairs;
+              }
+              """;
+        
         return $$"""
                  {{RenderDocComment(type)}}
                  public struct {{type.Name}}({{string.Join(", ", constructorFields)}}) : IInputObject
@@ -255,12 +261,11 @@ public class CodeRenderer : ICodeRenderer
             return "";
         }
 
-
         var builder = new StringBuilder("var arguments = ImmutableList<Argument>.Empty;");
         builder.Append('\n');
 
         var requiredArgs = field.RequiredArgs();
-        if (requiredArgs.Count() > 0)
+        if (requiredArgs.Any())
         {
             builder.Append("arguments = arguments.")
                 .Append(string.Join(".",
@@ -270,12 +275,12 @@ public class CodeRenderer : ICodeRenderer
         }
 
         var optionalArgs = field.OptionalArgs();
-        if (optionalArgs.Count() > 0)
+        if (optionalArgs.Any())
         {
-            optionalArgs.Aggregate(builder, (builder, arg) =>
+            optionalArgs.Aggregate(builder, (sb, arg) =>
                 {
                     var varName = arg.GetVarName();
-                    return builder
+                    return sb
                         .Append($"""if ({varName} is {arg.Type.GetTypeName()} {varName}_)""")
                         .Append("{\n")
                         .Append(
