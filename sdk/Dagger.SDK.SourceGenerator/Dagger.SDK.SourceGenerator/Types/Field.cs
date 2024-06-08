@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Text.Json.Serialization;
 
@@ -27,10 +28,10 @@ public class Field
     /// <summary>
     /// Get optional arguments from Args.
     /// </summary>
-    public IEnumerable<InputValue> OptionalArgs() => Args.Where(arg => arg.Type.Kind != "NON_NULL");
+    public ImmutableArray<InputValue> OptionalArgs() => Args.Where(arg => arg.Type.Kind != "NON_NULL").ToImmutableArray();
 
     /// <summary>
     /// Get required arguments from Args.
     /// </summary>
-    public IEnumerable<InputValue> RequiredArgs() => Args.Where(arg => arg.Type.Kind == "NON_NULL");
+    public ImmutableArray<InputValue> RequiredArgs() => Args.Where(arg => arg.Type.Kind == "NON_NULL").ToImmutableArray();
 }

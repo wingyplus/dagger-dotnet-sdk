@@ -15,9 +15,9 @@
                 OutputItemType="Analyzer"
                 ReferenceOutputAssembly="false" />
     </ItemGroup>
-
+    
     <ItemGroup>
-        <AdditionalFiles Include="introspection.json"/>
+        <AdditionalFiles Include="introspection.json" />
     </ItemGroup>
 
 </Project>
