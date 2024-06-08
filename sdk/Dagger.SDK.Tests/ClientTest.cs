@@ -1,3 +1,5 @@
+using Microsoft.ApplicationInsights.Extensibility.Implementation;
+
 namespace Dagger.SDK.Tests;
 
 [TestClass]
@@ -53,7 +55,7 @@ public class ClientTest
         var output = await _dag.Container()
             .Build(await dockerDir.Id(), buildArgs: [new BuildArg("SPAM", "egg")])
             .Stdout();
-        
+
         StringAssert.Contains(output, "SPAM=egg");
     }
 
@@ -72,5 +74,15 @@ public class ClientTest
                              0.0 mm
                 """)
             .Sync();
+    }
+
+    [TestMethod]
+    public async Task TestReturnArray()
+    {
+        var envs = await _dag.Container()
+            .From("alpine")
+            .WithEnvVariable("A", "B")
+            .WithEnvVariable("C", "D")
+            .EnvVariables();
     }
 }

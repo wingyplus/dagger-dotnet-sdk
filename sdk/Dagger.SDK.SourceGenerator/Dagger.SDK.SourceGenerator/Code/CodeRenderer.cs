@@ -157,7 +157,7 @@ public class CodeRenderer : ICodeRenderer
     {
         var builder = new StringBuilder();
         builder.AppendLine(RenderSummaryDocComment(field.Description));
-        var parameters = field.Args.Aggregate(builder, (sb, arg) =>
+        builder = field.Args.Aggregate(builder, (sb, arg) =>
         {
             string[] lines = arg.Description.Split('\n');
             sb.AppendLine($"/// <param name=\"{arg.GetVarName()}\">");
@@ -218,9 +218,31 @@ public class CodeRenderer : ICodeRenderer
     private static string RenderReturnValue(Field field)
     {
         var type = field.Type;
-        if (type.IsLeaf() || type.IsList())
+
+        if (type.IsLeaf())
         {
             return $"await Engine.Execute<{field.Type.GetTypeName()}>(GraphQLClient, queryBuilder)";
+        }
+
+        if (type.IsList() && type.GetType_().OfType.IsObject())
+        {
+            var typeName = type.GetType_().OfType.GetTypeName();
+            return $"""
+                    (await Engine.ExecuteList<{typeName}ID>(GraphQLClient, queryBuilder))
+                        .Select(id =>
+                            new {typeName}(
+                                QueryBuilder.Builder().Select("load{type}FromID", [new Argument("id", new StringValue(id.Value))]),
+                                GraphQLClient
+                            )
+                        )
+                        .ToArray();
+                    """;
+        }
+
+        if (type.IsList() && type.GetType_().OfType.IsScalar())
+        {
+            var typeName = type.GetType_().OfType.GetTypeName();
+            return $"await Engine.ExecuteList<{typeName}>(GraphQLClient, queryBuilder);";
         }
 
         return $"new {field.Type.GetTypeName()}(queryBuilder, GraphQLClient)";
@@ -339,7 +361,7 @@ public class CodeRenderer : ICodeRenderer
         }
 
         builder.Append(')');
-        if (field.Type.IsList())
+        if (field.Type.IsList() && !field.Type.GetType_().OfType.IsLeaf())
         {
             builder.Append(".Select(\"id\")");
         }

@@ -2,6 +2,7 @@ using Dagger.SDK.GraphQL;
 
 namespace Dagger.SDK.Tests;
 
+[TestClass]
 public class EngineTest
 {
     [TestMethod]
@@ -28,11 +29,13 @@ public class EngineTest
             .Select("container")
             .Select("from", [new Argument("address", new StringValue("alpine"))])
             .Select("envVariables")
-            .Select("name");
+            .Select("id");
 
-        var ids = await Engine.ExecuteList<string>(gqlClient, queryBuilder);
+        var ids = await Engine.ExecuteList<EnvVariableID>(gqlClient, queryBuilder);
 
-        Assert.IsTrue(ids.Count > 0);
+        Assert.IsTrue(ids.Length > 0);
         CollectionAssert.AllItemsAreNotNull(ids);
+        
+        Console.WriteLine(ids);
     }
 }

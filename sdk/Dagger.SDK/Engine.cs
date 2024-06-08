@@ -29,14 +29,15 @@ public static class Engine
     /// <param name="client">A GraphQL client</param>
     /// <param name="queryBuilder">A QueryBuilder instance.</param>
     /// <returns></returns>
-    public static async Task<List<T>> ExecuteList<T>(GraphQLClient client, QueryBuilder queryBuilder)
+    public static async Task<T[]> ExecuteList<T>(GraphQLClient client, QueryBuilder queryBuilder)
     {
         var jsonElement = await Request(client, queryBuilder);
         jsonElement = TakeJsonElementUntilLast<T>(jsonElement, queryBuilder.Path);
         return jsonElement
             .EnumerateArray()
-            .Select(elem => elem.GetProperty(queryBuilder.Path.Last().Name).Deserialize<T>()!)
-            .ToList();
+            .Select(elem => elem.GetProperty(queryBuilder.Path.Last().Name))
+            .Select(elem => elem.Deserialize<T>()!)
+            .ToArray();
     }
 
     private static async Task<JsonElement> Request(GraphQLClient client, QueryBuilder queryBuilder)
@@ -56,6 +57,7 @@ public static class Engine
         {
             json = json.GetProperty(fieldName);
         }
+
         return json;
     }
 }
