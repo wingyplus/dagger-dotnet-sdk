@@ -3,5 +3,5 @@
   "sdk": "go",
   "dependencies": [],
   "source": ".",
-  "engineVersion": "v0.11.6"
+  "engineVersion": "v0.11.7"
 }

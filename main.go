@@ -49,7 +49,7 @@ type DotnetSdk struct {
 func (m *DotnetSdk) ModuleRuntime(
 	ctx context.Context,
 	modSource *ModuleSource,
-	introspectionJson string,
+	introspectionJson *File,
 ) (*Container, error) {
 	subpath, err := modSource.SourceSubpath(ctx)
 	if err != nil {
@@ -73,7 +73,7 @@ func (m *DotnetSdk) ModuleRuntime(
 func (m *DotnetSdk) Codegen(
 	ctx context.Context,
 	modSource *ModuleSource,
-	introspectionJson string,
+	introspectionJson *File,
 ) (*GeneratedCode, error) {
 	m, err := m.codegenBase(ctx, modSource, introspectionJson)
 	if err != nil {
@@ -85,7 +85,7 @@ func (m *DotnetSdk) Codegen(
 		WithVCSIgnoredPaths([]string{"Dagger.SDK*/**", "obj", "bin"}), nil
 }
 
-func (m *DotnetSdk) codegenBase(ctx context.Context, modSource *ModuleSource, introspectionJson string) (*DotnetSdk, error) {
+func (m *DotnetSdk) codegenBase(ctx context.Context, modSource *ModuleSource, introspectionJson *File) (*DotnetSdk, error) {
 	modName, err := modSource.ModuleName(ctx)
 	if err != nil {
 		return nil, err
@@ -98,7 +98,7 @@ func (m *DotnetSdk) codegenBase(ctx context.Context, modSource *ModuleSource, in
 	return m.
 		WithBase(modSource.ContextDirectory(), subpath).
 		WithSln(modName).
-		WithSdk(subpath, introspectionJson).
+		WithSdk(subpath).
 		WithIntrospection(introspectionJson).
 		WithProject(ctx, subpath, modName)
 }
@@ -118,7 +118,7 @@ func (m *DotnetSdk) WithSln(modName string) *DotnetSdk {
 }
 
 // Installing sdk into subpath.
-func (m *DotnetSdk) WithSdk(subpath string, introspectionJson string) *DotnetSdk {
+func (m *DotnetSdk) WithSdk(subpath string) *DotnetSdk {
 	m.Container = m.Container.
 		WithDirectory(
 			"Dagger.SDK",
@@ -136,11 +136,9 @@ func (m *DotnetSdk) WithSdk(subpath string, introspectionJson string) *DotnetSdk
 	return m
 }
 
-func (m *DotnetSdk) WithIntrospection(introspectionJson string) *DotnetSdk {
+func (m *DotnetSdk) WithIntrospection(introspectionJson *File) *DotnetSdk {
 	m.Container = m.Container.
-		WithNewFile("Dagger.SDK/introspection.json", ContainerWithNewFileOpts{
-			Contents: introspectionJson,
-		})
+		WithFile("Dagger.SDK/introspection.json", introspectionJson)
 
 	return m
 }
