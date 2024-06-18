@@ -52,19 +52,34 @@ func (m *DotnetSdk) Introspect() *File {
 }
 
 // Testing the SDK.
-func (m *DotnetSdk) Test(ctx context.Context) error {
-	_, err := m.WithBase(m.SDKSourceDir, "sdk").
+func (m *DotnetSdk) Test(
+	ctx context.Context,
+	// Set this option to `true` to enable capture output.
+	//
+	// +optional
+	captureOutput bool,
+
+) *Terminal {
+	// args := []string{
+	// 	fmt.Sprintf("-p:TestingPlatformCaptureOutput=%t", captureOutput),
+	// }
+
+	return m.WithBase(m.SDKSourceDir, "sdk").
 		Container.
 		WithServiceBinding("dockerd", dockerEngine()).
 		WithEnvVariable("DOCKER_HOST", "tcp://dockerd:2375").
 		With(installDockerCli).
 		With(installDaggerCli).
 		WithFile("Dagger.SDK/introspection.json", m.Introspect()).
-		WithExec([]string{"dagger", "run", "dotnet", "test"}, ContainerWithExecOpts{
+		// WithExec(append([]string{"dagger", "run", "dotnet", "test"}, args...), ContainerWithExecOpts{
+		// 	ExperimentalPrivilegedNesting: true,
+		// }).
+		Terminal(ContainerTerminalOpts{
 			ExperimentalPrivilegedNesting: true,
-		}).
-		Sync(ctx)
-	return err
+			InsecureRootCapabilities:      true,
+		})
+	// Sync(ctx)
+	// return err
 }
 
 func (m *DotnetSdk) WithBase(contextDir *Directory, subpath string) *DotnetSdk {
