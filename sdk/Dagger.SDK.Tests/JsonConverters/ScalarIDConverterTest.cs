@@ -8,7 +8,7 @@ namespace Dagger.SDK.Tests;
 [TestClass]
 public class ScalarIDConverterTest
 {
-    [JsonConverter(typeof(ScalarIDConverter<DemoID>))]
+    [JsonConverter(typeof(ScalarIdConverter<DemoID>))]
     public class DemoID : Scalar
     {
     }
