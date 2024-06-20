@@ -53,7 +53,7 @@ public class ClientTest
 
         var dockerDir = _dag.Directory().WithNewFile("Dockerfile", dockerfile);
         var output = await _dag.Container()
-            .Build(await dockerDir.Id(), buildArgs: [new BuildArg("SPAM", "egg")])
+            .Build(dockerDir, buildArgs: [new BuildArg("SPAM", "egg")])
             .Stdout();
 
         StringAssert.Contains(output, "SPAM=egg");

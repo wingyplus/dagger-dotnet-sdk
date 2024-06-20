@@ -189,21 +189,37 @@ public class CodeRenderer : ICodeRenderer
                 """;
     }
 
-    private static string RenderArgument(InputValue argument)
+
+    private static string GetNormalizedTypeName(InputValue arg)
     {
-        var type = argument.Type.GetTypeName();
-        if (type.EndsWith("Id") && string.Equals(argument.Name, type.Replace("Id", ""),
-                StringComparison.CurrentCultureIgnoreCase))
+        return GetNormalizedTypeName(arg.Type, arg.Name);
+    }
+
+    private static string GetNormalizedTypeName(TypeRef typeRef, string name)
+    {
+        var tr = typeRef.GetType_();
+        if (tr.IsList())
+        {
+            return $"{GetNormalizedTypeName(tr.OfType, name)}[]";
+        }
+
+        var type = tr.GetTypeName();
+        if (type.EndsWith("Id") && !string.Equals(name, "id"))
         {
             type = type.Replace("Id", "");
         }
 
-        return $"{type} {argument.GetVarName()}";
+        return type;
     }
 
-    private static string RenderOptionalArgument(InputValue argument)
+    private static string RenderArgument(InputValue arg)
     {
-        return $"{argument.Type.GetTypeName()}? {argument.GetVarName()} = null";
+        return $"{GetNormalizedTypeName(arg)} {arg.GetVarName()}";
+    }
+
+    private static string RenderOptionalArgument(InputValue arg)
+    {
+        return $"{GetNormalizedTypeName(arg)}? {arg.GetVarName()} = null";
     }
 
     private static string RenderReturnType(TypeRef type)
@@ -276,7 +292,7 @@ public class CodeRenderer : ICodeRenderer
                 {
                     var varName = arg.GetVarName();
                     return sb
-                        .Append($"""if ({varName} is {arg.Type.GetTypeName()} {varName}_)""")
+                        .Append($"""if ({varName} is {GetNormalizedTypeName(arg)} {varName}_)""")
                         .Append("{\n")
                         .Append(
                             $$"""    arguments = arguments.Add(new Argument("{{arg.Name}}", {{RenderArgumentValue(arg, addVarSuffix: true)}}));""")
@@ -312,8 +328,7 @@ public class CodeRenderer : ICodeRenderer
                 case "float": return $"new FloatValue({argName})";
                 default:
                     // // a type but needs to convert into id value before sending it.
-                    if (type.EndsWith("Id") && string.Equals(arg.Name, type.Replace("Id", ""),
-                            StringComparison.CurrentCultureIgnoreCase))
+                    if (type.EndsWith("Id") && !string.Equals(arg.Name, "id"))
                     {
                         return $"new IdValue<{type}>({argName})";
                     }
@@ -339,13 +354,16 @@ public class CodeRenderer : ICodeRenderer
 
             if (tr.IsScalar())
             {
-                var value = tr.GetType_().Name switch
+                var value = tr.GetType_().GetTypeName() switch
                 {
-                    "String" => "new StringValue(v)",
-                    "Integer" => "new IntValue(v)",
-                    "Float" => "new FloatValue(v)",
-                    "Boolean" => "new BooleanValue(v)",
-                    _ => "new StringValue(v.Value)"
+                    "string" => "new StringValue(v)",
+                    "int" => "new IntValue(v)",
+                    "float" => "new FloatValue(v)",
+                    "boolean" => "new BooleanValue(v)",
+                    var type =>
+                        (type.EndsWith("Id") && !string.Equals(arg.Name, "id"))
+                            ? $"new IdValue<{type}>(v)"
+                            : "new StringValue(v.Value)"
                 };
 
                 return $"new ListValue({argName}.Select(v => {value} as Value).ToList())";

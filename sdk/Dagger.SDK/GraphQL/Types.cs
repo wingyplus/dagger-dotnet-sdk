@@ -12,7 +12,7 @@ public class IdValue<TId>(IId<TId> value) : Value where TId : Scalar
 {
     public override async Task<string> Format()
     {
-        return (await value.Id()).Value;
+        return await new StringValue((await value.Id()).Value).Format();
     }
 }
 
