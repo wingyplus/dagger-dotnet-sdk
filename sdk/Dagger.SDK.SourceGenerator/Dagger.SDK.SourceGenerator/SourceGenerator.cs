@@ -27,7 +27,7 @@ public class SourceGenerator(CodeGenerator codeGenerator) : IIncrementalGenerato
         ),
         location: null
     );
-    
+
     public static readonly Diagnostic FailedToReadSchemaFile = Diagnostic.Create(
         new DiagnosticDescriptor(
             id: "DAG002",
@@ -39,7 +39,7 @@ public class SourceGenerator(CodeGenerator codeGenerator) : IIncrementalGenerato
         ),
         location: null
     );
-    
+
     public static Diagnostic FailedToParseSchemaFile => Diagnostic.Create(
         new DiagnosticDescriptor(
             id: "DAG003",
@@ -62,22 +62,22 @@ public class SourceGenerator(CodeGenerator codeGenerator) : IIncrementalGenerato
         IncrementalValuesProvider<AdditionalText> schemaFiles = additionalText.Where(static x => x.Path.EndsWith("introspection.json"));
         IncrementalValuesProvider<SourceText?> sourceTexts = schemaFiles.Select((text, ct) => text.GetText(cancellationToken: ct));
         IncrementalValueProvider<ImmutableArray<SourceText?>> items = sourceTexts.Collect();
-        
-        context.RegisterSourceOutput(items, (spc, sourceTexts) =>
+
+        context.RegisterSourceOutput(items, (spc, sources) =>
         {
-            if (sourceTexts.Length == 0)
+            if (sources.Length == 0)
             {
                 spc.ReportDiagnostic(NoSchemaFileFound);
                 return;
             }
-            
-            if (sourceTexts.Length != 1)
+
+            if (sources.Length != 1)
             {
                 spc.ReportDiagnostic(FailedToReadSchemaFile);
                 return;
             }
-            
-            if (sourceTexts[0] is null)
+
+            if (sources[0] is null)
             {
                 spc.ReportDiagnostic(FailedToReadSchemaFile);
                 return;
@@ -85,7 +85,7 @@ public class SourceGenerator(CodeGenerator codeGenerator) : IIncrementalGenerato
 
             try
             {
-                Introspection introspection = JsonSerializer.Deserialize<Introspection>(sourceTexts[0]!.ToString())!;
+                Introspection introspection = JsonSerializer.Deserialize<Introspection>(sources[0]!.ToString())!;
                 string code = codeGenerator.Generate(introspection);
                 spc.AddSource("Dagger.SDK.g.cs", SourceText.From(code, Encoding.UTF8));
             }

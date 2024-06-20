@@ -3,11 +3,10 @@ using System.Linq;
 using System.Text;
 
 using Dagger.SDK.SourceGenerator.Extensions;
+using Dagger.SDK.SourceGenerator.Types;
 
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-
-using Dagger.SDK.SourceGenerator.Types;
 
 using Type = Dagger.SDK.SourceGenerator.Types.Type;
 
@@ -30,7 +29,6 @@ public class CodeRenderer : ICodeRenderer
                """;
     }
 
-    // TODO: test value converter.
     public string RenderEnum(Type type)
     {
         var evs = type.EnumValues.Select(ev => ev.Name);
@@ -46,22 +44,22 @@ public class CodeRenderer : ICodeRenderer
 
     public string RenderInputObject(Type type)
     {
-        var properties = type.InputFields.Select(field => 
+        var properties = type.InputFields.Select(field =>
             $$"""
-            {{RenderDocComment(field)}}
-            public {{field.Type.GetTypeName()}} {{Formatter.FormatProperty(field.Name)}} { get; } = {{field.GetVarName()}};
-            """);
+              {{RenderDocComment(field)}}
+              public {{field.Type.GetTypeName()}} {{Formatter.FormatProperty(field.Name)}} { get; } = {{field.GetVarName()}};
+              """);
 
         var constructorFields =
-            type.InputFields.Select(field => $"""{field.Type.GetTypeName()} {field.GetVarName()}""");
+            type.InputFields.Select(field => $"{field.Type.GetTypeName()} {field.GetVarName()}");
 
-        var toKeyValuePairsProperties = type.InputFields.Select(field => 
+        var toKeyValuePairsProperties = type.InputFields.Select(field =>
             $"""
-            kvPairs.Add(KeyValuePair.Create("{field.Name}", {RenderArgumentValue(field, asProperty: true)} as Value));
-            """);
+             kvPairs.Add(KeyValuePair.Create("{field.Name}", {RenderArgumentValue(field, asProperty: true)} as Value));
+             """);
 
-        var toKeyValuePairsMethod = 
-              $$"""
+        var toKeyValuePairsMethod =
+            $$"""
               public List<KeyValuePair<string,Value>> ToKeyValuePairs()
               {
                   var kvPairs = new List<KeyValuePair<string, Value>>();
@@ -69,7 +67,7 @@ public class CodeRenderer : ICodeRenderer
                   return kvPairs;
               }
               """;
-        
+
         return $$"""
                  {{RenderDocComment(type)}}
                  public struct {{type.Name}}({{string.Join(", ", constructorFields)}}) : IInputObject

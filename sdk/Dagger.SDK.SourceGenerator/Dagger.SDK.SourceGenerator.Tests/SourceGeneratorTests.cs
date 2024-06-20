@@ -19,9 +19,9 @@ public class SourceGeneratorTests
     {
         // Arrange
         var generator = new SourceGenerator();
-        var driver = CSharpGeneratorDriver.Create(generator);        
+        var driver = CSharpGeneratorDriver.Create(generator);
         var compilation = CSharpCompilation.Create(nameof(SourceGeneratorTests));
-        
+
         // Act
         var result = driver
             .AddAdditionalTexts([new TestAdditionalFile(path, text)])
@@ -29,18 +29,18 @@ public class SourceGeneratorTests
             .GetRunResult();
 
         var files = outputCompilation.SyntaxTrees.Select(t => Path.GetFileName(t.FilePath)).ToArray();
-        
+
         // Assert
         CollectionAssert.Contains(collection: files, element: "Dagger.SDK.g.cs", message: "Generated file not found.");
     }
-    
+
     [TestMethod]
     public void GenerateNoCodeWhenNoAdditionalFile()
     {
         // Arrange
         var generator = new SourceGenerator();
         var driver = CSharpGeneratorDriver.Create(generator);
-        
+
         // Act
         var compilation = CSharpCompilation.Create(nameof(SourceGeneratorTests));
         var runResult = driver
@@ -51,7 +51,7 @@ public class SourceGeneratorTests
         // Assert
         Assert.IsTrue(diagnostics.Contains(SourceGenerator.NoSchemaFileFound));
     }
-    
+
     [TestMethod]
     [DataRow("introspection.json", "<xml></xml>")]
     public void GenerateNoCodeWhenInvalidJson(string path, string text)
@@ -60,7 +60,7 @@ public class SourceGeneratorTests
         var generator = new SourceGenerator();
         var driver = CSharpGeneratorDriver.Create(generator);
         var compilation = CSharpCompilation.Create(nameof(SourceGeneratorTests));
-        
+
         // Act        
         var runResult = driver
                     .AddAdditionalTexts([new TestAdditionalFile(path, text)])

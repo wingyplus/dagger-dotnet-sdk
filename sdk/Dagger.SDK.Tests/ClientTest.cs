@@ -5,7 +5,7 @@ namespace Dagger.SDK.Tests;
 [TestClass]
 public class ClientTest
 {
-    private static Query _dag = Dagger.Connect();
+    private static readonly Query _dag = Dagger.Connect();
 
     [TestMethod]
     public async Task TestSimple()
