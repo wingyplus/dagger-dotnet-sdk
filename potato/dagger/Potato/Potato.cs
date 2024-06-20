@@ -1,5 +1,5 @@
 using Dagger.SDK;
-using Module = Potato.DaggerSDK.Module;
+using Mod = Dagger.SDK.Mod;
 
 namespace Potato;
 
@@ -8,10 +8,10 @@ internal class BaseObject(Query dag)
     protected Query Dag { get; } = dag;
 }
 
-[Module.Object]
+[Mod.Object]
 class Potato(Query dag) : BaseObject(dag)
 {
-    [Module.Function]
+    [Mod.Function]
     public async Task<string> Echo(string name)
     {
         return await Dag.Container()
@@ -20,7 +20,7 @@ class Potato(Query dag) : BaseObject(dag)
             .Stdout();
     }
 
-    [Module.Function]
+    [Mod.Function]
     public Container EchoContainer(string text)
     {
         return Dag.Container()

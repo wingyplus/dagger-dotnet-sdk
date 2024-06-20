@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using System.Collections.Generic;
 using System.Reflection;
 using System.Text.Json;
 using Dagger.SDK;
@@ -9,7 +8,7 @@ internal class Function
 {
     public required FunctionCall FnCall;
     public required string ParentName;
-    public required JSON ParentJson;
+    public required Json ParentJson;
     public required string Name;
     // public required FunctionCallArgValue[] Args;
 
@@ -22,50 +21,50 @@ internal class Function
 
     public async Task Return<TResult>(TResult result)
     {
-        var json = new JSON
+        var json = new Json
         {
             Value = JsonSerializer.Serialize(result)
         };
         await FnCall.ReturnValue(json);
     }
 
-    public async Task<ModuleID> InitializeModule(Client dag, Type t)
+    public async Task<ModuleId> InitializeModule(Client dag, Type t)
     {
         return await dag.Module()
             // Class comment code.
             .WithDescription("Eat me a potato")
-            .WithObject(await TypeToObjectTypeDef(dag, t))
+            .WithObject(TypeToObjectTypeDef(dag, t))
             .Id();
     }
 
-    private async Task<TypeDefID> TypeToObjectTypeDef(Client dag, Type t)
+    private TypeDef TypeToObjectTypeDef(Client dag, Type t)
     {
         var functions = t.GetMethods()
-            .Where(method => method.GetCustomAttribute<Potato.DaggerSDK.Module.Function>() is not null)
-            .Select(async method =>
+            .Where(method => method.GetCustomAttribute<Dagger.SDK.Mod.Function>() is not null)
+            .Select( method =>
             {
                 var function = dag.Function(
                     // Function name, convert to Pascal case. C# might not have any problems with this. lol
                     method.Name,
-                    await dag.TypeDef().WithKind(TypeDefKind.STRING_KIND).Id()
+                    dag.TypeDef().WithKind(TypeDefKind.STRING_KIND)
                 );
-                
+
                 foreach (var parameter in method.GetParameters())
                 {
-                    function = function.WithArg(parameter.Name!, await dag.TypeDef().WithKind(TypeDefKind.STRING_KIND).Id());
+                    function = function.WithArg(parameter.Name!, dag.TypeDef().WithKind(TypeDefKind.STRING_KIND));
                 }
 
-                return await function.Id();
+                return function;
             });
 
         var objTypeDef = dag.TypeDef().WithObject(t.Name);
 
         foreach (var fn in functions)
         {
-            objTypeDef = objTypeDef.WithFunction(await fn);
+            objTypeDef = objTypeDef.WithFunction(fn);
         }
 
-        return await objTypeDef.Id();
+        return objTypeDef;
     }
 
     public bool IsInitializeModule()

@@ -105,7 +105,7 @@ func (m *DotnetSdk) codegenBase(ctx context.Context, modSource *ModuleSource, in
 
 func (m *DotnetSdk) WithBase(contextDir *Directory, subpath string) *DotnetSdk {
 	m.Container = m.Container.
-		From("mcr.microsoft.com/dotnet/sdk:8.0").
+		From("mcr.microsoft.com/dotnet/sdk:8.0-alpine3.20").
 		WithMountedDirectory(ModSourceDirPath, contextDir).
 		WithWorkdir(path.Join(ModSourceDirPath, subpath))
 	return m
@@ -126,11 +126,17 @@ func (m *DotnetSdk) WithSdk(subpath string) *DotnetSdk {
 			ContainerWithDirectoryOpts{Exclude: IgnorePaths},
 		).
 		WithDirectory(
+			"Dagger.SDK.Mod",
+			m.SDKSourceDir.Directory("Dagger.SDK.Mod"),
+			ContainerWithDirectoryOpts{Exclude: IgnorePaths},
+		).
+		WithDirectory(
 			"Dagger.SDK.SourceGenerator/Dagger.SDK.SourceGenerator",
 			m.SDKSourceDir.Directory("Dagger.SDK.SourceGenerator/Dagger.SDK.SourceGenerator"),
 			ContainerWithDirectoryOpts{Exclude: IgnorePaths},
 		).
 		WithExec([]string{"dotnet", "sln", "add", "Dagger.SDK"}).
+		WithExec([]string{"dotnet", "sln", "add", "Dagger.SDK.Mod"}).
 		WithExec([]string{"dotnet", "sln", "add", "Dagger.SDK.SourceGenerator/Dagger.SDK.SourceGenerator"})
 
 	return m
@@ -162,7 +168,8 @@ func (m *DotnetSdk) WithProject(ctx context.Context, subpath string, modName str
 	if !created {
 		ctr = ctr.
 			WithExec([]string{"dotnet", "new", "console", "--framework", "net8.0", "--output", name, "-n", name}).
-			WithExec([]string{"dotnet", "add", name, "reference", "../Dagger.SDK"})
+			WithExec([]string{"dotnet", "add", name, "reference", "../Dagger.SDK"}).
+			WithExec([]string{"dotnet", "add", name, "reference", "../Dagger.SDK.Mod"})
 	}
 
 	m.Container = ctr.WithExec([]string{"dotnet", "sln", "add", name})

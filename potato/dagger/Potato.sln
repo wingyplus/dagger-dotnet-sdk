@@ -3,13 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dagger.SDK", "Dagger.SDK\Dagger.SDK.csproj", "{64091FA3-CF1A-486B-A6B2-4151195170EC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dagger.SDK", "Dagger.SDK\Dagger.SDK.csproj", "{F8ECC727-E423-4AAF-A109-BD6946D0F5C0}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Dagger.SDK.SourceGenerator", "Dagger.SDK.SourceGenerator", "{FCFAA9BB-D8EA-4060-A5E9-BEB7B1559C61}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dagger.SDK.Mod", "Dagger.SDK.Mod\Dagger.SDK.Mod.csproj", "{60D1AA37-B141-4C5A-928D-55E707A32E40}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dagger.SDK.SourceGenerator", "Dagger.SDK.SourceGenerator\Dagger.SDK.SourceGenerator\Dagger.SDK.SourceGenerator.csproj", "{BC078701-800C-430A-94F0-2B72A0C494E1}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Dagger.SDK.SourceGenerator", "Dagger.SDK.SourceGenerator", "{DD35BDDC-F668-48AE-83DD-5BCFEE895442}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Potato", "Potato\Potato.csproj", "{E05575EE-46DE-4095-9BD2-6381CF070758}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dagger.SDK.SourceGenerator", "Dagger.SDK.SourceGenerator\Dagger.SDK.SourceGenerator\Dagger.SDK.SourceGenerator.csproj", "{B863B4D4-330F-4989-BE35-A78115F96ED0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Potato", "Potato\Potato.csproj", "{88986982-E560-42FB-9044-1AA457F5D967}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -20,20 +22,24 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{64091FA3-CF1A-486B-A6B2-4151195170EC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{64091FA3-CF1A-486B-A6B2-4151195170EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{64091FA3-CF1A-486B-A6B2-4151195170EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{64091FA3-CF1A-486B-A6B2-4151195170EC}.Release|Any CPU.Build.0 = Release|Any CPU
-		{BC078701-800C-430A-94F0-2B72A0C494E1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BC078701-800C-430A-94F0-2B72A0C494E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BC078701-800C-430A-94F0-2B72A0C494E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BC078701-800C-430A-94F0-2B72A0C494E1}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E05575EE-46DE-4095-9BD2-6381CF070758}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E05575EE-46DE-4095-9BD2-6381CF070758}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E05575EE-46DE-4095-9BD2-6381CF070758}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E05575EE-46DE-4095-9BD2-6381CF070758}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F8ECC727-E423-4AAF-A109-BD6946D0F5C0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F8ECC727-E423-4AAF-A109-BD6946D0F5C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F8ECC727-E423-4AAF-A109-BD6946D0F5C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F8ECC727-E423-4AAF-A109-BD6946D0F5C0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{60D1AA37-B141-4C5A-928D-55E707A32E40}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{60D1AA37-B141-4C5A-928D-55E707A32E40}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{60D1AA37-B141-4C5A-928D-55E707A32E40}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{60D1AA37-B141-4C5A-928D-55E707A32E40}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B863B4D4-330F-4989-BE35-A78115F96ED0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B863B4D4-330F-4989-BE35-A78115F96ED0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B863B4D4-330F-4989-BE35-A78115F96ED0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B863B4D4-330F-4989-BE35-A78115F96ED0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{88986982-E560-42FB-9044-1AA457F5D967}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{88986982-E560-42FB-9044-1AA457F5D967}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{88986982-E560-42FB-9044-1AA457F5D967}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{88986982-E560-42FB-9044-1AA457F5D967}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{BC078701-800C-430A-94F0-2B72A0C494E1} = {FCFAA9BB-D8EA-4060-A5E9-BEB7B1559C61}
+		{B863B4D4-330F-4989-BE35-A78115F96ED0} = {DD35BDDC-F668-48AE-83DD-5BCFEE895442}
 	EndGlobalSection
 EndGlobal

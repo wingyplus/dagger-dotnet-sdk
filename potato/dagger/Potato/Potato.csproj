@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Dagger.SDK\Dagger.SDK.csproj" />
+    <ProjectReference Include="..\Dagger.SDK.Mod\Dagger.SDK.Mod.csproj" />
   </ItemGroup>
 
   <PropertyGroup>
