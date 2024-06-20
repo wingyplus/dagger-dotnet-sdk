@@ -27,24 +27,6 @@ public class CodeRenderer : ICodeRenderer
                using Dagger.SDK.JsonConverters;
 
                namespace Dagger.SDK;
-
-               public class Scalar
-               {
-                   public string Value { get; set; }
-               
-                   public override string ToString() => Value;
-               }
-
-               public class Object(QueryBuilder queryBuilder, GraphQLClient gqlClient)
-               {
-                   public QueryBuilder QueryBuilder { get; } = queryBuilder;
-                   public GraphQLClient GraphQLClient { get; } = gqlClient;
-               }
-
-               public interface IInputObject 
-               {
-                   List<KeyValuePair<string, Value>> ToKeyValuePairs();
-               }
                """;
     }
 
