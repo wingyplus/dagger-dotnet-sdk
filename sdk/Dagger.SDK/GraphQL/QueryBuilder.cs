@@ -7,16 +7,11 @@ namespace Dagger.SDK.GraphQL;
 /// <summary>
 /// A builder for constructing GraphQL query.
 /// </summary>
-public class QueryBuilder
+public class QueryBuilder(ImmutableList<Field> path)
 {
-    public readonly ImmutableList<Field> Path = [];
+    public readonly ImmutableList<Field> Path = path;
 
-    public QueryBuilder() { }
-
-    public QueryBuilder(ImmutableList<Field> children)
-    {
-        this.Path = children;
-    }
+    private QueryBuilder() : this([]) { }
 
     /// <summary>
     /// Select a field with name.
