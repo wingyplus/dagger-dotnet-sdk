@@ -3,11 +3,10 @@ using System.Linq;
 using System.Text;
 
 using Dagger.SDK.SourceGenerator.Extensions;
+using Dagger.SDK.SourceGenerator.Types;
 
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-
-using Dagger.SDK.SourceGenerator.Types;
 
 using Type = Dagger.SDK.SourceGenerator.Types.Type;
 
@@ -27,35 +26,16 @@ public class CodeRenderer : ICodeRenderer
                using Dagger.SDK.JsonConverters;
 
                namespace Dagger.SDK;
-
-               public class Scalar
-               {
-                   public string Value { get; set; }
-               
-                   public override string ToString() => Value;
-               }
-
-               public class Object(QueryBuilder queryBuilder, GraphQLClient gqlClient)
-               {
-                   public QueryBuilder QueryBuilder { get; } = queryBuilder;
-                   public GraphQLClient GraphQLClient { get; } = gqlClient;
-               }
-
-               public interface IInputObject 
-               {
-                   List<KeyValuePair<string, Value>> ToKeyValuePairs();
-               }
                """;
     }
 
-    // TODO: test value converter.
     public string RenderEnum(Type type)
     {
         var evs = type.EnumValues!.Select(ev => ev.Name);
         return $$"""
                  {{RenderDocComment(type)}}
                  [JsonConverter(typeof(JsonStringEnumConverter<{{type.Name}}>))]
-                 public enum {{type.Name}} 
+                 public enum {{Formatter.FormatType(type.Name)}}
                  {
                      {{string.Join(",", evs)}}
                  }
@@ -64,16 +44,16 @@ public class CodeRenderer : ICodeRenderer
 
     public string RenderInputObject(Type type)
     {
-        var properties = type.InputFields!.Select(field => 
+        var properties = type.InputFields!.Select(field =>
             $$"""
-            {{RenderDocComment(field)}}
-            public {{field.Type.GetTypeName()}} {{Formatter.FormatProperty(field.Name)}} { get; } = {{field.GetVarName()}};
-            """);
+              {{RenderDocComment(field)}}
+              public {{field.Type.GetTypeName()}} {{Formatter.FormatProperty(field.Name)}} { get; } = {{field.GetVarName()}};
+              """);
 
         var constructorFields =
             type.InputFields!.Select(field => $"{field.Type.GetTypeName()} {field.GetVarName()}");
 
-        var toKeyValuePairsProperties = type.InputFields!.Select(field => 
+        var toKeyValuePairsProperties = type.InputFields!.Select(field =>
             $"""
              kvPairs.Add(new KeyValuePair<string, Value>("{field.Name}", {RenderArgumentValue(field, asProperty: true)} as Value));
              """);
@@ -87,10 +67,10 @@ public class CodeRenderer : ICodeRenderer
                   return kvPairs;
               }
               """;
-        
+
         return $$"""
                  {{RenderDocComment(type)}}
-                 public struct {{type.Name}}({{string.Join(", ", constructorFields)}}) : IInputObject
+                 public struct {{Formatter.FormatType(type.Name)}}({{string.Join(", ", constructorFields)}}) : IInputObject
                  {
                      {{string.Join("\n\n", properties)}}
                      {{toKeyValuePairsMethod}}
@@ -124,9 +104,16 @@ public class CodeRenderer : ICodeRenderer
                      """;
         });
 
+        var implementsIdInterface = "";
+        if (type.Fields!.Any(field => field.Name == "id"))
+        {
+            var idField = type.Fields!.First(field => field.Name == "id");
+            implementsIdInterface = $", IId<{idField.Type.GetTypeName()}>";
+        }
+
         return $$"""
                  {{RenderDocComment(type)}}
-                 public class {{type.Name}}(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object(queryBuilder, gqlClient)
+                 public class {{Formatter.FormatType(type.Name)}}(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object(queryBuilder, gqlClient){{implementsIdInterface}}
                  {
                      {{string.Join("\n\n", methods)}}
                  }
@@ -135,10 +122,11 @@ public class CodeRenderer : ICodeRenderer
 
     public string RenderScalar(Type type)
     {
+        var t = Formatter.FormatType(type.Name);
         return $$"""
                  {{RenderDocComment(type)}}
-                 [JsonConverter(typeof(ScalarIDConverter<{{type.Name}}>))]
-                 public class {{type.Name}} : Scalar 
+                 [JsonConverter(typeof(ScalarIdConverter<{{t}}>))]
+                 public class {{Formatter.FormatType(t)}} : Scalar
                  {
                  }
                  """;
@@ -257,14 +245,14 @@ public class CodeRenderer : ICodeRenderer
         {
             var typeName = type.GetType_().OfType.GetTypeName();
             return $"""
-                    (await Engine.ExecuteList<{typeName}ID>(GraphQLClient, queryBuilder))
+                    (await Engine.ExecuteList<{typeName}Id>(GraphQLClient, queryBuilder))
                         .Select(id =>
                             new {typeName}(
                                 QueryBuilder.Builder().Select("load{typeName}FromID", ImmutableList.Create<Argument>(new Argument("id", new StringValue(id.Value)))),
                                 GraphQLClient
                             )
                         )
-                        .ToArray();
+                        .ToArray()
                     """;
         }
 
