@@ -137,7 +137,7 @@ public class CodeRenderer : ICodeRenderer
     {
         return $$"""
                  {{RenderDocComment(type)}}
-                 [JsonConverter(typeof(ScalarIDConverter<{{type.Name}}>))]
+                 [JsonConverter(typeof(ScalarIdConverter<{{type.Name}}>))]
                  public class {{type.Name}} : Scalar 
                  {
                  }
