@@ -31,7 +31,7 @@ public class EngineTest
             .Select("envVariables")
             .Select("id");
 
-        var ids = await Engine.ExecuteList<EnvVariableID>(gqlClient, queryBuilder);
+        var ids = await Engine.ExecuteList<EnvVariableId>(gqlClient, queryBuilder);
 
         Assert.IsTrue(ids.Length > 0);
         CollectionAssert.AllItemsAreNotNull(ids);

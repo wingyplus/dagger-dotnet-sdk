@@ -5,9 +5,9 @@ namespace Dagger.SDK.GraphQL;
 public class Argument(string key, Value value)
 {
     public string Key { get; } = key;
-    public Value Value { get; } = value;
+    private Value Value { get; } = value;
 
-    public string FormatValue()
+    public Task<string> FormatValue()
     {
         return Value.Format();
     }

@@ -35,7 +35,7 @@ public class CodeRenderer : ICodeRenderer
         return $$"""
                  {{RenderDocComment(type)}}
                  [JsonConverter(typeof(JsonStringEnumConverter<{{type.Name}}>))]
-                 public enum {{type.Name}} 
+                 public enum {{Formatter.FormatType(type.Name)}}
                  {
                      {{string.Join(",", evs)}}
                  }
@@ -70,7 +70,7 @@ public class CodeRenderer : ICodeRenderer
 
         return $$"""
                  {{RenderDocComment(type)}}
-                 public struct {{type.Name}}({{string.Join(", ", constructorFields)}}) : IInputObject
+                 public struct {{Formatter.FormatType(type.Name)}}({{string.Join(", ", constructorFields)}}) : IInputObject
                  {
                      {{string.Join("\n\n", properties)}}
                      {{toKeyValuePairsMethod}}
@@ -104,9 +104,16 @@ public class CodeRenderer : ICodeRenderer
                      """;
         });
 
+        var implementsIdInterface = "";
+        if (type.Fields.Any(field => field.Name == "id"))
+        {
+            var idField = type.Fields.First(field => field.Name == "id");
+            implementsIdInterface = $", IId<{idField.Type.GetTypeName()}>";
+        }
+
         return $$"""
                  {{RenderDocComment(type)}}
-                 public class {{type.Name}}(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object(queryBuilder, gqlClient)
+                 public class {{Formatter.FormatType(type.Name)}}(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object(queryBuilder, gqlClient){{implementsIdInterface}}
                  {
                      {{string.Join("\n\n", methods)}}
                  }
@@ -115,10 +122,11 @@ public class CodeRenderer : ICodeRenderer
 
     public string RenderScalar(Type type)
     {
+        var t = Formatter.FormatType(type.Name);
         return $$"""
                  {{RenderDocComment(type)}}
-                 [JsonConverter(typeof(ScalarIdConverter<{{type.Name}}>))]
-                 public class {{type.Name}} : Scalar 
+                 [JsonConverter(typeof(ScalarIdConverter<{{t}}>))]
+                 public class {{Formatter.FormatType(t)}} : Scalar
                  {
                  }
                  """;
@@ -183,7 +191,14 @@ public class CodeRenderer : ICodeRenderer
 
     private static string RenderArgument(InputValue argument)
     {
-        return $"{argument.Type.GetTypeName()} {argument.GetVarName()}";
+        var type = argument.Type.GetTypeName();
+        if (type.EndsWith("Id") && string.Equals(argument.Name, type.Replace("Id", ""),
+                StringComparison.CurrentCultureIgnoreCase))
+        {
+            type = type.Replace("Id", "");
+        }
+
+        return $"{type} {argument.GetVarName()}";
     }
 
     private static string RenderOptionalArgument(InputValue argument)
@@ -214,14 +229,14 @@ public class CodeRenderer : ICodeRenderer
         {
             var typeName = type.GetType_().OfType.GetTypeName();
             return $"""
-                    (await Engine.ExecuteList<{typeName}ID>(GraphQLClient, queryBuilder))
+                    (await Engine.ExecuteList<{typeName}Id>(GraphQLClient, queryBuilder))
                         .Select(id =>
                             new {typeName}(
                                 QueryBuilder.Builder().Select("load{type}FromID", [new Argument("id", new StringValue(id.Value))]),
                                 GraphQLClient
                             )
                         )
-                        .ToArray();
+                        .ToArray()
                     """;
         }
 
@@ -295,7 +310,16 @@ public class CodeRenderer : ICodeRenderer
                 case "bool": return $"new BooleanValue({argName})";
                 case "int": return $"new IntValue({argName})";
                 case "float": return $"new FloatValue({argName})";
-                default: return $"new StringValue({argName}.Value)";
+                default:
+                    // // a type but needs to convert into id value before sending it.
+                    if (type.EndsWith("Id") && string.Equals(arg.Name, type.Replace("Id", ""),
+                            StringComparison.CurrentCultureIgnoreCase))
+                    {
+                        return $"new IdValue<{type}>({argName})";
+                    }
+
+                    // Id type.
+                    return $"new StringValue({argName}.Value)";
             }
         }
 

@@ -5,12 +5,20 @@ namespace Dagger.SDK.GraphQL;
 
 public abstract class Value
 {
-    public abstract string Format();
+    public abstract Task<string> Format();
+}
+
+public class IdValue<TId>(IId<TId> value) : Value where TId : Scalar
+{
+    public override async Task<string> Format()
+    {
+        return (await value.Id()).Value;
+    }
 }
 
 public class StringValue(string value) : Value
 {
-    public override string Format()
+    public override Task<string> Format()
     {
         var s = value
             .Replace("\\", @"\\")
@@ -18,54 +26,54 @@ public class StringValue(string value) : Value
             .Replace("\n", "\\n")
             .Replace("\t", "\\t")
             .Replace("\"", "\\\"");
-        return $"\"{s}\"";
+        return Task.FromResult($"\"{s}\"");
     }
 }
 
 public class IntValue(int n) : Value
 {
-    public override string Format()
+    public override Task<string> Format()
     {
-        return n.ToString();
+        return Task.FromResult(n.ToString());
     }
 }
 
 public class FloatValue(float f) : Value
 {
-    public override string Format()
+    public override Task<string> Format()
     {
-        return f.ToString(CultureInfo.CurrentCulture);
+        return Task.FromResult(f.ToString(CultureInfo.CurrentCulture));
     }
 }
 
 public class BooleanValue(bool b) : Value
 {
-    public override string Format()
+    public override Task<string> Format()
     {
-        return b ? "true" : "false";
+        return Task.FromResult(b ? "true" : "false");
     }
 }
 
 public class ListValue(List<Value> list) : Value
 {
-    public override string Format()
+    public override Task<string> Format()
     {
         var builder = new StringBuilder();
         builder.Append('[');
-        builder.Append(string.Join(",", list.Select(element => element.Format())));
+        builder.Append(string.Join(",", list.Select(async element => await element.Format()).Select(v => v.Result)));
         builder.Append(']');
-        return builder.ToString();
+        return Task.FromResult(builder.ToString());
     }
 }
 
 public class ObjectValue(List<KeyValuePair<string, Value>> obj) : Value
 {
-    public override string Format()
+    public override Task<string> Format()
     {
         var builder = new StringBuilder();
         builder.Append('{');
-        builder.Append(string.Join(",", obj.Select(kv => $"{kv.Key}:{kv.Value.Format()}")));
+        builder.Append(string.Join(",", obj.Select(async kv => $"{kv.Key}:{await kv.Value.Format()}").Select(v => v.Result)));
         builder.Append('}');
-        return builder.ToString();
+        return Task.FromResult(builder.ToString());
     }
 }

@@ -100,7 +100,7 @@ public static class Formatter
             "Boolean" => "bool",
             "Int" => "int",
             "Float" => "float",
-            _ => typeName,
+            _ => typeName.ToPascalCase(),
         };
     }
 }
