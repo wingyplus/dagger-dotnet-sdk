@@ -110,7 +110,7 @@ public class TypeRef
             tr = OfType;
         }
 
-        if (tr.Kind == "OBJECT")
+        if (tr!.Kind == "OBJECT")
         {
             return true;
         }
