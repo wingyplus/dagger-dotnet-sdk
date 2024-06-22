@@ -11,7 +11,7 @@ public class QueryBuilder(ImmutableList<Field> path)
 {
     public readonly ImmutableList<Field> Path = path;
 
-    private QueryBuilder() : this([]) { }
+    private QueryBuilder() : this(ImmutableList<Field>.Empty) { }
 
     /// <summary>
     /// Select a field with name.
@@ -20,7 +20,7 @@ public class QueryBuilder(ImmutableList<Field> path)
     /// <returns>A new QueryBuilder instance.</returns>
     public QueryBuilder Select(string name)
     {
-        return Select(name, []);
+        return Select(name, ImmutableList<Argument>.Empty);
     }
 
     /// <summary>

@@ -55,12 +55,12 @@ public class CodeRenderer : ICodeRenderer
 
         var toKeyValuePairsProperties = type.InputFields.Select(field =>
             $"""
-             kvPairs.Add(KeyValuePair.Create("{field.Name}", {RenderArgumentValue(field, asProperty: true)} as Value));
+             kvPairs.Add(new KeyValuePair<string, Value>("{field.Name}", {RenderArgumentValue(field, asProperty: true)} as Value));
              """);
 
         var toKeyValuePairsMethod =
             $$"""
-              public List<KeyValuePair<string,Value>> ToKeyValuePairs()
+              public List<KeyValuePair<string, Value>> ToKeyValuePairs()
               {
                   var kvPairs = new List<KeyValuePair<string, Value>>();
                   {{string.Join("\n", toKeyValuePairsProperties)}}
@@ -248,7 +248,7 @@ public class CodeRenderer : ICodeRenderer
                     (await Engine.ExecuteList<{typeName}Id>(GraphQLClient, queryBuilder))
                         .Select(id =>
                             new {typeName}(
-                                QueryBuilder.Builder().Select("load{typeName}FromID", [new Argument("id", new StringValue(id.Value))]),
+                                QueryBuilder.Builder().Select("load{typeName}FromID", ImmutableList.Create<Argument>(new Argument("id", new StringValue(id.Value)))),
                                 GraphQLClient
                             )
                         )

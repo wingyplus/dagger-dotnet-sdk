@@ -1,6 +1,4 @@
 using System.Collections.Immutable;
-using System.Diagnostics;
-using System.Net.Http.Json;
 using System.Text.Json;
 
 using Dagger.SDK.GraphQL;
@@ -46,7 +44,8 @@ public static class Engine
         var query = queryBuilder.Build();
         var response = await client.RequestAsync(query);
         // TODO: handle error here.
-        var jsonElement = await response.Content.ReadFromJsonAsync<JsonElement>()!;
+        var data = await response.Content.ReadAsStringAsync();
+        var jsonElement = JsonSerializer.Deserialize<JsonElement>(data);
         return jsonElement.GetProperty("data");
     }
 
