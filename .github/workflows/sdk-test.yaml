@@ -1,0 +1,27 @@
+name: SDK Test
+
+on:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8'
+    - name: Install Dagger
+      env: 
+        BIN_DIR: /usr/local/bin
+        DAGGER_VERSION: 0.11.8
+      run: |
+        curl -L https://dl.dagger.io/dagger/install.sh | sh
+    - name: Fetch introspection
+      run: |
+        dagger call introspect export --path=./sdk/Dagger.SDK/introspection.json
+    - name: Test
+      working-directory: ./sdk
+      run: |
+        dagger run dotnet test
+
