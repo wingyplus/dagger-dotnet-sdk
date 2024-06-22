@@ -82,7 +82,7 @@ func (m *DotnetSdk) Codegen(
 
 	return dag.GeneratedCode(m.Container.Directory(ModSourceDirPath)).
 		WithVCSGeneratedPaths([]string{"Dagger.SDK*/**"}).
-		WithVCSIgnoredPaths([]string{"Dagger.SDK*/**", "obj", "bin"}), nil
+		WithVCSIgnoredPaths([]string{"Dagger.SDK*/**", "**/obj", "**/bin", "**/.idea"}), nil
 }
 
 func (m *DotnetSdk) codegenBase(ctx context.Context, modSource *ModuleSource, introspectionJson *File) (*DotnetSdk, error) {

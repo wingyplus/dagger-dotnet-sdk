@@ -1,3 +1,6 @@
 /Dagger.SDK*/**
 /obj
 /bin
+/**/obj
+/**/bin
+/**/.idea

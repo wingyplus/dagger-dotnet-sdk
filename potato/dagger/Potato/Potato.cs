@@ -3,13 +3,13 @@ using Mod = Dagger.SDK.Mod;
 
 namespace Potato;
 
-internal class BaseObject(Query dag)
+public class BaseObject(Query dag)
 {
     protected Query Dag { get; } = dag;
 }
 
 [Mod.Object]
-class Potato(Query dag) : BaseObject(dag)
+public class Potato(Query dag) : BaseObject(dag)
 {
     [Mod.Function]
     public async Task<string> Echo(string name)
@@ -20,11 +20,11 @@ class Potato(Query dag) : BaseObject(dag)
             .Stdout();
     }
 
-    [Mod.Function]
-    public Container EchoContainer(string text)
-    {
-        return Dag.Container()
-            .From("alpine")
-            .WithExec(["echo", $"Hello, {text}"]);
-    }
+    // [Mod.Function]
+    // public Container EchoContainer(string text)
+    // {
+    //     return Dag.Container()
+    //         .From("alpine")
+    //         .WithExec(["echo", $"Hello, {text}"]);
+    // }
 }

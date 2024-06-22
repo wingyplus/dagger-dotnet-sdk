@@ -6,4 +6,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Dagger.SDK\Dagger.SDK.csproj" />
+  </ItemGroup>
+
 </Project>
