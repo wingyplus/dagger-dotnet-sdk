@@ -248,7 +248,7 @@ public class CodeRenderer : ICodeRenderer
                     (await Engine.ExecuteList<{typeName}Id>(GraphQLClient, queryBuilder))
                         .Select(id =>
                             new {typeName}(
-                                QueryBuilder.Builder().Select("load{type}FromID", [new Argument("id", new StringValue(id.Value))]),
+                                QueryBuilder.Builder().Select("load{typeName}FromID", [new Argument("id", new StringValue(id.Value))]),
                                 GraphQLClient
                             )
                         )

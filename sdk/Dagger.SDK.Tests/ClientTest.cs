@@ -1,4 +1,4 @@
-using Microsoft.ApplicationInsights.Extensibility.Implementation;
+using System.Collections;
 
 namespace Dagger.SDK.Tests;
 
@@ -80,9 +80,13 @@ public class ClientTest
     public async Task TestReturnArray()
     {
         var envs = await _dag.Container()
-            .From("alpine")
             .WithEnvVariable("A", "B")
             .WithEnvVariable("C", "D")
             .EnvVariables();
+
+        ICollection envNames =
+            envs.Select(env => env.Name()).Select(task => task.Result).ToList();
+        ICollection expected = new[] { "A", "C" };
+        CollectionAssert.AreEqual(expected, envNames);
     }
 }
