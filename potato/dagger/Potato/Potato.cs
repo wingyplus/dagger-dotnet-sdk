@@ -3,18 +3,14 @@ using Mod = Dagger.SDK.Mod;
 
 namespace Potato;
 
-public class BaseObject(Query dag)
-{
-    protected Query Dag { get; } = dag;
-}
-
+[Serializable]
 [Mod.Object]
-public class Potato(Query dag) : BaseObject(dag)
+public partial class Potato()
 {
     [Mod.Function]
     public async Task<string> Echo(string name)
     {
-        return await Dag.Container()
+        return await _dag.Container()
             .From("alpine")
             .WithExec(["echo", $"Hello, {name}"])
             .Stdout();

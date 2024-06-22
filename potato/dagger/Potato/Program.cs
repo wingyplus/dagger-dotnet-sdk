@@ -3,6 +3,6 @@
     public static async Task Main(string[] args)
     {
         var dag = Dagger.SDK.Dagger.Connect();
-        await Dagger.SDK.Mod.Entrypoint.Invoke(dag, typeof(Potato.Potato));
+        await Dagger.SDK.Mod.Entrypoint.Invoke<Potato.Potato>(dag);
     }
 }

@@ -5,20 +5,67 @@ namespace Dagger.SDK.Mod;
 
 public class Entrypoint
 {
-    public static async Task<Void> Invoke(Query dag, Type rootType)
+    public static async Task<Void> Invoke<T>(Query dag) where T : class, IDagSetter
     {
-        FunctionCall fnCall = dag.CurrentFunctionCall();
-        string parentName = await fnCall.ParentName();
+        var rootType = typeof(T);
+        var fnCall = dag.CurrentFunctionCall();
+        var parentName = await fnCall.ParentName();
         // TODO: Get module name to check root type name match with it.
 
-        object result = parentName switch
+        var result = parentName switch
         {
             // TODO: Dagger.SDK should automatic serialize into id.
             "" => await Register(dag, dag.Module(), rootType).Id(),
-            _ => ""
+            _ => await DoInvoke<T>(dag, fnCall)
         };
 
         return await fnCall.ReturnValue(IntoJson(result));
+    }
+
+    private static async Task<object> DoInvoke<T>(Query dag, FunctionCall fnCall) where T : class, IDagSetter
+    {
+        var fnName = await fnCall.Name();
+        var parentJson = await fnCall.Parent();
+        var fnArgs = await fnCall.InputArgs();
+        var parent = JsonSerializer.Deserialize<T>(parentJson.Value);
+        parent.SetDag(dag);
+        // QUESTION: Can this be in source generator?
+        var parentType = parent.GetType();
+        var method = parentType.GetMethod(fnName);
+        var methodParameters = method.GetParameters();
+
+        var inputArgs = new Dictionary<string, JsonElement>();
+        foreach (FunctionCallArgValue arg in fnArgs)
+        {
+            var name = await arg.Name();
+            var value = await arg.Value();
+            inputArgs[name] = JsonSerializer.Deserialize<JsonElement>(value.Value);
+        }
+
+        IEnumerable<object?> parameters = [];
+        foreach (var param in methodParameters)
+        {
+            if (param.ParameterType.Name == "String")
+            {
+                parameters = parameters.Append(inputArgs[param.Name].Deserialize<string>());
+            }
+            else
+            {
+                // BOOM!
+                parameters = parameters.Append(inputArgs[param.Name]);
+            }
+        }
+
+        var result = method.Invoke(parent, parameters.ToArray())!;
+        // QUESTION: can source generator solve this issue?
+        if (result.GetType().IsGenericType)
+        {
+            var task = (Task)result;
+            await task.ConfigureAwait(false);
+            return task.GetType().GetProperty("Result").GetValue(task);
+        }
+
+        return result;
     }
 
     private static Json IntoJson(object result)
@@ -39,6 +86,7 @@ public class Entrypoint
             .Select(method =>
             {
                 var function = dag.Function(
+                    // TODO: we need name convertion.
                     method.Name,
                     ReturnTypeDef(dag, method)
                 );
