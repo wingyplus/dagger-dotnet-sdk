@@ -1,0 +1,16 @@
+{
+  "name": "codegen",
+  "sdk": "go",
+  "dependencies": [
+    {
+      "name": "dagger",
+      "source": "github.com/shykes/daggerverse/dagger@5c47fda7b11300c4a18a4f5e874441006b66c300"
+    },
+    {
+      "name": "docker",
+      "source": "github.com/shykes/daggerverse/docker@c9a80c9eac0675a53a7e052da3594207f4235988"
+    }
+  ],
+  "source": ".",
+  "engineVersion": "v0.11.6"
+}
