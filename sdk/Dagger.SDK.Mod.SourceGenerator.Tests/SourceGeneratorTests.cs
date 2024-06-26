@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using System.Reflection;
 
 using Microsoft.CodeAnalysis;
@@ -16,12 +17,12 @@ public class SourceGeneratorTests : VerifyBase
     public Task TestGeneratePartialClass()
     {
         const string potatoSource = """
-                                   namespace PotatoModule;
+                                    namespace PotatoModule;
 
-                                   [Dagger.SDK.Mod.Object]
-                                   public partial class Potato {
-                                   }
-                                   """;
+                                    [Dagger.SDK.Mod.Object]
+                                    public partial class Potato {
+                                    }
+                                    """;
 
         var inputCompilation = CreateCompilation([(potatoSource, "Potato.cs")]);
 
@@ -32,7 +33,7 @@ public class SourceGeneratorTests : VerifyBase
 
 
         var files = outputCompilation.SyntaxTrees.Select(t => Path.GetFileName(t.FilePath)).ToArray();
-        CollectionAssert.Contains(collection: files, element: "Potato.g.cs", message: "Generated file not found.");
+        CollectionAssert.Contains(collection: files, element: "Potato.g.cs");
 
         Assert.IsTrue(diagnostics.IsEmpty);
         // One from existing source and the one from generator.
@@ -45,6 +46,35 @@ public class SourceGeneratorTests : VerifyBase
         var result = runResult.Results[0];
         Assert.AreEqual(1, result.GeneratedSources.Length);
         return Verify(result.GeneratedSources[0].SourceText.ToString());
+    }
+
+    [TestMethod]
+    public void TestGenerateOnlyClassThatHasObjectAttributeAnnotated()
+    {
+        const string potatoSource = """
+                                    namespace PotatoModule;
+
+                                    [Dagger.SDK.Mod.Object]
+                                    public partial class Potato {}
+
+                                    public partial class Tomato {}
+
+                                    [Serializable]
+                                    public partial class Carrot {}
+                                    """;
+
+        var inputCompilation = CreateCompilation([(potatoSource, "Potato.cs")]);
+
+        var generator = new SourceGenerator();
+        GeneratorDriver driver = CSharpGeneratorDriver.Create(generator);
+        driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation,
+            out ImmutableArray<Diagnostic> _);
+
+        var files = outputCompilation.SyntaxTrees.Select(t => Path.GetFileName(t.FilePath)).ToArray();
+        Assert.AreEqual(2, files.Length);
+        CollectionAssert.Contains(collection: files, element: "Potato.g.cs");
+        CollectionAssert.DoesNotContain(collection: files, element: "Tomato.g.cs");
+        CollectionAssert.DoesNotContain(collection: files, element: "Carrot.g.cs");
     }
 
     private static CSharpCompilation CreateCompilation((string, string)[] sources)

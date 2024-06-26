@@ -35,7 +35,7 @@ public class SourceGenerator : IIncrementalGenerator
 
         var symbols = syntaxes
             .Select(syntax =>
-                compilation.GetSemanticModel(syntax.SyntaxTree).GetDeclaredSymbol(syntax) as INamedTypeSymbol)
+                compilation.GetSemanticModel(syntax.SyntaxTree).GetDeclaredSymbol(syntax))
             .Aggregate(context, (ctx, namedSymbol) =>
             {
                 var ns = namedSymbol.ContainingNamespace.Name;
@@ -67,6 +67,8 @@ public class SourceGenerator : IIncrementalGenerator
     {
         // Support only partial class that has at least one attribute.
         return node is ClassDeclarationSyntax { AttributeLists.Count: > 0 } classDeclaration &&
+               classDeclaration.AttributeLists.Any(attrs =>
+                   attrs.Attributes.Any(attr => attr.ToFullString() == "Dagger.SDK.Mod.Object")) &&
                classDeclaration.Modifiers.Any(SyntaxKind.PartialKeyword);
     }
 
