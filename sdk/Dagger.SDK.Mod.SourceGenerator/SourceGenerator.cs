@@ -42,7 +42,7 @@ public class SourceGenerator : IIncrementalGenerator
                 var className = namedSymbol.Name;
 
                 var source = $$"""
-                               using Dagger.SDK;
+                               using Dagger.SDK.Mod;
 
                                namespace {{ns}};
 

@@ -1,4 +1,4 @@
-﻿using Dagger.SDK;
+﻿using Dagger.SDK.Mod;
 
 namespace Potato;
 

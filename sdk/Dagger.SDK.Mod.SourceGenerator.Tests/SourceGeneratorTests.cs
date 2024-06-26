@@ -10,7 +10,7 @@ using Binder = Microsoft.CSharp.RuntimeBinder.Binder;
 namespace Dagger.SDK.Mod.SourceGenerator.Tests;
 
 [TestClass]
-public partial class SourceGeneratorTests : VerifyBase
+public class SourceGeneratorTests : VerifyBase
 {
     [TestMethod]
     public Task TestGeneratePartialClass()
