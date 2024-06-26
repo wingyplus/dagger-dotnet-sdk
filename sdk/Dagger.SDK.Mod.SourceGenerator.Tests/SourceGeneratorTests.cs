@@ -16,7 +16,7 @@ public class SourceGeneratorTests : VerifyBase
     public Task TestGeneratePartialClass()
     {
         const string potatoSource = """
-                                   namespace Potato;
+                                   namespace PotatoModule;
 
                                    [Dagger.SDK.Mod.Object]
                                    public partial class Potato {
