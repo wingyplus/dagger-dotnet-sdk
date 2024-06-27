@@ -22,11 +22,31 @@ public class SourceGenerator : IIncrementalGenerator
 
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
+        context.RegisterPostInitializationOutput(postInitializationContext =>
+        {
+            postInitializationContext.AddSource("Dagger.SDK.ModAttributes.g.cs", """
+                using System;
+                
+                namespace Dagger.SDK.Mod;
+
+                /// <summary>
+                /// Expose the class as a Dagger.ObjectTypeDef.
+                /// </summary>
+                [AttributeUsage(AttributeTargets.Class)]
+                public sealed class ObjectAttribute : Attribute;
+
+                /// <summary>
+                /// Expose the class as a Dagger.Function.
+                /// </summary>
+                [AttributeUsage(AttributeTargets.Method)]
+                public sealed class FunctionAttribute : Attribute;
+                """);
+        });
         var objectClasses = context.SyntaxProvider.ForAttributeWithMetadataName(
-                fullyQualifiedMetadataName: ObjectAttribute,
-                predicate: IsPartialClass,
-                transform: ExtractTarget
-            );
+            fullyQualifiedMetadataName: ObjectAttribute,
+            predicate: IsPartialClass,
+            transform: ExtractTarget
+        );
 
         context.RegisterSourceOutput(objectClasses, GenerateIDagSetter);
     }
@@ -49,11 +69,10 @@ public class SourceGenerator : IIncrementalGenerator
         (ClassDeclarationSyntax classDef, INamedTypeSymbol classSymbol) tuple)
     {
         (ClassDeclarationSyntax classDef, INamedTypeSymbol symbol) = tuple;
-        var containingType = symbol.ContainingType;
-        var ns = containingType.ContainingNamespace?.ToDisplayString(
+        var ns = symbol.ContainingNamespace?.ToDisplayString(
             SymbolDisplayFormat.FullyQualifiedFormat.WithGlobalNamespaceStyle(SymbolDisplayGlobalNamespaceStyle
                 .Omitted));
-        var className = containingType.Name;
+        var className = symbol.Name;
 
         var source = $$"""
                        using Dagger.SDK;
@@ -64,7 +83,7 @@ public class SourceGenerator : IIncrementalGenerator
                        public partial class {{className}} : IDagSetter
                        {
                            private Query _dag;
-
+                       
                            public void SetDag(Query dag) 
                            {
                                _dag = dag;
