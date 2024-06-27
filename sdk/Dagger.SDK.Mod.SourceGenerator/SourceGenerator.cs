@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Linq;
+using System.Text;
 using System.Threading;
 
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Text;
 
 namespace Dagger.SDK.Mod.SourceGenerator;
 
@@ -15,65 +18,60 @@ namespace Dagger.SDK.Mod.SourceGenerator;
 [Generator(LanguageNames.CSharp)]
 public class SourceGenerator : IIncrementalGenerator
 {
+    private const string ObjectAttribute = "Dagger.SDK.Mod.ObjectAttribute";
+
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        var provider = context.SyntaxProvider.CreateSyntaxProvider(
-                predicate: SyntaxPredicate,
-                transform: IntoClassDeclaration
-            )
-            .Where(m => m is not null);
+        var objectClasses = context.SyntaxProvider.ForAttributeWithMetadataName(
+                fullyQualifiedMetadataName: ObjectAttribute,
+                predicate: IsPartialClass,
+                transform: ExtractTarget
+            );
 
-        var compilation = context.CompilationProvider.Combine(provider.Collect());
-
-        context.RegisterSourceOutput(compilation, ExecuteGeneration);
+        context.RegisterSourceOutput(objectClasses, GenerateIDagSetter);
     }
 
-    private static void ExecuteGeneration(SourceProductionContext context,
-        (Compilation Left, ImmutableArray<ClassDeclarationSyntax> Right) tuple)
+    private static (ClassDeclarationSyntax classDef, INamedTypeSymbol classSymbol) ExtractTarget(
+        GeneratorAttributeSyntaxContext context,
+        CancellationToken token)
     {
-        var (compilation, syntaxes) = tuple;
-
-        var symbols = syntaxes
-            .Select(syntax =>
-                compilation.GetSemanticModel(syntax.SyntaxTree).GetDeclaredSymbol(syntax))
-            .Aggregate(context, (ctx, namedSymbol) =>
-            {
-                var ns = namedSymbol.ContainingNamespace.Name;
-                var className = namedSymbol.Name;
-
-                var source = $$"""
-                               using Dagger.SDK;
-                               using Dagger.SDK.Mod;
-
-                               namespace {{ns}};
-
-                               public partial class {{className}} : IDagSetter
-                               {
-                                   private Query _dag;
-                                  
-                                   public void SetDag(Query dag) 
-                                   {
-                                       _dag = dag;
-                                   }
-                               }
-                               """;
-
-                ctx.AddSource($"{className}.g.cs", source);
-                return ctx;
-            });
+        var classDef = (ClassDeclarationSyntax)context.TargetNode;
+        var classSymbol = (INamedTypeSymbol)context.TargetSymbol;
+        return (classDef, classSymbol);
     }
 
-    private static bool SyntaxPredicate(SyntaxNode node, CancellationToken token)
+    private static bool IsPartialClass(SyntaxNode node, CancellationToken token)
     {
-        // Support only partial class that has at least one attribute.
-        return node is ClassDeclarationSyntax { AttributeLists.Count: > 0 } classDeclaration &&
-               classDeclaration.AttributeLists.Any(attrs =>
-                   attrs.Attributes.Any(attr => attr.ToFullString() == "Dagger.SDK.Mod.Object")) &&
-               classDeclaration.Modifiers.Any(SyntaxKind.PartialKeyword);
+        return node is ClassDeclarationSyntax classDef && classDef.Modifiers.Any(SyntaxKind.PartialKeyword);
     }
 
-    private static ClassDeclarationSyntax IntoClassDeclaration(GeneratorSyntaxContext context, CancellationToken token)
+    private static void GenerateIDagSetter(SourceProductionContext context,
+        (ClassDeclarationSyntax classDef, INamedTypeSymbol classSymbol) tuple)
     {
-        return (ClassDeclarationSyntax)context.Node;
+        (ClassDeclarationSyntax classDef, INamedTypeSymbol symbol) = tuple;
+        var containingType = symbol.ContainingType;
+        var ns = containingType.ContainingNamespace?.ToDisplayString(
+            SymbolDisplayFormat.FullyQualifiedFormat.WithGlobalNamespaceStyle(SymbolDisplayGlobalNamespaceStyle
+                .Omitted));
+        var className = containingType.Name;
+
+        var source = $$"""
+                       using Dagger.SDK;
+                       using Dagger.SDK.Mod;
+
+                       namespace {{ns}};
+
+                       public partial class {{className}} : IDagSetter
+                       {
+                           private Query _dag;
+
+                           public void SetDag(Query dag) 
+                           {
+                               _dag = dag;
+                           }
+                       }
+                       """;
+
+        context.AddSource($"{className}.g.cs", SourceText.From(source, Encoding.UTF8));
     }
 }
