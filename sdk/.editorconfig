@@ -5,6 +5,7 @@ root = true
 [*]
 indent_style = space
 charset = utf-8
+trim_trailing_whitespace = true
 
 [*.csproj]
 indent_size = 2
