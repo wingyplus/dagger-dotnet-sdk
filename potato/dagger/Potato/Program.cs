@@ -1,4 +1,5 @@
-﻿public class Program
+﻿// QUESTION: is it possible to get generate by source generator?
+public class Program
 {
     public static async Task Main(string[] args)
     {
