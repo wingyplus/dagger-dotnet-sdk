@@ -4,10 +4,10 @@ namespace Dagger.SDK.Mod;
 /// Expose the class as a Dagger.ObjectTypeDef.
 /// </summary>
 [AttributeUsage(AttributeTargets.Class)]
-public sealed class Object : Attribute;
+public sealed class ObjectAttribute : Attribute;
 
 /// <summary>
 /// Expose the class as a Dagger.Function.
 /// </summary>
 [AttributeUsage(AttributeTargets.Method)]
-public sealed class Function : Attribute;
+public sealed class FunctionAttribute : Attribute;

@@ -37,20 +37,22 @@ public class SourceGeneratorTests : VerifyBase
 
         var files = outputCompilation.SyntaxTrees.Select(t => Path.GetFileName(t.FilePath)).ToArray();
         CollectionAssert.Contains(collection: files, element: "Potato.g.cs");
+        CollectionAssert.Contains(collection: files, element: "Dagger.SDK.Mod_Attributes.g.cs");
+        CollectionAssert.Contains(collection: files, element: "Dagger.SDK.Mod_Interfaces.g.cs");
 
-        // Assert.IsTrue(diagnostics.IsEmpty);
+        Assert.IsTrue(diagnostics.IsEmpty);
         // One from existing source and the one from generator.
-        // Assert.AreEqual(2, outputCompilation.SyntaxTrees.Count());
+        Assert.AreEqual(4, outputCompilation.SyntaxTrees.Count());
 
         var runResult = driver.GetRunResult();
 
         Assert.IsTrue(runResult.Diagnostics.IsEmpty);
 
         var result = runResult.Results[0];
-        Assert.AreEqual(2, result.GeneratedSources.Length);
+        Assert.AreEqual(3, result.GeneratedSources.Length);
         // Assert.IsTrue(result.Diagnostics.IsEmpty);
 
-        return Verify(result.GeneratedSources[1].SourceText.ToString());
+        return Verify(result.GeneratedSources[2].SourceText.ToString());
     }
 
     [TestMethod]
@@ -76,7 +78,7 @@ public class SourceGeneratorTests : VerifyBase
             out ImmutableArray<Diagnostic> _);
 
         var files = outputCompilation.SyntaxTrees.Select(t => Path.GetFileName(t.FilePath)).ToArray();
-        Assert.AreEqual(2, files.Length);
+        Assert.AreEqual(4, files.Length);
         CollectionAssert.Contains(collection: files, element: "Potato.g.cs");
         CollectionAssert.DoesNotContain(collection: files, element: "Tomato.g.cs");
         CollectionAssert.DoesNotContain(collection: files, element: "Carrot.g.cs");

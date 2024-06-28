@@ -82,7 +82,7 @@ public class Entrypoint
     private static TypeDef RegisterFunctions(Query dag, TypeDef obj, MethodInfo[] methods)
     {
         var functions = methods
-            .Where(method => method.GetCustomAttribute<Function>() is not null)
+            .Where(method => method.GetCustomAttribute<FunctionAttribute>() is not null)
             .Select(method =>
             {
                 var function = dag.Function(

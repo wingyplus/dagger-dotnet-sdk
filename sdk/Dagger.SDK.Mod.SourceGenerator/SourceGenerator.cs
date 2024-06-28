@@ -24,23 +24,8 @@ public class SourceGenerator : IIncrementalGenerator
     {
         context.RegisterPostInitializationOutput(postInitializationContext =>
         {
-            postInitializationContext.AddSource("Dagger.SDK.ModAttributes.g.cs", """
-                using System;
-                
-                namespace Dagger.SDK.Mod;
-
-                /// <summary>
-                /// Expose the class as a Dagger.ObjectTypeDef.
-                /// </summary>
-                [AttributeUsage(AttributeTargets.Class)]
-                public sealed class ObjectAttribute : Attribute;
-
-                /// <summary>
-                /// Expose the class as a Dagger.Function.
-                /// </summary>
-                [AttributeUsage(AttributeTargets.Method)]
-                public sealed class FunctionAttribute : Attribute;
-                """);
+            postInitializationContext.AddSource("Dagger.SDK.Mod_Attributes.g.cs", ModuleAttributesSource());
+            postInitializationContext.AddSource("Dagger.SDK.Mod_Interfaces.g.cs", ModuleInterfacesSource());
         });
         var objectClasses = context.SyntaxProvider.ForAttributeWithMetadataName(
             fullyQualifiedMetadataName: ObjectAttribute,
@@ -49,6 +34,49 @@ public class SourceGenerator : IIncrementalGenerator
         );
 
         context.RegisterSourceOutput(objectClasses, GenerateIDagSetter);
+    }
+
+    private SourceText ModuleInterfacesSource()
+    {
+        string sourceText = """
+                            namespace Dagger.SDK.Mod;
+
+                            /// <summary> 
+                            /// An interface for module runtime to inject Dagger client instance to the 
+                            /// object class.
+                            /// </summary>
+                            public interface IDagSetter
+                            {
+                                /// <summary>
+                                /// Set Dagger client instance.
+                                /// </summary>
+                                /// <param name="dag">The Dagger client instance.</param>
+                                void SetDag(Query dag);
+                            }
+                            """;
+        return SourceText.From(sourceText, Encoding.UTF8);
+    }
+
+    private static SourceText ModuleAttributesSource()
+    {
+        const string sourceText = """
+                                  using System;
+
+                                  namespace Dagger.SDK.Mod;
+
+                                  /// <summary>
+                                  /// Expose the class as a Dagger.ObjectTypeDef.
+                                  /// </summary>
+                                  [AttributeUsage(AttributeTargets.Class)]
+                                  public sealed class ObjectAttribute : Attribute;
+
+                                  /// <summary>
+                                  /// Expose the class as a Dagger.Function.
+                                  /// </summary>
+                                  [AttributeUsage(AttributeTargets.Method)]
+                                  public sealed class FunctionAttribute : Attribute;
+                                  """;
+        return SourceText.From(sourceText, Encoding.UTF8);
     }
 
     private static (ClassDeclarationSyntax classDef, INamedTypeSymbol classSymbol) ExtractTarget(
