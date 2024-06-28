@@ -1,26 +1,26 @@
+using Dagger.SDK;
 using Mod = Dagger.SDK.Mod;
 
 namespace Potato;
 
 [Serializable]
-// [Potato.Object]
 [Mod.Object]
-public partial class Potato()
+public partial class Potato
 {
-    // [Mod.Function]
-    // public async Task<string> Echo(string name)
-    // {
-    //     return await _dag.Container()
-    //         .From("alpine")
-    //         .WithExec(["echo", $"Hello, {name}"])
-    //         .Stdout();
-    // }
+    [Mod.Function]
+    public async Task<string> Echo(string name)
+    {
+        return await _dag.Container()
+            .From("alpine")
+            .WithExec(["echo", $"Hello, {name}"])
+            .Stdout();
+    }
 
-    // [Mod.Function]
-    // public Container EchoContainer(string text)
-    // {
-    //     return Dag.Container()
-    //         .From("alpine")
-    //         .WithExec(["echo", $"Hello, {text}"]);
-    // }
+    [Mod.Function]
+    public Container EchoContainer(string text)
+    {
+        return _dag.Container()
+            .From("alpine")
+            .WithExec(["echo", $"Hello, {text}"]);
+    }
 }

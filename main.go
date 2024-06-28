@@ -126,11 +126,6 @@ func (m *DotnetSdk) WithSdk(subpath string) *DotnetSdk {
 			ContainerWithDirectoryOpts{Exclude: IgnorePaths},
 		).
 		WithDirectory(
-			"Dagger.SDK.Mod",
-			m.SDKSourceDir.Directory("Dagger.SDK.Mod"),
-			ContainerWithDirectoryOpts{Exclude: IgnorePaths},
-		).
-		WithDirectory(
 			"Dagger.SDK.Mod.SourceGenerator",
 			m.SDKSourceDir.Directory("Dagger.SDK.Mod.SourceGenerator"),
 			ContainerWithDirectoryOpts{Exclude: IgnorePaths},
@@ -141,7 +136,6 @@ func (m *DotnetSdk) WithSdk(subpath string) *DotnetSdk {
 			ContainerWithDirectoryOpts{Exclude: IgnorePaths},
 		).
 		WithExec([]string{"dotnet", "sln", "add", "Dagger.SDK"}).
-		WithExec([]string{"dotnet", "sln", "add", "Dagger.SDK.Mod"}).
 		WithExec([]string{"dotnet", "sln", "add", "Dagger.SDK.Mod.SourceGenerator"}).
 		WithExec([]string{"dotnet", "sln", "add", "Dagger.SDK.SourceGenerator/Dagger.SDK.SourceGenerator"})
 
@@ -175,7 +169,6 @@ func (m *DotnetSdk) WithProject(ctx context.Context, subpath string, modName str
 		ctr = ctr.
 			WithExec([]string{"dotnet", "new", "console", "--framework", "net8.0", "--output", name, "-n", name}).
 			WithExec([]string{"dotnet", "add", name, "reference", "../Dagger.SDK"}).
-			WithExec([]string{"dotnet", "add", name, "reference", "../Dagger.SDK.Mod"}).
 			WithExec([]string{"dotnet", "add", name, "reference", "../Dagger.SDK.Mod.SourceGenerator"})
 	}
 

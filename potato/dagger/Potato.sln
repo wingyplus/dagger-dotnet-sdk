@@ -3,17 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dagger.SDK", "Dagger.SDK\Dagger.SDK.csproj", "{77B7F949-0AD0-40A8-8634-33BA1978018B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dagger.SDK", "Dagger.SDK\Dagger.SDK.csproj", "{A0B2A90D-C08C-454A-9235-16EB19D69372}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dagger.SDK.Mod", "Dagger.SDK.Mod\Dagger.SDK.Mod.csproj", "{21B8D5D0-9492-43EA-91DF-3D4DF5B0A6DC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dagger.SDK.Mod.SourceGenerator", "Dagger.SDK.Mod.SourceGenerator\Dagger.SDK.Mod.SourceGenerator.csproj", "{B81EAAEB-BECD-413A-958C-37D980BB3042}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dagger.SDK.Mod.SourceGenerator", "Dagger.SDK.Mod.SourceGenerator\Dagger.SDK.Mod.SourceGenerator.csproj", "{6E2C971D-3479-4143-B183-03A540A0C43D}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Dagger.SDK.SourceGenerator", "Dagger.SDK.SourceGenerator", "{FEC7ED66-6F65-4ADB-9610-500FD61545DA}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Dagger.SDK.SourceGenerator", "Dagger.SDK.SourceGenerator", "{87A238DA-67EF-443F-9D26-D232A4BDA960}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dagger.SDK.SourceGenerator", "Dagger.SDK.SourceGenerator\Dagger.SDK.SourceGenerator\Dagger.SDK.SourceGenerator.csproj", "{C73DBB4B-68A8-450F-9427-D112A3D9D437}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dagger.SDK.SourceGenerator", "Dagger.SDK.SourceGenerator\Dagger.SDK.SourceGenerator\Dagger.SDK.SourceGenerator.csproj", "{DBA0341B-6362-4730-A604-03C5A722B242}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Potato", "Potato\Potato.csproj", "{12D8B7F9-38A7-4C8A-8911-74E3D1BFC370}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Potato", "Potato\Potato.csproj", "{8FF591D1-F928-4FED-96BF-DC9BC4196956}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -24,28 +22,24 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{77B7F949-0AD0-40A8-8634-33BA1978018B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{77B7F949-0AD0-40A8-8634-33BA1978018B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{77B7F949-0AD0-40A8-8634-33BA1978018B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{77B7F949-0AD0-40A8-8634-33BA1978018B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{21B8D5D0-9492-43EA-91DF-3D4DF5B0A6DC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{21B8D5D0-9492-43EA-91DF-3D4DF5B0A6DC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{21B8D5D0-9492-43EA-91DF-3D4DF5B0A6DC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{21B8D5D0-9492-43EA-91DF-3D4DF5B0A6DC}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6E2C971D-3479-4143-B183-03A540A0C43D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6E2C971D-3479-4143-B183-03A540A0C43D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6E2C971D-3479-4143-B183-03A540A0C43D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6E2C971D-3479-4143-B183-03A540A0C43D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{DBA0341B-6362-4730-A604-03C5A722B242}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DBA0341B-6362-4730-A604-03C5A722B242}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{DBA0341B-6362-4730-A604-03C5A722B242}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DBA0341B-6362-4730-A604-03C5A722B242}.Release|Any CPU.Build.0 = Release|Any CPU
-		{12D8B7F9-38A7-4C8A-8911-74E3D1BFC370}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{12D8B7F9-38A7-4C8A-8911-74E3D1BFC370}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{12D8B7F9-38A7-4C8A-8911-74E3D1BFC370}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{12D8B7F9-38A7-4C8A-8911-74E3D1BFC370}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A0B2A90D-C08C-454A-9235-16EB19D69372}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A0B2A90D-C08C-454A-9235-16EB19D69372}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A0B2A90D-C08C-454A-9235-16EB19D69372}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A0B2A90D-C08C-454A-9235-16EB19D69372}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B81EAAEB-BECD-413A-958C-37D980BB3042}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B81EAAEB-BECD-413A-958C-37D980BB3042}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B81EAAEB-BECD-413A-958C-37D980BB3042}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B81EAAEB-BECD-413A-958C-37D980BB3042}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C73DBB4B-68A8-450F-9427-D112A3D9D437}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C73DBB4B-68A8-450F-9427-D112A3D9D437}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C73DBB4B-68A8-450F-9427-D112A3D9D437}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C73DBB4B-68A8-450F-9427-D112A3D9D437}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8FF591D1-F928-4FED-96BF-DC9BC4196956}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8FF591D1-F928-4FED-96BF-DC9BC4196956}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8FF591D1-F928-4FED-96BF-DC9BC4196956}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8FF591D1-F928-4FED-96BF-DC9BC4196956}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{DBA0341B-6362-4730-A604-03C5A722B242} = {87A238DA-67EF-443F-9D26-D232A4BDA960}
+		{C73DBB4B-68A8-450F-9427-D112A3D9D437} = {FEC7ED66-6F65-4ADB-9610-500FD61545DA}
 	EndGlobalSection
 EndGlobal

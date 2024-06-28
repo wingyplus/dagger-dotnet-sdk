@@ -36,24 +36,24 @@ public class SourceGenerator : IIncrementalGenerator
         context.RegisterSourceOutput(objectClasses, GenerateIDagSetter);
     }
 
-    private SourceText ModuleInterfacesSource()
+    private static SourceText ModuleInterfacesSource()
     {
-        string sourceText = """
-                            namespace Dagger.SDK.Mod;
+        const string sourceText = """
+                                  namespace Dagger.SDK.Mod;
 
-                            /// <summary> 
-                            /// An interface for module runtime to inject Dagger client instance to the 
-                            /// object class.
-                            /// </summary>
-                            public interface IDagSetter
-                            {
-                                /// <summary>
-                                /// Set Dagger client instance.
-                                /// </summary>
-                                /// <param name="dag">The Dagger client instance.</param>
-                                void SetDag(Query dag);
-                            }
-                            """;
+                                  /// <summary> 
+                                  /// An interface for module runtime to inject Dagger client instance to the 
+                                  /// object class.
+                                  /// </summary>
+                                  public interface IDagSetter
+                                  {
+                                      /// <summary>
+                                      /// Set Dagger client instance.
+                                      /// </summary>
+                                      /// <param name="dag">The Dagger client instance.</param>
+                                      void SetDag(Query dag);
+                                  }
+                                  """;
         return SourceText.From(sourceText, Encoding.UTF8);
     }
 
