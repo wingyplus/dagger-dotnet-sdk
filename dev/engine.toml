@@ -1,0 +1,4 @@
+
+debug = true
+trace = false
+insecure-entitlements = ["security.insecure"]
