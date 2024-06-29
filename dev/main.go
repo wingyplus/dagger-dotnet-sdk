@@ -46,7 +46,7 @@ func (m *Dev) Test(
 		WithFile("Dagger.SDK/introspection.json", m.Introspect()).
 		WithExec([]string{"dotnet", "restore"}).
 		WithExec([]string{"dotnet", "build", "--no-restore"}).
-		WithExec([]string{"dotnet", "test", "--no-build", "--blame-hang", "--blame-hang-timeout", "2m"}, ContainerWithExecOpts{
+		WithExec([]string{"dotnet", "test", "--no-build"}, ContainerWithExecOpts{
 			ExperimentalPrivilegedNesting: true,
 		}).
 		Sync(ctx)
