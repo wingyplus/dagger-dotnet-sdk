@@ -44,7 +44,7 @@ func (m *Dev) Test(
 		WithMountedDirectory("/src", source).
 		WithWorkdir("/src/sdk").
 		WithFile("Dagger.SDK/introspection.json", m.Introspect()).
-		WithExec([]string{"dotnet", "test"}, ContainerWithExecOpts{
+		WithExec([]string{"sh", "-c", "dotnet test"}, ContainerWithExecOpts{
 			ExperimentalPrivilegedNesting: true,
 		}).
 		Sync(ctx)
