@@ -1,7 +1,6 @@
 # Dagger SDK for DotNet
 
-This is the place for DotNet Dagger SDK. It's forked from official SDK to make 
-Dagger Module works.
+This is the place for DotNet Dagger SDK.
 
 ## Development
 
