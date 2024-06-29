@@ -1,5 +1,4 @@
-name: SDK Test
-
+name: dotnet sdk
 on:
   pull_request:
 
