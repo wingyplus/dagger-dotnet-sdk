@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -67,7 +67,8 @@ public class SourceGenerator : IIncrementalGenerator
     {
         return new FunctionContext
         {
-            Syntax = (MethodDeclarationSyntax)context.TargetNode, Symbol = (IMethodSymbol)context.TargetSymbol
+            Syntax = (MethodDeclarationSyntax)context.TargetNode,
+            Symbol = (IMethodSymbol)context.TargetSymbol
         };
     }
 
@@ -97,20 +98,12 @@ public class SourceGenerator : IIncrementalGenerator
     {
         var className = objectContext.Name;
 
-        var withFunctionLines = string.Join(
-            "\n",
-            objectContext
-                .Functions
-                .Select(static m => m.Name)
-                .Select(static methodName => $"""
-                                              .WithFunction("{methodName}", dag.TypeDef().WithKind(TypeDefKind.STRING)))
-                                              """)
-        );
-
-        var defineFunction = $"""
-                              objTypeDef
-                              {withFunctionLines};
-                              """;
+        var withFunctionDefs = objectContext
+            .Functions
+            .Select(static m => m.Name)
+            .Select(static methodName => $"""
+                                          .WithFunction("{methodName}", dag.TypeDef().WithKind(TypeDefKind.STRING)))
+                                          """);
 
         var sourceText = SourceText.From($$"""
                                            using Dagger.SDK;
@@ -120,7 +113,8 @@ public class SourceGenerator : IIncrementalGenerator
                                                public ObjectTypeDef ToObjectTypeDef(Query dag)
                                                {
                                                    var objTypeDef = dag.TypeDef().WithObject("{{className}}");
-                                                   {{defineFunction}}
+                                                   objTypeDef
+                                                   {{string.Join("\n", withFunctionDefs)}};
                                                    return objTypeDef;
                                                }
                                            }
