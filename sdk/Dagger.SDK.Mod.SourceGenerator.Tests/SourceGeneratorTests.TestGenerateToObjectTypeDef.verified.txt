@@ -1,0 +1,13 @@
+﻿using Dagger.SDK;
+
+class partial Potato
+{
+    public ObjectTypeDef ToObjectTypeDef(Query dag)
+    {
+        var objTypeDef = dag.TypeDef().WithObject("Potato");
+        objTypeDef
+.WithFunction("Hello", dag.TypeDef().WithKind(TypeDefKind.STRING)))
+.WithFunction("Hello2", dag.TypeDef().WithKind(TypeDefKind.STRING)));
+        return objTypeDef;
+    }
+}

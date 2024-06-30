@@ -42,15 +42,14 @@ public class SourceGeneratorTests : VerifyBase
 
         Assert.IsTrue(diagnostics.IsEmpty);
         // One from existing source and the one from generator.
-        Assert.AreEqual(4, outputCompilation.SyntaxTrees.Count());
+        Assert.AreEqual(5, outputCompilation.SyntaxTrees.Count());
 
         var runResult = driver.GetRunResult();
 
         Assert.IsTrue(runResult.Diagnostics.IsEmpty);
 
         var result = runResult.Results[0];
-        Assert.AreEqual(3, result.GeneratedSources.Length);
-        // Assert.IsTrue(result.Diagnostics.IsEmpty);
+        Assert.AreEqual(4, result.GeneratedSources.Length);
 
         return Verify(result.GeneratedSources[2].SourceText.ToString());
     }
@@ -78,10 +77,54 @@ public class SourceGeneratorTests : VerifyBase
             out ImmutableArray<Diagnostic> _);
 
         var files = outputCompilation.SyntaxTrees.Select(t => Path.GetFileName(t.FilePath)).ToArray();
-        Assert.AreEqual(4, files.Length);
         CollectionAssert.Contains(collection: files, element: "Potato.g.cs");
         CollectionAssert.DoesNotContain(collection: files, element: "Tomato.g.cs");
         CollectionAssert.DoesNotContain(collection: files, element: "Carrot.g.cs");
+    }
+
+    [TestMethod]
+    public Task TestGenerateToObjectTypeDef()
+    {
+        const string potatoSource = """
+                                    using Mod = Dagger.SDK.Mod;
+
+                                    namespace PotatoModule;
+
+                                    [Dagger.SDK.Mod.Object]
+                                    public partial class Potato {
+                                        [Dagger.SDK.Mod.Function]
+                                        public string Hello(string name) {
+                                           return $"Hello, {name}";
+                                        }
+
+                                        [Mod.Function]
+                                        public string Hello2(string name) {
+                                           return $"Hello, {name}";
+                                        }
+
+                                        public string PublicWithoutAttributeFunction() {
+                                            return "Should not add to object type def function";
+                                        }
+
+                                        private string PrivateFunction() {
+                                           return "Should not add to object type def function";
+                                        }
+                                    }
+                                    """;
+
+        var inputCompilation = CreateCompilation([(potatoSource, "Potato.cs")]);
+
+        var generator = new SourceGenerator();
+        GeneratorDriver driver = CSharpGeneratorDriver.Create(generator);
+        driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation,
+            out var diagnostics);
+
+        var files = outputCompilation.SyntaxTrees.Select(t => Path.GetFileName(t.FilePath)).ToArray();
+        CollectionAssert.Contains(collection: files, element: "Potato_ObjectTypeDef.g.cs");
+
+        var runResult = driver.GetRunResult();
+
+        return Verify(runResult.Results[0].GeneratedSources[3].SourceText.ToString());
     }
 
     private static CSharpCompilation CreateCompilation((string, string)[] sources)

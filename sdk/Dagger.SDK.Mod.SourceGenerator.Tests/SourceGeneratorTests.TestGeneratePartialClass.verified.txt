@@ -7,7 +7,7 @@ public partial class Potato : IDagSetter
 {
     private Query _dag;
 
-    public void SetDag(Query dag) 
+    public void SetDag(Query dag)
     {
         _dag = dag;
     }
