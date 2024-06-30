@@ -2,7 +2,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Dagger.SDK\Dagger.SDK.csproj" />
-    <ProjectReference Include="..\Dagger.SDK.Mod\Dagger.SDK.Mod.csproj" />
     <ProjectReference Include="..\Dagger.SDK.Mod.SourceGenerator\Dagger.SDK.Mod.SourceGenerator.csproj" 
                       OutputItemType="Analyzer" />
   </ItemGroup>

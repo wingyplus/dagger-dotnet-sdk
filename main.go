@@ -9,11 +9,6 @@ import (
 	"github.com/iancoleman/strcase"
 )
 
-//go:embed introspection.graphql
-var introspectionGraphql string
-
-const introspectionJsonPath = "/introspection.json"
-
 const (
 	ModSourceDirPath = "/src"
 )

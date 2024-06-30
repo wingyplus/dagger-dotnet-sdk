@@ -83,7 +83,7 @@ public class SourceGeneratorTests : VerifyBase
     }
 
     [TestMethod]
-    public Task TestGenerateToObjectTypeDef()
+    public Task TestGenerateToObjectTypeDef_RenderPublicMethodWithFunctionAttribute()
     {
         const string potatoSource = """
                                     using Mod = Dagger.SDK.Mod;

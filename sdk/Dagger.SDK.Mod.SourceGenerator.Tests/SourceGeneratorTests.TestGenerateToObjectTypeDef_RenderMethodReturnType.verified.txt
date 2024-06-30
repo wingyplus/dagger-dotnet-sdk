@@ -6,8 +6,8 @@ class partial Potato
     {
         var objTypeDef = dag.TypeDef().WithObject("Potato");
         objTypeDef
-        .WithFunction("Hello", dag.TypeDef().WithKind(TypeDefKind.STRING)))
-.WithFunction("Hello2", dag.TypeDef().WithKind(TypeDefKind.STRING)));
+        .WithFunction("Hello", dag.TypeDef().WithKind(TypeDefKind.STRING_KIND)))
+.WithFunction("Hello2", dag.TypeDef().WithKind(TypeDefKind.STRING_KIND)));
         return objTypeDef;
     }
 }

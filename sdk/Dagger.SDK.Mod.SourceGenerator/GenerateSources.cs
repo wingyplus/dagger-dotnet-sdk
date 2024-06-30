@@ -24,7 +24,7 @@ public static class GenerateSources
                                       void SetDag(Query dag);
                                   }
                                   """;
-        return SourceText.From(sourceText, Encoding.UTF8);
+        return SourceText.From(CSharpSource.Format(sourceText), Encoding.UTF8);
     }
 
     public static SourceText ModuleAttributesSource()
@@ -46,6 +46,6 @@ public static class GenerateSources
                                   [AttributeUsage(AttributeTargets.Method)]
                                   public sealed class FunctionAttribute : Attribute;
                                   """;
-        return SourceText.From(sourceText, Encoding.UTF8);
+        return SourceText.From(CSharpSource.Format(sourceText), Encoding.UTF8);
     }
 }

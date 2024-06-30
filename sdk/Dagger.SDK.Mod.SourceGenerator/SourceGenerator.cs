@@ -37,6 +37,8 @@ public class SourceGenerator : IIncrementalGenerator
             transform: ToObjectContext
         );
 
+        context.RegisterSourceOutput(objects, GenerateIDagSetter);
+
         var functions = context.SyntaxProvider.ForAttributeWithMetadataName(
             fullyQualifiedMetadataName: FunctionAttribute,
             predicate: IsPublicMethod,
@@ -45,7 +47,6 @@ public class SourceGenerator : IIncrementalGenerator
 
         var objectWithFunctions = objects.Combine(functions.Collect()).Select(GroupIntoObjectContext);
 
-        context.RegisterSourceOutput(objects, GenerateIDagSetter);
         context.RegisterSourceOutput(objectWithFunctions, GenerateObjectTypeDef);
     }
 
@@ -67,8 +68,7 @@ public class SourceGenerator : IIncrementalGenerator
     {
         return new FunctionContext
         {
-            Syntax = (MethodDeclarationSyntax)context.TargetNode,
-            Symbol = (IMethodSymbol)context.TargetSymbol
+            Syntax = (MethodDeclarationSyntax)context.TargetNode, Symbol = (IMethodSymbol)context.TargetSymbol
         };
     }
 
@@ -96,30 +96,35 @@ public class SourceGenerator : IIncrementalGenerator
     private static void GenerateObjectTypeDef(SourceProductionContext context,
         ObjectContext objectContext)
     {
+        var ns = objectContext.Namespace;
         var className = objectContext.Name;
 
         var withFunctionDefs = objectContext
             .Functions
             .Select(static m => m.Name)
             .Select(static methodName => $"""
-                                          .WithFunction("{methodName}", dag.TypeDef().WithKind(TypeDefKind.STRING)))
+                                          .WithFunction(
+                                              dag.Function("{methodName}", dag.TypeDef().WithKind(TypeDefKind.STRING_KIND))
+                                          )
                                           """);
 
-        var sourceText = SourceText.From($$"""
-                                           using Dagger.SDK;
+        var source = $$"""
+                       using Dagger.SDK;
 
-                                           class partial {{className}}
-                                           {
-                                               public ObjectTypeDef ToObjectTypeDef(Query dag)
-                                               {
-                                                   var objTypeDef = dag.TypeDef().WithObject("{{className}}");
-                                                   objTypeDef
-                                                   {{string.Join("\n", withFunctionDefs)}};
-                                                   return objTypeDef;
-                                               }
-                                           }
-                                           """, Encoding.UTF8);
-        context.AddSource($"{className}_ObjectTypeDef.g.cs", sourceText);
+                       namespace {{ns}};
+
+                       public partial class {{className}}
+                       {
+                           public TypeDef ToObjectTypeDef(Query dag)
+                           {
+                               var objTypeDef = dag.TypeDef().WithObject("{{className}}");
+                               return objTypeDef
+                               {{string.Join("\n", withFunctionDefs)}};
+                           }
+                       }
+                       """;
+        context.AddSource($"{className}_ObjectTypeDef.g.cs",
+            SourceText.From(CSharpSource.Format(source), Encoding.UTF8));
     }
 
     private static void GenerateIDagSetter(SourceProductionContext context, ObjectContext objectContext)
@@ -144,6 +149,6 @@ public class SourceGenerator : IIncrementalGenerator
                        }
                        """;
 
-        context.AddSource($"{className}.g.cs", SourceText.From(source, Encoding.UTF8));
+        context.AddSource($"{className}.g.cs", SourceText.From(CSharpSource.Format(source), Encoding.UTF8));
     }
 }

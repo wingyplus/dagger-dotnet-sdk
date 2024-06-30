@@ -1,0 +1,11 @@
+﻿using Dagger.SDK;
+
+namespace PotatoModule;
+public partial class Potato
+{
+    public TypeDef ToObjectTypeDef(Query dag)
+    {
+        var objTypeDef = dag.TypeDef().WithObject("Potato");
+        return objTypeDef.WithFunction(dag.Function("Hello", dag.TypeDef().WithKind(TypeDefKind.STRING_KIND))).WithFunction(dag.Function("Hello2", dag.TypeDef().WithKind(TypeDefKind.STRING_KIND)));
+    }
+}
