@@ -13,7 +13,8 @@ using Binder = Microsoft.CSharp.RuntimeBinder.Binder;
 namespace Dagger.SDK.Mod.SourceGenerator.Tests;
 
 [TestClass]
-public class SourceGeneratorTests : VerifyBase
+[UsesVerify]
+public partial class SourceGeneratorTests
 {
     [TestMethod]
     public Task TestGeneratePartialClass()
@@ -33,29 +34,11 @@ public class SourceGeneratorTests : VerifyBase
         driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation,
             out var diagnostics);
 
-        var outputDiagnostics = outputCompilation.GetDiagnostics();
-
-        var files = outputCompilation.SyntaxTrees.Select(t => Path.GetFileName(t.FilePath)).ToArray();
-        CollectionAssert.Contains(collection: files, element: "Potato.g.cs");
-        CollectionAssert.Contains(collection: files, element: "Dagger.SDK.Mod_Attributes.g.cs");
-        CollectionAssert.Contains(collection: files, element: "Dagger.SDK.Mod_Interfaces.g.cs");
-
-        Assert.IsTrue(diagnostics.IsEmpty);
-        // One from existing source and the one from generator.
-        Assert.AreEqual(5, outputCompilation.SyntaxTrees.Count());
-
-        var runResult = driver.GetRunResult();
-
-        Assert.IsTrue(runResult.Diagnostics.IsEmpty);
-
-        var result = runResult.Results[0];
-        Assert.AreEqual(4, result.GeneratedSources.Length);
-
-        return Verify(result.GeneratedSources[2].SourceText.ToString());
+        return Verify(driver.GetRunResult());
     }
 
     [TestMethod]
-    public void TestGenerateOnlyClassThatHasObjectAttributeAnnotated()
+    public Task TestGenerateParOnlyClassThatHasObjectAttributeAnnotated()
     {
         const string potatoSource = """
                                     namespace PotatoModule;
@@ -73,13 +56,10 @@ public class SourceGeneratorTests : VerifyBase
 
         var generator = new SourceGenerator();
         GeneratorDriver driver = CSharpGeneratorDriver.Create(generator);
-        driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation,
+        driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation,
             out ImmutableArray<Diagnostic> _);
 
-        var files = outputCompilation.SyntaxTrees.Select(t => Path.GetFileName(t.FilePath)).ToArray();
-        CollectionAssert.Contains(collection: files, element: "Potato.g.cs");
-        CollectionAssert.DoesNotContain(collection: files, element: "Tomato.g.cs");
-        CollectionAssert.DoesNotContain(collection: files, element: "Carrot.g.cs");
+        return Verify(driver.GetRunResult());
     }
 
     [TestMethod]
@@ -119,12 +99,7 @@ public class SourceGeneratorTests : VerifyBase
         driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation,
             out var diagnostics);
 
-        var files = outputCompilation.SyntaxTrees.Select(t => Path.GetFileName(t.FilePath)).ToArray();
-        CollectionAssert.Contains(collection: files, element: "Potato_ObjectTypeDef.g.cs");
-
-        var runResult = driver.GetRunResult();
-
-        return Verify(runResult.Results[0].GeneratedSources[3].SourceText.ToString());
+        return Verify(driver.GetRunResult());
     }
 
     private static CSharpCompilation CreateCompilation((string, string)[] sources)
