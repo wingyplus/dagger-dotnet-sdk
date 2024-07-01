@@ -102,6 +102,30 @@ public partial class SourceGeneratorTests
         return Verify(driver.GetRunResult());
     }
 
+    [TestMethod]
+    public Task TestGenerateEntrypoint()
+    {
+        const string potatoSource = """
+                                    using Mod = Dagger.SDK.Mod;
+
+                                    namespace PotatoModule;
+
+                                    [Dagger.SDK.Mod.Object]
+                                    [Dagger.SDK.Mod.Entrypoint]
+                                    public partial class Potato {
+                                    }
+                                    """;
+
+        var inputCompilation = CreateCompilation([(potatoSource, "Potato.cs")]);
+
+        var generator = new SourceGenerator();
+        GeneratorDriver driver = CSharpGeneratorDriver.Create(generator);
+        driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation,
+            out var diagnostics);
+
+        return Verify(driver.GetRunResult());
+    }
+
     private static CSharpCompilation CreateCompilation((string, string)[] sources)
     {
         return CSharpCompilation.Create(
