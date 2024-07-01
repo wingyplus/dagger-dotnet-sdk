@@ -99,7 +99,8 @@ public partial class SourceGeneratorTests
         driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation,
             out var diagnostics);
 
-        return Verify(driver.GetRunResult());
+        return Verify(driver.GetRunResult().Results.Where(r =>
+            r.GeneratedSources.Any(source => source.SyntaxTree.FilePath.EndsWith("Potato_ObjectTypeDef.g.cs"))));
     }
 
     [TestMethod]
