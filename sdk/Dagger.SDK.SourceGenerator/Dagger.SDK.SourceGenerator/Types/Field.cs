@@ -20,7 +20,7 @@ public class Field
     public required InputValue[] Args { get; set; }
 
     [JsonPropertyName("isDeprecated")]
-    public bool IsDeprecated { get; set; }
+    public required bool IsDeprecated { get; set; }
 
     [JsonPropertyName("deprecationReason")]
     public required string DeprecationReason { get; set; }
