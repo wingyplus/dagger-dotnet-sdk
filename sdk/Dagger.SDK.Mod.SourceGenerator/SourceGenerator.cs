@@ -18,6 +18,7 @@ namespace Dagger.SDK.Mod.SourceGenerator;
 [Generator(LanguageNames.CSharp)]
 public class SourceGenerator : IIncrementalGenerator
 {
+    private const string EntrypointAttribute = "Dagger.SDK.Mod.EntrypointAttribute";
     private const string ObjectAttribute = "Dagger.SDK.Mod.ObjectAttribute";
     private const string FunctionAttribute = "Dagger.SDK.Mod.FunctionAttribute";
 
@@ -30,6 +31,14 @@ public class SourceGenerator : IIncrementalGenerator
             postInitializationContext.AddSource("Dagger.SDK.Mod_Interfaces.g.cs",
                 GenerateSources.ModuleInterfacesSource());
         });
+
+        var entrypoint = context.SyntaxProvider.ForAttributeWithMetadataName(
+            fullyQualifiedMetadataName: EntrypointAttribute,
+            predicate: IsPartialClass,
+            transform: ToObjectContext
+        );
+
+        context.RegisterSourceOutput(entrypoint, GenerateEntrypoint);
 
         var objects = context.SyntaxProvider.ForAttributeWithMetadataName(
             fullyQualifiedMetadataName: ObjectAttribute,
@@ -49,6 +58,12 @@ public class SourceGenerator : IIncrementalGenerator
 
         context.RegisterSourceOutput(objectWithFunctions, GenerateObjectTypeDef);
     }
+
+    private T ToEntrypointContext<T>(GeneratorAttributeSyntaxContext arg1, CancellationToken arg2)
+    {
+        throw new NotImplementedException();
+    }
+
 
     private ObjectContext GroupIntoObjectContext((ObjectContext Left, ImmutableArray<FunctionContext> Right) tuple,
         CancellationToken token)
@@ -90,65 +105,109 @@ public class SourceGenerator : IIncrementalGenerator
 
     private static bool IsPartialClass(SyntaxNode node, CancellationToken token)
     {
-        return node is ClassDeclarationSyntax classDecl && classDecl.Modifiers.Any(SyntaxKind.PartialKeyword);
+        return node is ClassDeclarationSyntax classDecl &&
+               classDecl.Modifiers.Any(SyntaxKind.PublicKeyword) &&
+               classDecl.Modifiers.Any(SyntaxKind.PartialKeyword);
     }
 
     private static void GenerateObjectTypeDef(SourceProductionContext context,
         ObjectContext objectContext)
     {
-        var ns = objectContext.Namespace;
-        var className = objectContext.Name;
-
         var withFunctionDefs = objectContext
             .Functions
             .Select(static m => m.Name)
             .Select(static methodName => $"""
                                           .WithFunction(
-                                              dag.Function("{methodName}", dag.TypeDef().WithKind(TypeDefKind.STRING_KIND))
+                                              dag.Function("{methodName}", dag.TypeDef().WithKind(Dagger.SDK.TypeDefKind.STRING_KIND))
                                           )
                                           """);
 
         var source = $$"""
-                       using Dagger.SDK;
+                       namespace {{objectContext.Namespace}};
 
-                       namespace {{ns}};
-
-                       public partial class {{className}}
+                       public partial class {{objectContext.Name}}
                        {
-                           public TypeDef ToObjectTypeDef(Query dag)
+                           public Dagger.SDK.TypeDef ToObjectTypeDef(Dagger.SDK.Query dag)
                            {
-                               var objTypeDef = dag.TypeDef().WithObject("{{className}}");
+                               var objTypeDef = dag.TypeDef().WithObject("{{objectContext.Name}}");
                                return objTypeDef
                                {{string.Join("\n", withFunctionDefs)}};
                            }
                        }
                        """;
-        context.AddSource($"{className}_ObjectTypeDef.g.cs",
+        context.AddSource($"{objectContext.Name}_ObjectTypeDef.g.cs",
             SourceText.From(CSharpSource.Format(source), Encoding.UTF8));
     }
 
     private static void GenerateIDagSetter(SourceProductionContext context, ObjectContext objectContext)
     {
-        var ns = objectContext.Namespace;
-        var className = objectContext.Name;
-
         var source = $$"""
-                       using Dagger.SDK;
-                       using Dagger.SDK.Mod;
+                       namespace {{objectContext.Namespace}};
 
-                       namespace {{ns}};
-
-                       public partial class {{className}} : IDagSetter
+                       public partial class {{objectContext.Name}} : Dagger.SDK.Mod.IDagSetter
                        {
-                           private Query _dag;
+                           private Dagger.SDK.Query _dag;
 
-                           public void SetDag(Query dag)
+                           public void SetDag(Dagger.SDK.Query dag)
                            {
                                _dag = dag;
                            }
                        }
                        """;
 
-        context.AddSource($"{className}.g.cs", SourceText.From(CSharpSource.Format(source), Encoding.UTF8));
+        context.AddSource($"{objectContext.Name}_IDagSetter.g.cs", SourceText.From(CSharpSource.Format(source), Encoding.UTF8));
+    }
+
+    private static void GenerateEntrypoint(SourceProductionContext context, ObjectContext objectContext)
+    {
+        var entrypoint = $$"""
+                           namespace {{objectContext.Namespace}};
+
+                           public partial class {{objectContext.Name}} : Dagger.SDK.Mod.IEntrypoint
+                           {
+                               public Dagger.SDK.Module Register(Dagger.SDK.Query dag, Dagger.SDK.Module module)
+                               {
+                                   return module.WithObject(ToObjectTypeDef(dag));
+                               }
+                           }
+                           """;
+        context.AddSource($"{objectContext.Name}_IEntrypoint.g.cs", SourceText.From(CSharpSource.Format(entrypoint), Encoding.UTF8));
+
+        var main = $$"""
+                     namespace {{objectContext.Namespace}};
+
+                     public static class Entrypoint
+                     {
+                         public static async Task Invoke(string[] args)
+                         {
+                             var dag = Dagger.SDK.Dagger.Connect();
+                             await Invoke<{{objectContext.Name}}>(dag);
+                         }
+
+                         private static async Task Invoke<T>(Dagger.SDK.Query dag) where T : class, Dagger.SDK.Mod.IDagSetter, Dagger.SDK.Mod.IEntrypoint, new()
+                         {
+                             T root = new();
+                             var fnCall = dag.CurrentFunctionCall();
+                             var parentName = await fnCall.ParentName();
+                             // TODO: Get module name to check root type name match with it.
+
+                             var result = parentName switch
+                             {
+                                 // TODO: Dagger.SDK should automatic serialize into id.
+                                 "" => await root.Register(dag, dag.Module()).Id(),
+                                 _ => throw new Exception($"{parentName} is not supported at the moment.")
+                             };
+
+                             await fnCall.ReturnValue(IntoJson(result));
+                         }
+
+                         private static Dagger.SDK.Json IntoJson(object result)
+                         {
+                             return new Dagger.SDK.Json { Value = System.Text.Json.JsonSerializer.Serialize(result) };
+                         }
+                     }
+                     """;
+
+        context.AddSource("Entrypoint.g.cs", SourceText.From(CSharpSource.Format(main), Encoding.UTF8));
     }
 }

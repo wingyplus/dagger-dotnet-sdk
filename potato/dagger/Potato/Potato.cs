@@ -4,6 +4,7 @@ using Mod = Dagger.SDK.Mod;
 namespace Potato;
 
 [Serializable]
+[Mod.Entrypoint]
 [Mod.Object]
 public partial class Potato
 {
