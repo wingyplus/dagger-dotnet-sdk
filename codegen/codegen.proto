@@ -1,0 +1,150 @@
+syntax = "proto3";
+
+package codegen;
+
+option go_package = "./proto/codegen";
+
+// Deprecation message.
+message Deprecation { string reason = 1; }
+
+message ObjectTypeRef {
+  // Type name.
+  string name = 1;
+}
+
+message ScalarTypeRef {
+  // Type name.
+  string name = 1;
+}
+
+message EnumTypeRef {
+  // Type name.
+  string name = 1;
+}
+
+message ListTypeRef {
+  // List of type.
+  TypeRef of_type = 1;
+}
+
+message TypeRef {
+  // This field is optional type?
+  bool nullable = 1;
+
+  // What is the type of this field.
+  oneof type {
+    ObjectTypeRef object_type = 5;
+    ScalarTypeRef scalar_type = 6;
+    EnumTypeRef enum_type = 7;
+    ListTypeRef list_type = 8;
+  }
+}
+
+// The value in Enum.
+message EnumValue {
+  // Enum value name
+  string name = 1;
+
+  // Enum value description.
+  string description = 2;
+
+  // Tells this enum is deprecated.
+  optional Deprecation deprecated = 3;
+}
+
+message Field {
+  // Field name.
+  string name = 1;
+
+  // Field documentation.
+  string description = 2;
+
+  // The default value of this field. It can be null.
+  optional string default_value = 3;
+
+  // The type of this field.
+  TypeRef type = 4;
+
+  optional Deprecation deprecated = 5;
+}
+
+// Function definition.
+message Function {
+  // Function name.
+  string name = 1;
+
+  // Funciton documentation.
+  string description = 2;
+
+  // Function required arguments.
+  repeated Field required_args = 3;
+
+  // Function optional arguments.
+  repeated Field optional_args = 4;
+
+  // Function return type.
+  TypeRef return_type = 5;
+
+  // Tells this function already deprecated.
+  optional Deprecation deprecated = 6;
+}
+
+// GraphQL object.
+message Object {
+  // Scalar name.
+  string name = 1;
+
+  // Scalar documentation.
+  string description = 2;
+
+  // Avaiable functions for this object.
+  //
+  // This mapped from `fields` in GraphQL object world.
+  repeated Function functions = 3;
+}
+
+// GraphQL scalar.
+message Scalar {
+  // Scalar name.
+  string name = 1;
+
+  // Scalar documentation.
+  string description = 2;
+}
+
+// GraphQL input object.
+message Input {
+  // Input object name.
+  string name = 1;
+
+  // Input object documentaion.
+  string description = 2;
+
+  // Fields inside this input object.
+  repeated Field fields = 3;
+}
+
+// GraphQL enum.
+message Enum {
+  // Enum name.
+  string name = 1;
+
+  // Enum documentation.
+  string description = 2;
+
+  // Available enum values.
+  repeated EnumValue values = 3;
+
+  optional Deprecation deprecated = 4;
+}
+
+message Type {
+  oneof value {
+    Object object = 1;
+    Scalar scalar = 2;
+    Input input = 3;
+    Enum enum = 4;
+  }
+}
+
+message Schema { repeated Type types = 1; }
