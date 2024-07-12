@@ -7,9 +7,9 @@ public class TypeRef
     // TODO: use TypeKind.
     [JsonPropertyName("kind")] public required string Kind { get; set; }
 
-    [JsonPropertyName("name")] public required string Name { get; set; }
+    [JsonPropertyName("name")] public string? Name { get; set; }
 
-    [JsonPropertyName("ofType")] public required TypeRef OfType { get; set; }
+    [JsonPropertyName("ofType")] public TypeRef? OfType { get; set; }
 
     public bool IsLeaf()
     {
@@ -17,7 +17,7 @@ public class TypeRef
 
         if (Kind == "NON_NULL")
         {
-            tr = OfType;
+            tr = OfType!;
         }
 
         if (tr.Kind == "ENUM")
@@ -39,7 +39,7 @@ public class TypeRef
 
         if (Kind == "NON_NULL")
         {
-            tr = OfType;
+            tr = OfType!;
         }
 
         if (tr.Kind == "LIST")
@@ -56,7 +56,7 @@ public class TypeRef
 
         if (Kind == "NON_NULL")
         {
-            tr = OfType;
+            tr = OfType!;
         }
 
         if (tr.Kind == "ENUM")
@@ -73,7 +73,7 @@ public class TypeRef
 
         if (Kind == "NON_NULL")
         {
-            tr = OfType;
+            tr = OfType!;
         }
 
         if (tr.Kind == "INPUT_OBJECT")
@@ -90,7 +90,7 @@ public class TypeRef
 
         if (Kind == "NON_NULL")
         {
-            tr = OfType;
+            tr = OfType!;
         }
 
         if (tr.Kind == "SCALAR")
@@ -110,7 +110,7 @@ public class TypeRef
             tr = OfType;
         }
 
-        if (tr.Kind == "OBJECT")
+        if (tr!.Kind == "OBJECT")
         {
             return true;
         }
@@ -124,7 +124,7 @@ public class TypeRef
 
         if (Kind == "NON_NULL")
         {
-            tr = OfType;
+            tr = OfType!;
         }
 
         return tr;
