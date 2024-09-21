@@ -12,7 +12,11 @@ namespace Dagger.SDK.Mod.SourceGenerator.Tests;
 public partial class SourceGeneratorTests
 {
     private readonly (string, SourceText) _modAttributeSource = (
-        @"Dagger.SDK.Mod.SourceGenerator\Dagger.SDK.Mod.SourceGenerator.SourceGenerator\Dagger.SDK.Mod_Attributes.g.cs",
+        Path.Join(
+            "Dagger.SDK.Mod.SourceGenerator",
+            "Dagger.SDK.Mod.SourceGenerator.SourceGenerator",
+            "Dagger.SDK.Mod_Attributes.g.cs"
+        ),
         SourceText.From(
             """
             using System;
@@ -39,7 +43,11 @@ public partial class SourceGeneratorTests
     );
 
     private readonly (string, SourceText) _modInterfaceSource = (
-        @"Dagger.SDK.Mod.SourceGenerator\Dagger.SDK.Mod.SourceGenerator.SourceGenerator\Dagger.SDK.Mod_Interfaces.g.cs",
+        Path.Join(
+            "Dagger.SDK.Mod.SourceGenerator",
+            "Dagger.SDK.Mod.SourceGenerator.SourceGenerator",
+            "Dagger.SDK.Mod_Interfaces.g.cs"
+        ),
         SourceText.From(
             """
             namespace Dagger.SDK.Mod;
@@ -75,7 +83,11 @@ public partial class SourceGeneratorTests
     );
 
     private readonly (string, SourceText) _potatoIDagSetterSource = (
-        @"Dagger.SDK.Mod.SourceGenerator\Dagger.SDK.Mod.SourceGenerator.SourceGenerator\Potato_IDagSetter.g.cs",
+        Path.Join(
+            "Dagger.SDK.Mod.SourceGenerator",
+            "Dagger.SDK.Mod.SourceGenerator.SourceGenerator",
+            "Potato_IDagSetter.g.cs"
+        ),
         SourceText.From(
             """
             namespace PotatoModule;
@@ -120,7 +132,11 @@ public partial class SourceGeneratorTests
                     _modInterfaceSource,
                     _potatoIDagSetterSource,
                     (
-                        @"Dagger.SDK.Mod.SourceGenerator\Dagger.SDK.Mod.SourceGenerator.SourceGenerator\Potato_ObjectTypeDef.g.cs",
+                        Path.Join(
+                            "Dagger.SDK.Mod.SourceGenerator",
+                            "Dagger.SDK.Mod.SourceGenerator.SourceGenerator",
+                            "Potato_ObjectTypeDef.g.cs"
+                        ),
                         SourceText.From(
                             """
                             namespace PotatoModule;
@@ -184,7 +200,11 @@ public partial class SourceGeneratorTests
                     _modInterfaceSource,
                     _potatoIDagSetterSource,
                     (
-                        @"Dagger.SDK.Mod.SourceGenerator\Dagger.SDK.Mod.SourceGenerator.SourceGenerator\Potato_ObjectTypeDef.g.cs",
+                        Path.Join(
+                            "Dagger.SDK.Mod.SourceGenerator",
+                            "Dagger.SDK.Mod.SourceGenerator.SourceGenerator",
+                            "Potato_ObjectTypeDef.g.cs"
+                        ),
                         SourceText.From(
                             """
                             namespace PotatoModule;
@@ -231,7 +251,11 @@ public partial class SourceGeneratorTests
                     _modAttributeSource,
                     _modInterfaceSource,
                     (
-                        @"Dagger.SDK.Mod.SourceGenerator\Dagger.SDK.Mod.SourceGenerator.SourceGenerator\Potato_IEntrypoint.g.cs",
+                        Path.Join(
+                            "Dagger.SDK.Mod.SourceGenerator",
+                            "Dagger.SDK.Mod.SourceGenerator.SourceGenerator",
+                            "Potato_IEntrypoint.g.cs"
+                        ),
                         SourceText.From(
                             """
                             namespace PotatoModule;
@@ -247,7 +271,11 @@ public partial class SourceGeneratorTests
                         )
                     ),
                     (
-                        @"Dagger.SDK.Mod.SourceGenerator\Dagger.SDK.Mod.SourceGenerator.SourceGenerator\Entrypoint.g.cs",
+                        Path.Join(
+                            "Dagger.SDK.Mod.SourceGenerator",
+                            "Dagger.SDK.Mod.SourceGenerator.SourceGenerator",
+                            "Entrypoint.g.cs"
+                        ),
                         SourceText.From(
                             """
                             namespace PotatoModule;
@@ -288,7 +316,11 @@ public partial class SourceGeneratorTests
                     ),
                     _potatoIDagSetterSource,
                     (
-                        @"Dagger.SDK.Mod.SourceGenerator\Dagger.SDK.Mod.SourceGenerator.SourceGenerator\Potato_ObjectTypeDef.g.cs",
+                        Path.Join(
+                            "Dagger.SDK.Mod.SourceGenerator",
+                            "Dagger.SDK.Mod.SourceGenerator.SourceGenerator",
+                            "Potato_ObjectTypeDef.g.cs"
+                        ),
                         SourceText.From(
                             """
                             namespace PotatoModule;
