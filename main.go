@@ -171,10 +171,18 @@ func (m *DotnetSdk) WithProject(ctx context.Context, subpath string, modName str
 	}
 
 	if !created {
+		var buf bytes.Buffer
+		err = template.Must(template.New("MainModule.cs").Parse(mainModule)).Execute(&buf, struct{ Module string }{Module: name})
+		if err != nil {
+			return nil, err
+		}
+
+		mainMod := buf.String()
 		ctr = ctr.
 			WithExec([]string{"dotnet", "new", "console", "--framework", "net8.0", "--output", name, "-n", name}).
 			WithExec([]string{"dotnet", "add", name, "reference", "Dagger.SDK"}).
-			WithExec([]string{"dotnet", "add", name, "reference", "Dagger.SDK.Mod.SourceGenerator"})
+			WithExec([]string{"dotnet", "add", name, "reference", "Dagger.SDK.Mod.SourceGenerator"}).
+			WithNewFile(name+"/"+name+".cs", mainMod)
 	}
 
 	var buf bytes.Buffer
@@ -184,19 +192,10 @@ func (m *DotnetSdk) WithProject(ctx context.Context, subpath string, modName str
 	}
 
 	prog := buf.String()
-	buf.Reset()
-
-	err = template.Must(template.New("MainModule.cs").Parse(mainModule)).Execute(&buf, struct{ Module string }{Module: name})
-	if err != nil {
-		return nil, err
-	}
-
-	mainMod := buf.String()
 
 	m.Container = ctr.
 		WithExec([]string{"dotnet", "sln", "add", name}).
-		WithNewFile(name+"/Program.cs", prog).
-		WithNewFile(name+"/"+name+".cs", mainMod)
-	return m,
-		nil
+		WithNewFile(name+"/Program.cs", prog)
+
+	return m, nil
 }
