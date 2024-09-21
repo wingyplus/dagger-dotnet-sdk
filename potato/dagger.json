@@ -2,5 +2,5 @@
   "name": "potato",
   "sdk": "..",
   "source": "dagger",
-  "engineVersion": "v0.11.8"
+  "engineVersion": "v0.13.0"
 }
