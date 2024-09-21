@@ -1,6 +1,5 @@
 using System.Collections.Immutable;
 using System.Text;
-
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Testing;
@@ -104,16 +103,16 @@ public partial class SourceGeneratorTests
                 Sources =
                 {
                     """
-                    namespace PotatoModule;
+                        namespace PotatoModule;
 
-                    [Dagger.SDK.Mod.Object]
-                    public partial class Potato {}
+                        [Dagger.SDK.Mod.Object]
+                        public partial class Potato {}
 
-                    public partial class Tomato {}
+                        public partial class Tomato {}
 
-                    [Serializable]
-                    public partial class Carrot {}
-                    """
+                        [Serializable]
+                        public partial class Carrot {}
+                        """,
                 },
                 GeneratedSources =
                 {
@@ -136,9 +135,9 @@ public partial class SourceGeneratorTests
                             """,
                             Encoding.UTF8
                         )
-                    )
-                }
-            }
+                    ),
+                },
+            },
         }.RunAsync();
     }
 
@@ -153,31 +152,31 @@ public partial class SourceGeneratorTests
                 Sources =
                 {
                     """
-                    using Mod = Dagger.SDK.Mod;
+                        using Mod = Dagger.SDK.Mod;
 
-                    namespace PotatoModule;
+                        namespace PotatoModule;
 
-                    [Dagger.SDK.Mod.Object]
-                    public partial class Potato {
-                        [Dagger.SDK.Mod.Function]
-                        public string Hello(string name) {
-                           return $"Hello, {name}";
+                        [Dagger.SDK.Mod.Object]
+                        public partial class Potato {
+                            [Dagger.SDK.Mod.Function]
+                            public string Hello(string name) {
+                               return $"Hello, {name}";
+                            }
+
+                            [Mod.Function]
+                            public string Hello2(string name) {
+                               return $"Hello, {name}";
+                            }
+
+                            public string PublicWithoutAttributeFunction() {
+                                return "Should not add to object type def function";
+                            }
+
+                            private string PrivateFunction() {
+                               return "Should not add to object type def function";
+                            }
                         }
-
-                        [Mod.Function]
-                        public string Hello2(string name) {
-                           return $"Hello, {name}";
-                        }
-
-                        public string PublicWithoutAttributeFunction() {
-                            return "Should not add to object type def function";
-                        }
-
-                        private string PrivateFunction() {
-                           return "Should not add to object type def function";
-                        }
-                    }
-                    """
+                        """,
                 },
                 GeneratedSources =
                 {
@@ -200,9 +199,9 @@ public partial class SourceGeneratorTests
                             """,
                             Encoding.UTF8
                         )
-                    )
-                }
-            }
+                    ),
+                },
+            },
         }.RunAsync();
     }
 
@@ -217,35 +216,38 @@ public partial class SourceGeneratorTests
                 Sources =
                 {
                     """
-                    using Mod = Dagger.SDK.Mod;
+                        using Mod = Dagger.SDK.Mod;
 
-                    namespace PotatoModule;
+                        namespace PotatoModule;
 
-                    [Dagger.SDK.Mod.Object]
-                    [Dagger.SDK.Mod.Entrypoint]
-                    public partial class Potato {
-                    }
-                    """
+                        [Dagger.SDK.Mod.Object]
+                        [Dagger.SDK.Mod.Entrypoint]
+                        public partial class Potato {
+                        }
+                        """,
                 },
                 GeneratedSources =
                 {
                     _modAttributeSource,
                     _modInterfaceSource,
-                    (@"Dagger.SDK.Mod.SourceGenerator\Dagger.SDK.Mod.SourceGenerator.SourceGenerator\Potato_IEntrypoint.g.cs",
-                        SourceText.From("""
-                                        namespace PotatoModule;
-                                        public partial class Potato : Dagger.SDK.Mod.IEntrypoint
-                                        {
-                                            public Dagger.SDK.Module Register(Dagger.SDK.Query dag, Dagger.SDK.Module module)
-                                            {
-                                                return module.WithObject(ToObjectTypeDef(dag));
-                                            }
-                                        }
-                                        """,
+                    (
+                        @"Dagger.SDK.Mod.SourceGenerator\Dagger.SDK.Mod.SourceGenerator.SourceGenerator\Potato_IEntrypoint.g.cs",
+                        SourceText.From(
+                            """
+                            namespace PotatoModule;
+                            public partial class Potato : Dagger.SDK.Mod.IEntrypoint
+                            {
+                                public Dagger.SDK.Module Register(Dagger.SDK.Query dag, Dagger.SDK.Module module)
+                                {
+                                    return module.WithObject(ToObjectTypeDef(dag));
+                                }
+                            }
+                            """,
                             Encoding.UTF8
                         )
                     ),
-                    (@"Dagger.SDK.Mod.SourceGenerator\Dagger.SDK.Mod.SourceGenerator.SourceGenerator\Entrypoint.g.cs",
+                    (
+                        @"Dagger.SDK.Mod.SourceGenerator\Dagger.SDK.Mod.SourceGenerator.SourceGenerator\Entrypoint.g.cs",
                         SourceText.From(
                             """
                             namespace PotatoModule;
@@ -301,9 +303,9 @@ public partial class SourceGeneratorTests
                             """,
                             Encoding.UTF8
                         )
-                    )
-                }
-            }
+                    ),
+                },
+            },
         }.RunAsync();
     }
 }
