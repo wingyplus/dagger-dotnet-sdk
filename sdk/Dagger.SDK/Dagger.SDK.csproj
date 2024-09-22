@@ -15,14 +15,14 @@
                 OutputItemType="Analyzer"
                 ReferenceOutputAssembly="false" />
     </ItemGroup>
-    
+
     <ItemGroup>
         <AdditionalFiles Include="introspection.json" />
     </ItemGroup>
-    
+
     <ItemGroup>
       <PackageReference Include="System.Collections.Immutable" Version="6.0.0" />
-      <PackageReference Include="System.Text.Json" Version="8.0.3" />
+      <PackageReference Include="System.Text.Json" Version="8.0.4" />
     </ItemGroup>
 
 </Project>

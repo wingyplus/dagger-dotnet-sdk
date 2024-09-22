@@ -23,14 +23,6 @@ const (
 	ModSourceDirPath = "/src"
 )
 
-var (
-	IgnorePaths = []string{
-		"**/introspection.json",
-		"**/bin",
-		"**/obj",
-	}
-)
-
 func New(
 	// +optional
 	sdkSourceDir *dagger.Directory,
@@ -86,8 +78,8 @@ func (m *DotnetSdk) Codegen(
 	}
 
 	return dag.GeneratedCode(m.Container.Directory(ModSourceDirPath)).
-		WithVCSGeneratedPaths([]string{"Dagger.SDK*/**"}).
-		WithVCSIgnoredPaths([]string{"Dagger.SDK*/**", "**/obj", "**/bin", "**/.idea"}), nil
+		WithVCSGeneratedPaths([]string{"Dagger.SDK*/**", "**/Program.cs"}).
+		WithVCSIgnoredPaths([]string{"Dagger.SDK*/**", "**/obj", "**/bin", "**/.idea", "**/Program.cs"}), nil
 }
 
 func (m *DotnetSdk) codegenBase(ctx context.Context, modSource *dagger.ModuleSource, introspectionJson *dagger.File) (*DotnetSdk, error) {
@@ -100,12 +92,16 @@ func (m *DotnetSdk) codegenBase(ctx context.Context, modSource *dagger.ModuleSou
 		return nil, err
 	}
 
-	return m.
+	m, err = m.
 		WithBase(modSource.ContextDirectory(), subpath).
 		WithSln(modName).
-		WithSdk(subpath).
 		WithIntrospection(introspectionJson).
 		WithProject(ctx, subpath, modName)
+	if err != nil {
+		return nil, err
+	}
+
+	return m.WithSdk(subpath, modName), nil
 }
 
 func (m *DotnetSdk) WithBase(contextDir *dagger.Directory, subpath string) *DotnetSdk {
@@ -123,26 +119,27 @@ func (m *DotnetSdk) WithSln(modName string) *DotnetSdk {
 }
 
 // Installing sdk into subpath.
-func (m *DotnetSdk) WithSdk(subpath string) *DotnetSdk {
-	m.Container = m.Container.
-		WithDirectory(
-			"Dagger.SDK",
-			m.SDKSourceDir.Directory("Dagger.SDK"),
-			dagger.ContainerWithDirectoryOpts{Exclude: IgnorePaths},
-		).
-		WithDirectory(
-			"Dagger.SDK.Mod.SourceGenerator",
-			m.SDKSourceDir.Directory("Dagger.SDK.Mod.SourceGenerator"),
-			dagger.ContainerWithDirectoryOpts{Exclude: IgnorePaths},
-		).
-		WithDirectory(
-			"Dagger.SDK.SourceGenerator/Dagger.SDK.SourceGenerator",
-			m.SDKSourceDir.Directory("Dagger.SDK.SourceGenerator/Dagger.SDK.SourceGenerator"),
-			dagger.ContainerWithDirectoryOpts{Exclude: IgnorePaths},
-		).
-		WithExec([]string{"dotnet", "sln", "add", "Dagger.SDK"}).
-		WithExec([]string{"dotnet", "sln", "add", "Dagger.SDK.Mod.SourceGenerator"}).
-		WithExec([]string{"dotnet", "sln", "add", "Dagger.SDK.SourceGenerator/Dagger.SDK.SourceGenerator"})
+func (m *DotnetSdk) WithSdk(subpath string, modName string) *DotnetSdk {
+	name := strcase.ToCamel(modName)
+	includePatterns := []string{"**/*.cs", "**/*.csproj"}
+	projects := []string{
+		"Dagger.SDK",
+		"Dagger.SDK.Mod",
+		"Dagger.SDK.Mod.SourceGenerator",
+		"Dagger.SDK.SourceGenerator/Dagger.SDK.SourceGenerator",
+	}
+
+	// Copy the SDK and link it to the project.
+	for _, project := range projects {
+		m.Container = m.Container.
+			WithDirectory(
+				project,
+				m.SDKSourceDir.Directory(project),
+				dagger.ContainerWithDirectoryOpts{Include: includePatterns},
+			).
+			WithExec([]string{"dotnet", "sln", "add", project}).
+			WithExec([]string{"dotnet", "add", name, "reference", project})
+	}
 
 	return m
 }
@@ -180,8 +177,6 @@ func (m *DotnetSdk) WithProject(ctx context.Context, subpath string, modName str
 		mainMod := buf.String()
 		ctr = ctr.
 			WithExec([]string{"dotnet", "new", "console", "--framework", "net8.0", "--output", name, "-n", name}).
-			WithExec([]string{"dotnet", "add", name, "reference", "Dagger.SDK"}).
-			WithExec([]string{"dotnet", "add", name, "reference", "Dagger.SDK.Mod.SourceGenerator"}).
 			WithNewFile(name+"/"+name+".cs", mainMod)
 	}
 

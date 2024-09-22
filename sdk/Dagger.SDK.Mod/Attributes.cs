@@ -11,3 +11,9 @@ public sealed class ObjectAttribute : Attribute;
 /// </summary>
 [AttributeUsage(AttributeTargets.Method)]
 public sealed class FunctionAttribute : Attribute;
+
+/// <summary>
+/// Treat the class as the root of Module.
+/// </summary>
+[AttributeUsage(AttributeTargets.Class)]
+public sealed class EntrypointAttribute : Attribute;
