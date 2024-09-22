@@ -1,0 +1,45 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dagger.SDK", "Dagger.SDK\Dagger.SDK.csproj", "{81E53C30-C591-4675-8A34-471F1243B18F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dagger.SDK.Mod.SourceGenerator", "Dagger.SDK.Mod.SourceGenerator\Dagger.SDK.Mod.SourceGenerator.csproj", "{A270CF98-2378-47AF-8512-29633A9B90B3}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Dagger.SDK.SourceGenerator", "Dagger.SDK.SourceGenerator", "{1845A79C-3FFE-4A3F-8C40-B4F57203A380}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dagger.SDK.SourceGenerator", "Dagger.SDK.SourceGenerator\Dagger.SDK.SourceGenerator\Dagger.SDK.SourceGenerator.csproj", "{76B7EBFE-0878-4C42-8380-31C95DF367F7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Potato", "Potato\Potato.csproj", "{04493F10-AE54-4215-BE1B-41C5B315FF8B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{81E53C30-C591-4675-8A34-471F1243B18F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{81E53C30-C591-4675-8A34-471F1243B18F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{81E53C30-C591-4675-8A34-471F1243B18F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{81E53C30-C591-4675-8A34-471F1243B18F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A270CF98-2378-47AF-8512-29633A9B90B3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A270CF98-2378-47AF-8512-29633A9B90B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A270CF98-2378-47AF-8512-29633A9B90B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A270CF98-2378-47AF-8512-29633A9B90B3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{76B7EBFE-0878-4C42-8380-31C95DF367F7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{76B7EBFE-0878-4C42-8380-31C95DF367F7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{76B7EBFE-0878-4C42-8380-31C95DF367F7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{76B7EBFE-0878-4C42-8380-31C95DF367F7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{04493F10-AE54-4215-BE1B-41C5B315FF8B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{04493F10-AE54-4215-BE1B-41C5B315FF8B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{04493F10-AE54-4215-BE1B-41C5B315FF8B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{04493F10-AE54-4215-BE1B-41C5B315FF8B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{76B7EBFE-0878-4C42-8380-31C95DF367F7} = {1845A79C-3FFE-4A3F-8C40-B4F57203A380}
+	EndGlobalSection
+EndGlobal

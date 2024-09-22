@@ -31,7 +31,7 @@ public class CodeRenderer : ICodeRenderer
 
     public string RenderEnum(Type type)
     {
-        var evs = type.EnumValues.Select(ev => ev.Name);
+        var evs = type.EnumValues!.Select(ev => ev.Name);
         return $$"""
                  {{RenderDocComment(type)}}
                  [JsonConverter(typeof(JsonStringEnumConverter<{{type.Name}}>))]
@@ -44,16 +44,16 @@ public class CodeRenderer : ICodeRenderer
 
     public string RenderInputObject(Type type)
     {
-        var properties = type.InputFields.Select(field =>
+        var properties = type.InputFields!.Select(field =>
             $$"""
               {{RenderDocComment(field)}}
               public {{field.Type.GetTypeName()}} {{Formatter.FormatProperty(field.Name)}} { get; } = {{field.GetVarName()}};
               """);
 
         var constructorFields =
-            type.InputFields.Select(field => $"{field.Type.GetTypeName()} {field.GetVarName()}");
+            type.InputFields!.Select(field => $"{field.Type.GetTypeName()} {field.GetVarName()}");
 
-        var toKeyValuePairsProperties = type.InputFields.Select(field =>
+        var toKeyValuePairsProperties = type.InputFields!.Select(field =>
             $"""
              kvPairs.Add(new KeyValuePair<string, Value>("{field.Name}", {RenderArgumentValue(field, asProperty: true)} as Value));
              """);
@@ -80,7 +80,7 @@ public class CodeRenderer : ICodeRenderer
 
     public string RenderObject(Type type)
     {
-        var methods = type.Fields.Select(field =>
+        var methods = type.Fields!.Select(field =>
         {
             var methodName = Formatter.FormatMethod(field.Name);
             if (type.Name.Equals(field.Name, StringComparison.CurrentCultureIgnoreCase))
@@ -105,9 +105,9 @@ public class CodeRenderer : ICodeRenderer
         });
 
         var implementsIdInterface = "";
-        if (type.Fields.Any(field => field.Name == "id"))
+        if (type.Fields!.Any(field => field.Name == "id"))
         {
-            var idField = type.Fields.First(field => field.Name == "id");
+            var idField = type.Fields!.First(field => field.Name == "id");
             implementsIdInterface = $", IId<{idField.Type.GetTypeName()}>";
         }
 
@@ -200,7 +200,7 @@ public class CodeRenderer : ICodeRenderer
         var tr = typeRef.GetType_();
         if (tr.IsList())
         {
-            return $"{GetNormalizedTypeName(tr.OfType, name)}[]";
+            return $"{GetNormalizedTypeName(tr.OfType!, name)}[]";
         }
 
         var type = tr.GetTypeName();
@@ -241,9 +241,9 @@ public class CodeRenderer : ICodeRenderer
             return $"await Engine.Execute<{field.Type.GetTypeName()}>(GraphQLClient, queryBuilder)";
         }
 
-        if (type.IsList() && type.GetType_().OfType.IsObject())
+        if (type.IsList() && type.GetType_().OfType!.IsObject())
         {
-            var typeName = type.GetType_().OfType.GetTypeName();
+            var typeName = type.GetType_().OfType!.GetTypeName();
             return $"""
                     (await Engine.ExecuteList<{typeName}Id>(GraphQLClient, queryBuilder))
                         .Select(id =>
@@ -256,9 +256,9 @@ public class CodeRenderer : ICodeRenderer
                     """;
         }
 
-        if (type.IsList() && type.GetType_().OfType.IsScalar())
+        if (type.IsList() && type.GetType_().OfType!.IsScalar())
         {
-            var typeName = type.GetType_().OfType.GetTypeName();
+            var typeName = type.GetType_().OfType!.GetTypeName();
             return $"await Engine.ExecuteList<{typeName}>(GraphQLClient, queryBuilder);";
         }
 
@@ -350,7 +350,7 @@ public class CodeRenderer : ICodeRenderer
 
         if (arg.Type.IsList())
         {
-            var tr = arg.Type.GetType_().OfType.GetType_();
+            var tr = arg.Type.GetType_().OfType!.GetType_();
 
             if (tr.IsScalar())
             {
@@ -375,7 +375,7 @@ public class CodeRenderer : ICodeRenderer
             }
         }
 
-        throw new Exception($"The type {arg.Type.OfType.Kind} should not be enter here.");
+        throw new Exception($"The type {arg.Type.OfType!.Kind} should not be enter here.");
     }
 
     private static string RenderQueryBuilder(Field field)
@@ -388,7 +388,7 @@ public class CodeRenderer : ICodeRenderer
         }
 
         builder.Append(')');
-        if (field.Type.IsList() && !field.Type.GetType_().OfType.IsLeaf())
+        if (field.Type.IsList() && !field.Type.GetType_().OfType!.IsLeaf())
         {
             builder.Append(".Select(\"id\")");
         }
