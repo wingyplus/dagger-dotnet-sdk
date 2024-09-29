@@ -1,7 +1,0 @@
-{
-  "name": "dotnet-sdk",
-  "sdk": "go",
-  "dependencies": [],
-  "source": ".",
-  "engineVersion": "v0.11.6"
-}
