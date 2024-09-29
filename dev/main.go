@@ -21,7 +21,7 @@ func New(
 	//
 	// +optional
 	// +defaultPath=".."
-	// +ignore=["**/*","!sdk/Dagger.sln","!sdk/Dagger.sln.DotSettings.user","!sdk/global.json","!sdk/**/*.cs","!sdk/**/*.csproj"]
+	// +ignore=["**/*","!sdk/.config","!sdk/Dagger.sln","!sdk/Dagger.sln.DotSettings.user","!sdk/global.json","!sdk/**/*.cs","!sdk/**/*.csproj"]
 	source *dagger.Directory) *DotnetSdkDev {
 	return &DotnetSdkDev{
 		Source: source,
@@ -35,9 +35,9 @@ type DotnetSdkDev struct {
 // Fetch introspection json from the Engine.
 //
 // This function forked from https://github.com/helderco/daggerverse/blob/main/codegen/main.go but
-// didn't modify anything in the data.
+// didn't modify anything in the JSON file.
 //
-// It's uses for test for the codegen only.
+// It's uses only for testing the codegen.
 func (m *DotnetSdkDev) Introspect() *dagger.File {
 	return dag.Container().
 		From("alpine:3.20").
@@ -49,13 +49,9 @@ func (m *DotnetSdkDev) Introspect() *dagger.File {
 		File(introspectionJsonPath)
 }
 
-func (m *DotnetSdkDev) Test(
-	ctx context.Context,
-) error {
-	_, err := dag.Container().
-		From("mcr.microsoft.com/dotnet/sdk:8.0-alpine3.20").
-		WithMountedDirectory("/src", m.Source).
-		WithWorkdir("/src/sdk").
+// Testing the SDK.
+func (m *DotnetSdkDev) Test(ctx context.Context) error {
+	_, err := m.Base().
 		WithFile("Dagger.SDK/introspection.json", m.Introspect()).
 		WithExec([]string{"dotnet", "restore"}).
 		WithExec([]string{"dotnet", "build", "--no-restore"}).
@@ -64,4 +60,28 @@ func (m *DotnetSdkDev) Test(
 		}).
 		Sync(ctx)
 	return err
+}
+
+// Lint all CSharp source files in the SDK.
+func (m *DotnetSdkDev) Lint(ctx context.Context) error {
+	_, err := m.Base().
+		WithExec([]string{"dotnet", "tool", "restore"}).
+		WithExec([]string{"dotnet", "csharpier", "--check", "."}).
+		Sync(ctx)
+	return err
+}
+
+// Format all CSharp source files.
+func (m *DotnetSdkDev) Format() *dagger.Directory {
+	return m.Base().
+		WithExec([]string{"dotnet", "csharpier", "."}).
+		Directory(".")
+}
+
+func (m *DotnetSdkDev) Base() *dagger.Container {
+	return dag.Container().
+		From("mcr.microsoft.com/dotnet/sdk:8.0-alpine3.20").
+		WithMountedDirectory("/src", m.Source).
+		WithWorkdir("/src/sdk").
+		WithExec([]string{"dotnet", "tool", "restore"})
 }
