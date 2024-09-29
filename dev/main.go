@@ -9,6 +9,7 @@ import (
 	_ "embed"
 
 	"github.com/dagger/dagger/sdk/dotnet/dev/internal/dagger"
+	"golang.org/x/sync/errgroup"
 )
 
 //go:embed introspection.graphql
@@ -50,6 +51,10 @@ func (m *DotnetSdkDev) Introspect() *dagger.File {
 }
 
 // Testing the SDK.
+//
+// Usage:
+//
+//	dagger call test
 func (m *DotnetSdkDev) Test(ctx context.Context) error {
 	_, err := m.Base().
 		WithFile("Dagger.SDK/introspection.json", m.Introspect()).
@@ -63,6 +68,10 @@ func (m *DotnetSdkDev) Test(ctx context.Context) error {
 }
 
 // Lint all CSharp source files in the SDK.
+//
+// Usage:
+//
+//	dagger call lint
 func (m *DotnetSdkDev) Lint(ctx context.Context) error {
 	_, err := m.Base().
 		WithExec([]string{"dotnet", "tool", "restore"}).
@@ -71,7 +80,31 @@ func (m *DotnetSdkDev) Lint(ctx context.Context) error {
 	return err
 }
 
+// Run test and lint.
+//
+// Usage:
+//
+//	dagger call check
+func (m *DotnetSdkDev) Check(ctx context.Context) error {
+	eg, ctx := errgroup.WithContext(ctx)
+	eg.Go(func() error {
+		ctx, span := Tracer().Start(ctx, "test")
+		defer span.End()
+		return m.Test(ctx)
+	})
+	eg.Go(func() error {
+		ctx, span := Tracer().Start(ctx, "lint")
+		defer span.End()
+		return m.Lint(ctx)
+	})
+	return eg.Wait()
+}
+
 // Format all CSharp source files.
+//
+// Usage:
+//
+//	dagger call format export --path=./sdk
 func (m *DotnetSdkDev) Format() *dagger.Directory {
 	return m.Base().
 		WithExec([]string{"dotnet", "csharpier", "."}).
