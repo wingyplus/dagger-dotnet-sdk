@@ -1,10 +1,8 @@
 using System;
 using System.Linq;
 using System.Text;
-
 using Dagger.SDK.SourceGenerator.Extensions;
 using Dagger.SDK.SourceGenerator.Types;
-
 using Type = Dagger.SDK.SourceGenerator.Types.Type;
 
 namespace Dagger.SDK.SourceGenerator.Code;
@@ -20,9 +18,7 @@ public class CodeGenerator(ICodeRenderer renderer)
         builder.AppendLine();
 
         _ = introspection
-            .Schema
-            .Types
-            .ExceptBy(_primitiveTypes, type => type.Name)
+            .Schema.Types.ExceptBy(_primitiveTypes, type => type.Name)
             .Where(NotInternalTypes)
             .Select(Render)
             .Aggregate(builder, (b, code) => b.Append(code).AppendLine());
@@ -40,7 +36,7 @@ public class CodeGenerator(ICodeRenderer renderer)
             "SCALAR" => renderer.RenderScalar(type),
             "INPUT_OBJECT" => renderer.RenderInputObject(type),
             "ENUM" => renderer.RenderEnum(type),
-            _ => throw new Exception($"Type kind {type.Kind} is not supported")
+            _ => throw new Exception($"Type kind {type.Kind} is not supported"),
         };
     }
 }

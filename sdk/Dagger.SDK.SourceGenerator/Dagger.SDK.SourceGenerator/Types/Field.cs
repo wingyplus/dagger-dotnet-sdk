@@ -28,10 +28,12 @@ public class Field
     /// <summary>
     /// Get optional arguments from Args.
     /// </summary>
-    public ImmutableArray<InputValue> OptionalArgs() => Args.Where(arg => arg.Type.Kind != "NON_NULL").ToImmutableArray();
+    public ImmutableArray<InputValue> OptionalArgs() =>
+        Args.Where(arg => arg.Type.Kind != "NON_NULL").ToImmutableArray();
 
     /// <summary>
     /// Get required arguments from Args.
     /// </summary>
-    public ImmutableArray<InputValue> RequiredArgs() => Args.Where(arg => arg.Type.Kind == "NON_NULL").ToImmutableArray();
+    public ImmutableArray<InputValue> RequiredArgs() =>
+        Args.Where(arg => arg.Type.Kind == "NON_NULL").ToImmutableArray();
 }

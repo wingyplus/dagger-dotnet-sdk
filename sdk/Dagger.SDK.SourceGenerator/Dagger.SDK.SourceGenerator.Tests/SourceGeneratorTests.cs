@@ -1,9 +1,7 @@
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
-
 using Dagger.SDK.SourceGenerator.Tests.Utils;
-
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -25,13 +23,23 @@ public class SourceGeneratorTests
         // Act
         var result = driver
             .AddAdditionalTexts([new TestAdditionalFile(path, text)])
-            .RunGeneratorsAndUpdateCompilation(compilation, out Compilation outputCompilation, out ImmutableArray<Diagnostic> diagnostics)
+            .RunGeneratorsAndUpdateCompilation(
+                compilation,
+                out Compilation outputCompilation,
+                out ImmutableArray<Diagnostic> diagnostics
+            )
             .GetRunResult();
 
-        var files = outputCompilation.SyntaxTrees.Select(t => Path.GetFileName(t.FilePath)).ToArray();
+        var files = outputCompilation
+            .SyntaxTrees.Select(t => Path.GetFileName(t.FilePath))
+            .ToArray();
 
         // Assert
-        CollectionAssert.Contains(collection: files, element: "Dagger.SDK.g.cs", message: "Generated file not found.");
+        CollectionAssert.Contains(
+            collection: files,
+            element: "Dagger.SDK.g.cs",
+            message: "Generated file not found."
+        );
     }
 
     [TestMethod]
@@ -45,7 +53,11 @@ public class SourceGeneratorTests
         var compilation = CSharpCompilation.Create(nameof(SourceGeneratorTests));
         var runResult = driver
             .AddAdditionalTexts(ImmutableArray<AdditionalText>.Empty)
-            .RunGeneratorsAndUpdateCompilation(compilation, out Compilation outputCompilation, out ImmutableArray<Diagnostic> diagnostics)
+            .RunGeneratorsAndUpdateCompilation(
+                compilation,
+                out Compilation outputCompilation,
+                out ImmutableArray<Diagnostic> diagnostics
+            )
             .GetRunResult();
 
         // Assert
@@ -61,11 +73,15 @@ public class SourceGeneratorTests
         var driver = CSharpGeneratorDriver.Create(generator);
         var compilation = CSharpCompilation.Create(nameof(SourceGeneratorTests));
 
-        // Act        
+        // Act
         var runResult = driver
-                    .AddAdditionalTexts([new TestAdditionalFile(path, text)])
-                    .RunGeneratorsAndUpdateCompilation(compilation, out Compilation outputCompilation, out ImmutableArray<Diagnostic> diagnostics)
-                    .GetRunResult();
+            .AddAdditionalTexts([new TestAdditionalFile(path, text)])
+            .RunGeneratorsAndUpdateCompilation(
+                compilation,
+                out Compilation outputCompilation,
+                out ImmutableArray<Diagnostic> diagnostics
+            )
+            .GetRunResult();
 
         // Assert
         Assert.IsTrue(diagnostics.Contains(SourceGenerator.FailedToParseSchemaFile));

@@ -20,7 +20,8 @@ public static class StringExtensions
         var words = Regex.Split(input, @"[\s_]+");
 
         // Capitalize the first letter of each word and join them
-        return string.Concat(words.Select(word => CultureInfo.CurrentCulture.TextInfo.ToTitleCase(word)));
+        return string.Concat(
+            words.Select(word => CultureInfo.CurrentCulture.TextInfo.ToTitleCase(word))
+        );
     }
 }
-

@@ -8,7 +8,14 @@ namespace System.Runtime.CompilerServices
 #endif // !NET5_0_OR_GREATER
 
 #if !NET7_0_OR_GREATER
-    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false, Inherited = false)]
+    [AttributeUsage(
+        AttributeTargets.Class
+            | AttributeTargets.Struct
+            | AttributeTargets.Field
+            | AttributeTargets.Property,
+        AllowMultiple = false,
+        Inherited = false
+    )]
     internal sealed class RequiredMemberAttribute : Attribute { }
 
     [AttributeUsage(AttributeTargets.All, AllowMultiple = true, Inherited = false)]

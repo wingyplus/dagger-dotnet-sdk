@@ -4,10 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
-
 using Dagger.SDK.SourceGenerator.Code;
 using Dagger.SDK.SourceGenerator.Types;
-
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
 
@@ -40,65 +38,74 @@ public class SourceGenerator(CodeGenerator codeGenerator) : IIncrementalGenerato
         location: null
     );
 
-    public static Diagnostic FailedToParseSchemaFile => Diagnostic.Create(
-        new DiagnosticDescriptor(
-            id: "DAG003",
-            title: "Failed to parse introspection.json file",
-            messageFormat: "Failed to parse introspection.json file. The source generator will not generate any code.",
-            category: "Dagger.SDK.SourceGenerator",
-            DiagnosticSeverity.Error,
-            isEnabledByDefault: true
-        ),
-        location: null
-    );
+    public static Diagnostic FailedToParseSchemaFile =>
+        Diagnostic.Create(
+            new DiagnosticDescriptor(
+                id: "DAG003",
+                title: "Failed to parse introspection.json file",
+                messageFormat: "Failed to parse introspection.json file. The source generator will not generate any code.",
+                category: "Dagger.SDK.SourceGenerator",
+                DiagnosticSeverity.Error,
+                isEnabledByDefault: true
+            ),
+            location: null
+        );
 
-    public SourceGenerator() : this(new CodeGenerator(new CodeRenderer()))
-    {
-    }
+    public SourceGenerator()
+        : this(new CodeGenerator(new CodeRenderer())) { }
 
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         IncrementalValuesProvider<AdditionalText> additionalText = context.AdditionalTextsProvider;
-        IncrementalValuesProvider<AdditionalText> schemaFiles = additionalText.Where(static x => x.Path.EndsWith("introspection.json"));
-        IncrementalValuesProvider<SourceText?> sourceTexts = schemaFiles.Select((text, ct) => text.GetText(cancellationToken: ct));
+        IncrementalValuesProvider<AdditionalText> schemaFiles = additionalText.Where(static x =>
+            x.Path.EndsWith("introspection.json")
+        );
+        IncrementalValuesProvider<SourceText?> sourceTexts = schemaFiles.Select(
+            (text, ct) => text.GetText(cancellationToken: ct)
+        );
         IncrementalValueProvider<ImmutableArray<SourceText?>> items = sourceTexts.Collect();
 
-        context.RegisterSourceOutput(items, (spc, sources) =>
-        {
-            if (sources.Length == 0)
+        context.RegisterSourceOutput(
+            items,
+            (spc, sources) =>
             {
-                spc.ReportDiagnostic(NoSchemaFileFound);
-                return;
-            }
+                if (sources.Length == 0)
+                {
+                    spc.ReportDiagnostic(NoSchemaFileFound);
+                    return;
+                }
 
-            if (sources.Length != 1)
-            {
-                spc.ReportDiagnostic(FailedToReadSchemaFile);
-                return;
-            }
+                if (sources.Length != 1)
+                {
+                    spc.ReportDiagnostic(FailedToReadSchemaFile);
+                    return;
+                }
 
-            if (sources[0] is null)
-            {
-                spc.ReportDiagnostic(FailedToReadSchemaFile);
-                return;
-            }
+                if (sources[0] is null)
+                {
+                    spc.ReportDiagnostic(FailedToReadSchemaFile);
+                    return;
+                }
 
-            try
-            {
-                Introspection introspection = JsonSerializer.Deserialize<Introspection>(sources[0]!.ToString())!;
-                string code = codeGenerator.Generate(introspection);
-                Console.WriteLine(code);
-                spc.AddSource("Dagger.SDK.g.cs", SourceText.From(code, Encoding.UTF8));
+                try
+                {
+                    Introspection introspection = JsonSerializer.Deserialize<Introspection>(
+                        sources[0]!.ToString()
+                    )!;
+                    string code = codeGenerator.Generate(introspection);
+                    Console.WriteLine(code);
+                    spc.AddSource("Dagger.SDK.g.cs", SourceText.From(code, Encoding.UTF8));
+                }
+                catch (JsonException)
+                {
+                    spc.ReportDiagnostic(FailedToParseSchemaFile);
+                }
+                catch (Exception ex)
+                {
+                    spc.ReportDiagnostic(FailedToGenerateCode(ex));
+                }
             }
-            catch (JsonException)
-            {
-                spc.ReportDiagnostic(FailedToParseSchemaFile);
-            }
-            catch (Exception ex)
-            {
-                spc.ReportDiagnostic(FailedToGenerateCode(ex));
-            }
-        });
+        );
     }
 
     private static Diagnostic FailedToGenerateCode(Exception ex)

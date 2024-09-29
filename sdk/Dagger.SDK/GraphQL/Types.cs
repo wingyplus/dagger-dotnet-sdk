@@ -8,7 +8,8 @@ public abstract class Value
     public abstract Task<string> Format();
 }
 
-public class IdValue<TId>(IId<TId> value) : Value where TId : Scalar
+public class IdValue<TId>(IId<TId> value) : Value
+    where TId : Scalar
 {
     public override async Task<string> Format()
     {
@@ -60,7 +61,12 @@ public class ListValue(List<Value> list) : Value
     {
         var builder = new StringBuilder();
         builder.Append('[');
-        builder.Append(string.Join(",", list.Select(async element => await element.Format()).Select(v => v.Result)));
+        builder.Append(
+            string.Join(
+                ",",
+                list.Select(async element => await element.Format()).Select(v => v.Result)
+            )
+        );
         builder.Append(']');
         return Task.FromResult(builder.ToString());
     }
@@ -72,7 +78,12 @@ public class ObjectValue(List<KeyValuePair<string, Value>> obj) : Value
     {
         var builder = new StringBuilder();
         builder.Append('{');
-        builder.Append(string.Join(",", obj.Select(async kv => $"{kv.Key}:{await kv.Value.Format()}").Select(v => v.Result)));
+        builder.Append(
+            string.Join(
+                ",",
+                obj.Select(async kv => $"{kv.Key}:{await kv.Value.Format()}").Select(v => v.Result)
+            )
+        );
         builder.Append('}');
         return Task.FromResult(builder.ToString());
     }

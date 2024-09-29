@@ -1,6 +1,5 @@
 using System.Net;
 using System.Net.Http.Json;
-
 using Dagger.SDK.GraphQL;
 
 namespace Dagger.SDK.Tests.GraphQL;
@@ -12,16 +11,16 @@ public class GraphQLClientTest
     public async Task TestRequest()
     {
         var query = """
-        query {
-            container {
-                from(address: "alpine:3.16") {
-                    withExec(args: ["echo", "hello"]) {
-                        stdout
+            query {
+                container {
+                    from(address: "alpine:3.16") {
+                        withExec(args: ["echo", "hello"]) {
+                            stdout
+                        }
                     }
                 }
             }
-        }
-        """;
+            """;
 
         var gqlCLient = new GraphQLClient();
         var response = await gqlCLient.RequestAsync(query);
@@ -30,6 +29,14 @@ public class GraphQLClientTest
 
         var gqlResponse = await response.Content.ReadFromJsonAsync<GraphQLResponse>();
         Assert.IsNull(gqlResponse!.Errors);
-        Assert.AreEqual("hello\n", gqlResponse!.Data.GetProperty("container").GetProperty("from").GetProperty("withExec").GetProperty("stdout").GetString());
+        Assert.AreEqual(
+            "hello\n",
+            gqlResponse!
+                .Data.GetProperty("container")
+                .GetProperty("from")
+                .GetProperty("withExec")
+                .GetProperty("stdout")
+                .GetString()
+        );
     }
 }

@@ -9,5 +9,5 @@ enum TypeKind
     Enum,
     InputObject,
     List,
-    NonNull
+    NonNull,
 }

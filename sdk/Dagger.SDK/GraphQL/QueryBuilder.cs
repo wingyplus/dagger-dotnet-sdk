@@ -11,7 +11,8 @@ public class QueryBuilder(ImmutableList<Field> path)
 {
     public readonly ImmutableList<Field> Path = path;
 
-    private QueryBuilder() : this(ImmutableList<Field>.Empty) { }
+    private QueryBuilder()
+        : this(ImmutableList<Field>.Empty) { }
 
     /// <summary>
     /// Select a field with name.
@@ -54,7 +55,14 @@ public class QueryBuilder(ImmutableList<Field> path)
             if (selection.Args.Count > 0)
             {
                 builder.Append('(');
-                builder.Append(string.Join(",", selection.Args.Select(async arg => $"{arg.Key}:{await arg.FormatValue()}").Select(v => v.Result)));
+                builder.Append(
+                    string.Join(
+                        ",",
+                        selection
+                            .Args.Select(async arg => $"{arg.Key}:{await arg.FormatValue()}")
+                            .Select(v => v.Result)
+                    )
+                );
                 builder.Append(')');
             }
         }

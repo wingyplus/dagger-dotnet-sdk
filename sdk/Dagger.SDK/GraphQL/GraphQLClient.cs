@@ -11,17 +11,27 @@ public class GraphQLClient
 {
     private readonly HttpClient _httpClient;
 
-    public GraphQLClient() : this(Environment.GetEnvironmentVariable("DAGGER_SESSION_PORT")!,
-        Environment.GetEnvironmentVariable("DAGGER_SESSION_TOKEN")!)
-    {
-    }
+    public GraphQLClient()
+        : this(
+            Environment.GetEnvironmentVariable("DAGGER_SESSION_PORT")!,
+            Environment.GetEnvironmentVariable("DAGGER_SESSION_TOKEN")!
+        ) { }
 
-    public GraphQLClient(string port, string token, string scheme = "http", string host = "localhost")
+    public GraphQLClient(
+        string port,
+        string token,
+        string scheme = "http",
+        string host = "localhost"
+    )
     {
         _httpClient = new HttpClient();
-        _httpClient.DefaultRequestHeaders.Authorization =
-            new AuthenticationHeaderValue("Basic", GetTokenHeaderValue(token));
-        _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+            "Basic",
+            GetTokenHeaderValue(token)
+        );
+        _httpClient.DefaultRequestHeaders.Accept.Add(
+            new MediaTypeWithQualityHeaderValue("application/json")
+        );
         _httpClient.BaseAddress = new Uri($"{scheme}://{host}:{port}");
     }
 
@@ -35,7 +45,11 @@ public class GraphQLClient
     /// <returns>Raw HTTP response.</returns>
     public async Task<HttpResponseMessage> RequestAsync(string query)
     {
-        var content = new StringContent(JsonSerializer.Serialize(new { query }), Encoding.UTF8, "application/json");
+        var content = new StringContent(
+            JsonSerializer.Serialize(new { query }),
+            Encoding.UTF8,
+            "application/json"
+        );
         return await _httpClient.PostAsync("/query", content);
     }
 }

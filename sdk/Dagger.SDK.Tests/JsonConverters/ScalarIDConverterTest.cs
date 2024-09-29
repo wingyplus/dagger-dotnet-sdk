@@ -1,6 +1,5 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
-
 using Dagger.SDK.JsonConverters;
 
 namespace Dagger.SDK.Tests;
@@ -9,9 +8,7 @@ namespace Dagger.SDK.Tests;
 public class ScalarIDConverterTest
 {
     [JsonConverter(typeof(ScalarIdConverter<DemoID>))]
-    public class DemoID : Scalar
-    {
-    }
+    public class DemoID : Scalar { }
 
     [TestMethod]
     public void TestJsonSerialization()

@@ -10,11 +10,7 @@ public class ClientTest
     [TestMethod]
     public async Task TestSimple()
     {
-        var output = await _dag
-            .Container()
-            .From("debian")
-            .WithExec(["echo", "hello"])
-            .Stdout();
+        var output = await _dag.Container().From("debian").WithExec(["echo", "hello"]).Stdout();
 
         Assert.AreEqual("hello\n", output);
     }
@@ -22,8 +18,7 @@ public class ClientTest
     [TestMethod]
     public async Task TestOptionalArguments()
     {
-        var env = await _dag
-            .Container()
+        var env = await _dag.Container()
             .From("debian")
             .WithEnvVariable("A", "a")
             .WithEnvVariable("B", "b")
@@ -45,11 +40,11 @@ public class ClientTest
     public async Task TestInputObject()
     {
         const string dockerfile = """
-                                  FROM alpine:3.20.0
-                                  ARG SPAM=spam
-                                  ENV SPAM=$SPAM
-                                  CMD printenv
-                                  """;
+            FROM alpine:3.20.0
+            ARG SPAM=spam
+            ENV SPAM=$SPAM
+            CMD printenv
+            """;
 
         var dockerDir = _dag.Directory().WithNewFile("Dockerfile", dockerfile);
         var output = await _dag.Container()
@@ -63,17 +58,18 @@ public class ClientTest
     [TestMethod]
     public async Task TestStringEscape()
     {
-        await _dag
-            .Container()
+        await _dag.Container()
             .From("alpine")
-            .WithNewFile("/a.txt", contents:
-                """
+            .WithNewFile(
+                "/a.txt",
+                contents: """
                   \\  /       Partly cloudy
                 _ /\"\".-.     +29(31) °C
                   \\_(   ).   ↑ 13 km/h
                   /(___(__)  10 km
                              0.0 mm
-                """)
+                """
+            )
             .Sync();
     }
 
@@ -85,8 +81,7 @@ public class ClientTest
             .WithEnvVariable("C", "D")
             .EnvVariables();
 
-        ICollection envNames =
-            envs.Select(env => env.Name()).Select(task => task.Result).ToList();
+        ICollection envNames = envs.Select(env => env.Name()).Select(task => task.Result).ToList();
         ICollection expected = new[] { "A", "C" };
         CollectionAssert.AreEqual(expected, envNames);
     }

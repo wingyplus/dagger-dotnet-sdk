@@ -1,6 +1,5 @@
 using System.Collections.Immutable;
 using System.Text.Json;
-
 using Dagger.SDK.GraphQL;
 
 namespace Dagger.SDK;
@@ -50,7 +49,10 @@ public static class Engine
     }
 
     // Traverse jsonElement until the last element.
-    private static JsonElement TakeJsonElementUntilLast<T>(JsonElement jsonElement, ImmutableList<Field> path)
+    private static JsonElement TakeJsonElementUntilLast<T>(
+        JsonElement jsonElement,
+        ImmutableList<Field> path
+    )
     {
         var json = jsonElement;
         foreach (var fieldName in path.RemoveAt(path.Count - 1).Select(field => field.Name))

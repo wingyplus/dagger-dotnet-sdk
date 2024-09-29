@@ -1,13 +1,10 @@
 using System;
 using System.Linq;
 using System.Text;
-
 using Dagger.SDK.SourceGenerator.Extensions;
 using Dagger.SDK.SourceGenerator.Types;
-
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-
 using Type = Dagger.SDK.SourceGenerator.Types.Type;
 
 namespace Dagger.SDK.SourceGenerator.Code;
@@ -17,65 +14,75 @@ public class CodeRenderer : ICodeRenderer
     public string RenderPre()
     {
         return """
-               #nullable enable
+            #nullable enable
 
-               using System.Collections.Immutable;
-               using System.Text.Json.Serialization;
+            using System.Collections.Immutable;
+            using System.Text.Json.Serialization;
 
-               using Dagger.SDK.GraphQL;
-               using Dagger.SDK.JsonConverters;
+            using Dagger.SDK.GraphQL;
+            using Dagger.SDK.JsonConverters;
 
-               namespace Dagger.SDK;
-               """;
+            namespace Dagger.SDK;
+            """;
     }
 
     public string RenderEnum(Type type)
     {
         var evs = type.EnumValues.Select(ev => ev.Name);
         return $$"""
-                 {{RenderDocComment(type)}}
-                 [JsonConverter(typeof(JsonStringEnumConverter<{{type.Name}}>))]
-                 public enum {{Formatter.FormatType(type.Name)}}
-                 {
-                     {{string.Join(",", evs)}}
-                 }
-                 """;
+            {{RenderDocComment(type)}}
+            [JsonConverter(typeof(JsonStringEnumConverter<{{type.Name}}>))]
+            public enum {{Formatter.FormatType(type.Name)}}
+            {
+                {{string.Join(",", evs)}}
+            }
+            """;
     }
 
     public string RenderInputObject(Type type)
     {
         var properties = type.InputFields.Select(field =>
             $$"""
-              {{RenderDocComment(field)}}
-              public {{field.Type.GetTypeName()}} {{Formatter.FormatProperty(field.Name)}} { get; } = {{field.GetVarName()}};
-              """);
+            {{RenderDocComment(field)}}
+            public {{field.Type.GetTypeName()}} {{Formatter.FormatProperty(
+                field.Name
+            )}} { get; } = {{field.GetVarName()}};
+            """
+        );
 
-        var constructorFields =
-            type.InputFields.Select(field => $"{field.Type.GetTypeName()} {field.GetVarName()}");
+        var constructorFields = type.InputFields.Select(field =>
+            $"{field.Type.GetTypeName()} {field.GetVarName()}"
+        );
 
         var toKeyValuePairsProperties = type.InputFields.Select(field =>
             $"""
-             kvPairs.Add(new KeyValuePair<string, Value>("{field.Name}", {RenderArgumentValue(field, asProperty: true)} as Value));
-             """);
+            kvPairs.Add(new KeyValuePair<string, Value>("{field.Name}", {RenderArgumentValue(
+                field,
+                asProperty: true
+            )} as Value));
+            """
+        );
 
-        var toKeyValuePairsMethod =
-            $$"""
-              public List<KeyValuePair<string, Value>> ToKeyValuePairs()
-              {
-                  var kvPairs = new List<KeyValuePair<string, Value>>();
-                  {{string.Join("\n", toKeyValuePairsProperties)}}
-                  return kvPairs;
-              }
-              """;
+        var toKeyValuePairsMethod = $$"""
+            public List<KeyValuePair<string, Value>> ToKeyValuePairs()
+            {
+                var kvPairs = new List<KeyValuePair<string, Value>>();
+                {{string.Join("\n", toKeyValuePairsProperties)}}
+                return kvPairs;
+            }
+            """;
 
         return $$"""
-                 {{RenderDocComment(type)}}
-                 public struct {{Formatter.FormatType(type.Name)}}({{string.Join(", ", constructorFields)}}) : IInputObject
-                 {
-                     {{string.Join("\n\n", properties)}}
-                     {{toKeyValuePairsMethod}}
-                 }
-                 """;
+            {{RenderDocComment(type)}}
+            public struct {{Formatter.FormatType(type.Name)}}({{string.Join(
+                ", ",
+                constructorFields
+            )}}) : IInputObject
+            {
+                {{string.Join("\n\n", properties)}}
+                {{toKeyValuePairsMethod}}
+            }
+            """;
     }
 
     public string RenderObject(Type type)
@@ -90,18 +97,20 @@ public class CodeRenderer : ICodeRenderer
 
             var requiredArgs = field.RequiredArgs();
             var optionalArgs = field.OptionalArgs();
-            var args = requiredArgs.Select(RenderArgument).Concat(optionalArgs.Select(RenderOptionalArgument));
+            var args = requiredArgs
+                .Select(RenderArgument)
+                .Concat(optionalArgs.Select(RenderOptionalArgument));
 
             return $$"""
-                     {{RenderDocComment(field)}}
-                     {{RenderObsolete(field)}}
-                     public {{RenderReturnType(field.Type)}} {{methodName}}({{string.Join(",", args)}})
-                     {
-                         {{RenderArgumentBuilder(field)}}
-                         {{RenderQueryBuilder(field)}}
-                         return {{RenderReturnValue(field)}};
-                     }
-                     """;
+            {{RenderDocComment(field)}}
+            {{RenderObsolete(field)}}
+            public {{RenderReturnType(field.Type)}} {{methodName}}({{string.Join(",", args)}})
+            {
+                {{RenderArgumentBuilder(field)}}
+                {{RenderQueryBuilder(field)}}
+                return {{RenderReturnValue(field)}};
+            }
+            """;
         });
 
         var implementsIdInterface = "";
@@ -112,29 +121,35 @@ public class CodeRenderer : ICodeRenderer
         }
 
         return $$"""
-                 {{RenderDocComment(type)}}
-                 public class {{Formatter.FormatType(type.Name)}}(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object(queryBuilder, gqlClient){{implementsIdInterface}}
-                 {
-                     {{string.Join("\n\n", methods)}}
-                 }
-                 """;
+            {{RenderDocComment(type)}}
+            public class {{Formatter.FormatType(
+                type.Name
+            )}}(QueryBuilder queryBuilder, GraphQLClient gqlClient) : Object(queryBuilder, gqlClient){{implementsIdInterface}}
+            {
+                {{string.Join("\n\n", methods)}}
+            }
+            """;
     }
 
     public string RenderScalar(Type type)
     {
         var t = Formatter.FormatType(type.Name);
         return $$"""
-                 {{RenderDocComment(type)}}
-                 [JsonConverter(typeof(ScalarIdConverter<{{t}}>))]
-                 public class {{Formatter.FormatType(t)}} : Scalar
-                 {
-                 }
-                 """;
+            {{RenderDocComment(type)}}
+            [JsonConverter(typeof(ScalarIdConverter<{{t}}>))]
+            public class {{Formatter.FormatType(t)}} : Scalar
+            {
+            }
+            """;
     }
 
     public string Format(string source)
     {
-        return CSharpSyntaxTree.ParseText(source).GetRoot().NormalizeWhitespace(eol: "\n").ToFullString();
+        return CSharpSyntaxTree
+            .ParseText(source)
+            .GetRoot()
+            .NormalizeWhitespace(eol: "\n")
+            .ToFullString();
     }
 
     private static string RenderObsolete(Field field)
@@ -151,18 +166,21 @@ public class CodeRenderer : ICodeRenderer
     {
         var builder = new StringBuilder();
         builder.AppendLine(RenderSummaryDocComment(field.Description));
-        builder = field.Args.Aggregate(builder, (sb, arg) =>
-        {
-            string[] lines = arg.Description.Split('\n');
-            sb.AppendLine($"/// <param name=\"{arg.GetVarName()}\">");
-            foreach (var line in lines)
+        builder = field.Args.Aggregate(
+            builder,
+            (sb, arg) =>
             {
-                sb.AppendLine($"/// {line}");
-            }
+                string[] lines = arg.Description.Split('\n');
+                sb.AppendLine($"/// <param name=\"{arg.GetVarName()}\">");
+                foreach (var line in lines)
+                {
+                    sb.AppendLine($"/// {line}");
+                }
 
-            sb.AppendLine($"/// </param>");
-            return sb;
-        });
+                sb.AppendLine($"/// </param>");
+                return sb;
+            }
+        );
         return builder.ToString();
     }
 
@@ -178,17 +196,13 @@ public class CodeRenderer : ICodeRenderer
             return "";
         }
 
-        var description = doc
-            .Split('\n')
-            .Select(line => $"/// {line}")
-            .Select(line => line.Trim());
+        var description = doc.Split('\n').Select(line => $"/// {line}").Select(line => line.Trim());
         return $"""
-                /// <summary>
-                {string.Join("\n", description)}
-                /// </summary>
-                """;
+            /// <summary>
+            {string.Join("\n", description)}
+            /// </summary>
+            """;
     }
-
 
     private static string GetNormalizedTypeName(InputValue arg)
     {
@@ -245,15 +259,15 @@ public class CodeRenderer : ICodeRenderer
         {
             var typeName = type.GetType_().OfType.GetTypeName();
             return $"""
-                    (await Engine.ExecuteList<{typeName}Id>(GraphQLClient, queryBuilder))
-                        .Select(id =>
-                            new {typeName}(
-                                QueryBuilder.Builder().Select("load{typeName}FromID", ImmutableList.Create<Argument>(new Argument("id", new StringValue(id.Value)))),
-                                GraphQLClient
-                            )
+                (await Engine.ExecuteList<{typeName}Id>(GraphQLClient, queryBuilder))
+                    .Select(id =>
+                        new {typeName}(
+                            QueryBuilder.Builder().Select("load{typeName}FromID", ImmutableList.Create<Argument>(new Argument("id", new StringValue(id.Value)))),
+                            GraphQLClient
                         )
-                        .ToArray()
-                    """;
+                    )
+                    .ToArray()
+                """;
         }
 
         if (type.IsList() && type.GetType_().OfType.IsScalar())
@@ -278,33 +292,50 @@ public class CodeRenderer : ICodeRenderer
         var requiredArgs = field.RequiredArgs();
         if (requiredArgs.Any())
         {
-            builder.Append("arguments = arguments.")
-                .Append(string.Join(".",
-                    requiredArgs.Select(arg =>
-                        $$"""Add(new Argument("{{arg.Name}}", {{RenderArgumentValue(arg)}}))"""))).Append(';');
+            builder
+                .Append("arguments = arguments.")
+                .Append(
+                    string.Join(
+                        ".",
+                        requiredArgs.Select(arg =>
+                            $$"""Add(new Argument("{{arg.Name}}", {{RenderArgumentValue(arg)}}))"""
+                        )
+                    )
+                )
+                .Append(';');
             builder.Append('\n');
         }
 
         var optionalArgs = field.OptionalArgs();
         if (optionalArgs.Any())
         {
-            optionalArgs.Aggregate(builder, (sb, arg) =>
-                {
-                    var varName = arg.GetVarName();
-                    return sb
-                        .Append($"""if ({varName} is {GetNormalizedTypeName(arg)} {varName}_)""")
-                        .Append("{\n")
-                        .Append(
-                            $$"""    arguments = arguments.Add(new Argument("{{arg.Name}}", {{RenderArgumentValue(arg, addVarSuffix: true)}}));""")
-                        .Append("}\n");
-                })
+            optionalArgs
+                .Aggregate(
+                    builder,
+                    (sb, arg) =>
+                    {
+                        var varName = arg.GetVarName();
+                        return sb.Append(
+                                $"""if ({varName} is {GetNormalizedTypeName(arg)} {varName}_)"""
+                            )
+                            .Append("{\n")
+                            .Append(
+                                $$"""    arguments = arguments.Add(new Argument("{{arg.Name}}", {{RenderArgumentValue(arg, addVarSuffix: true)}}));"""
+                            )
+                            .Append("}\n");
+                    }
+                )
                 .Append("\n");
         }
 
         return builder.ToString();
     }
 
-    private static string RenderArgumentValue(InputValue arg, bool addVarSuffix = false, bool asProperty = false)
+    private static string RenderArgumentValue(
+        InputValue arg,
+        bool addVarSuffix = false,
+        bool asProperty = false
+    )
     {
         var argName = arg.GetVarName();
         if (addVarSuffix)
@@ -322,10 +353,14 @@ public class CodeRenderer : ICodeRenderer
             var type = arg.Type.GetTypeName();
             switch (type)
             {
-                case "string": return $"new StringValue({argName})";
-                case "bool": return $"new BooleanValue({argName})";
-                case "int": return $"new IntValue({argName})";
-                case "float": return $"new FloatValue({argName})";
+                case "string":
+                    return $"new StringValue({argName})";
+                case "bool":
+                    return $"new BooleanValue({argName})";
+                case "int":
+                    return $"new IntValue({argName})";
+                case "float":
+                    return $"new FloatValue({argName})";
                 default:
                     // // a type but needs to convert into id value before sending it.
                     if (type.EndsWith("Id") && !string.Equals(arg.Name, "id"))
@@ -360,10 +395,9 @@ public class CodeRenderer : ICodeRenderer
                     "int" => "new IntValue(v)",
                     "float" => "new FloatValue(v)",
                     "boolean" => "new BooleanValue(v)",
-                    var type =>
-                        (type.EndsWith("Id") && !string.Equals(arg.Name, "id"))
-                            ? $"new IdValue<{type}>(v)"
-                            : "new StringValue(v.Value)"
+                    var type => (type.EndsWith("Id") && !string.Equals(arg.Name, "id"))
+                        ? $"new IdValue<{type}>(v)"
+                        : "new StringValue(v.Value)",
                 };
 
                 return $"new ListValue({argName}.Select(v => {value} as Value).ToList())";

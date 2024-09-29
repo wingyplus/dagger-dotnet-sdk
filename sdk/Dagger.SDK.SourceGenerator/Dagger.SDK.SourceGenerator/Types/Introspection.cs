@@ -1,6 +1,7 @@
 using System.Text.Json.Serialization;
 
 namespace Dagger.SDK.SourceGenerator.Types;
+
 public class Introspection
 {
     [JsonPropertyName("__schema")]
